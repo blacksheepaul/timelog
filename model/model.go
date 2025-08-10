@@ -9,8 +9,9 @@ import (
 	"github.com/blacksheepaul/timelog/core/config"
 	"github.com/blacksheepaul/timelog/core/logger"
 
+	_ "github.com/ncruces/go-sqlite3/embed"
+	sqlite "github.com/ncruces/go-sqlite3/gormlite"
 	"github.com/patrickmn/go-cache"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	gl "gorm.io/gorm/logger"
 )
