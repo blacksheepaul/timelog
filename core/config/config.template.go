@@ -5,6 +5,7 @@ type Config struct {
 		Host string `yaml:"host"`
 	} `yaml:"database"`
 	Server struct {
+		Addr         string   `yaml:"addr" env-default:""`
 		Port         int      `yaml:"port" env-required:"true"`
 		AllowOrigins []string `yaml:"allow_origins"`
 	} `yaml:"server"`

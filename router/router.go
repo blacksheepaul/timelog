@@ -52,8 +52,11 @@ func Register(r *gin.Engine, cfg *config.Config, l logger.Logger) *gin.Engine {
 func LaunchServer(ctx context.Context, wg *sync.WaitGroup, r *gin.Engine, cfg *config.Config) {
 	defer wg.Done()
 
+	addr := fmt.Sprintf("%s:%d", cfg.Server.Addr, cfg.Server.Port)
+	log.Info("[Startup] Server is starting...")
+	log.Info(fmt.Sprintf("[Startup] Listen address: %s", addr))
 	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%d", cfg.Server.Port),
+		Addr:    addr,
 		Handler: r,
 	}
 
