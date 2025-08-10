@@ -11,6 +11,10 @@ import (
 	"github.com/blacksheepaul/timelog/core/logger"
 	"github.com/blacksheepaul/timelog/router/middleware"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "github.com/blacksheepaul/timelog/docs"
 )
 
 var GinLogger = gin.LoggerWithFormatter(func(p gin.LogFormatterParams) string {
@@ -35,6 +39,12 @@ func Register(r *gin.Engine, cfg *config.Config, l logger.Logger) *gin.Engine {
 	api := r.Group("/api")   // api
 	auth := api.Group("/v1") // api/v1
 	auth.Use(middleware.Auth())
+
+	// 注册 TimeLog 路由
+	RegisterTimeLogRoutes(api)
+
+	// 注册 Swagger 文档路由
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	return r
 }
