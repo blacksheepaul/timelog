@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER DEFAULT 1,
+    start_time DATETIME NOT NULL,
+    end_time DATETIME NOT NULL,
+    tag TEXT,
+    remark TEXT
+);
