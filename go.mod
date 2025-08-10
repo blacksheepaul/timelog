@@ -1,4 +1,4 @@
-module github.com/blacksheepaul/templateToGo
+module github.com/blacksheepaul/timelog
 
 go 1.23.4
 

@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/blacksheepaul/templateToGo/core/config"
-	"github.com/blacksheepaul/templateToGo/core/logger"
+	"github.com/blacksheepaul/timelog/core/config"
+	"github.com/blacksheepaul/timelog/core/logger"
 )
 
 var log logger.Logger

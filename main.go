@@ -8,11 +8,11 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/blacksheepaul/templateToGo/core/config"
-	log "github.com/blacksheepaul/templateToGo/core/logger"
-	"github.com/blacksheepaul/templateToGo/model"
-	"github.com/blacksheepaul/templateToGo/router"
-	"github.com/blacksheepaul/templateToGo/service"
+	"github.com/blacksheepaul/timelog/core/config"
+	log "github.com/blacksheepaul/timelog/core/logger"
+	"github.com/blacksheepaul/timelog/model"
+	"github.com/blacksheepaul/timelog/router"
+	"github.com/blacksheepaul/timelog/service"
 	"github.com/gin-gonic/gin"
 )
 

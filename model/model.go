@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/blacksheepaul/templateToGo/core/config"
-	"github.com/blacksheepaul/templateToGo/core/logger"
+	"github.com/blacksheepaul/timelog/core/config"
+	"github.com/blacksheepaul/timelog/core/logger"
 
 	"github.com/patrickmn/go-cache"
 	"gorm.io/driver/sqlite"

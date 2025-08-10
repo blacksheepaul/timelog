@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"github.com/blacksheepaul/templateToGo/core/config"
+	"github.com/blacksheepaul/timelog/core/config"
 
 	"github.com/gin-gonic/gin"
 )

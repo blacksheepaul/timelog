@@ -5,10 +5,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/blacksheepaul/templateToGo/core/config"
-	"github.com/blacksheepaul/templateToGo/core/logger"
-	"github.com/blacksheepaul/templateToGo/model"
-	"github.com/blacksheepaul/templateToGo/service"
+	"github.com/blacksheepaul/timelog/core/config"
+	"github.com/blacksheepaul/timelog/core/logger"
+	"github.com/blacksheepaul/timelog/model"
+	"github.com/blacksheepaul/timelog/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-migrate/migrate/v4"
