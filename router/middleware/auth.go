@@ -5,7 +5,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/blacksheepaul/templateToGo/model"
+	"github.com/blacksheepaul/timelog/model"
 
 	"github.com/gin-gonic/gin"
 )

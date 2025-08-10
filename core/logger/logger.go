@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/blacksheepaul/templateToGo/core/config"
+	"github.com/blacksheepaul/timelog/core/config"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
