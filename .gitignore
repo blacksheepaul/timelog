@@ -27,3 +27,6 @@ config.yml
 
 # database file
 *.db
+
+docs/
+app.log
