@@ -8,6 +8,9 @@ COPY config-test.yml .
 COPY dev.db .
 COPY entrypoint.sh .
 
+# 复制前端构建文件
+COPY web/dist ./web/dist
+
 # 赋予启动脚本执行权限
 RUN chmod +x entrypoint.sh
 

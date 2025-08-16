@@ -17,7 +17,7 @@ else
 	$(error Unknown env: $(env))
 endif
 
-.PHONY: all build build-linux docker run clean
+.PHONY: all build build-linux docker run clean web web-build web-dev
 
 all: build
 
@@ -35,3 +35,13 @@ run: docker
 
 clean:
 	rm -f $(BIN_NAME) $(BIN_NAME_ARM)
+	rm -rf web/dist web/node_modules
+
+# Web frontend targets
+web-build:
+	cd web && npm install && npm run build
+
+web-dev:
+	cd web && npm install && npm run dev
+
+web: web-build
