@@ -33,3 +33,4 @@ config-test.yml
 docs/
 app.log
 main
+.DS_STORE
