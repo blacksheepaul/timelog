@@ -90,6 +90,27 @@
       </div>
       
       <div>
+        <label for="task_id" class="block text-sm font-medium text-gray-700 mb-2">
+          Associated Task (Optional)
+        </label>
+        <select
+          id="task_id"
+          v-model="form.task_id"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="" disabled>Select a task (optional)</option>
+          <option value="">No task</option>
+          <option 
+            v-for="task in availableTasks" 
+            :key="task.id" 
+            :value="task.id"
+          >
+            {{ task.title }} ({{ task.tag?.name }})
+          </option>
+        </select>
+      </div>
+      
+      <div>
         <label for="remarks" class="block text-sm font-medium text-gray-700 mb-2">
           Remarks
         </label>
@@ -126,13 +147,14 @@
 <script setup lang="ts">
 import { reactive, watch, computed } from 'vue'
 import { ClockIcon, XMarkIcon } from '@heroicons/vue/24/outline'
-import type { TimeLog, Tag, CreateTimeLogRequest, UpdateTimeLogRequest } from '@/types'
+import type { TimeLog, Tag, Task, CreateTimeLogRequest, UpdateTimeLogRequest } from '@/types'
 import { formatDateTimeLocal, formatUTCToLocal, formatLocalToUTC } from '@/utils/date'
 
 const props = defineProps<{
   editingLog?: TimeLog
   submitting: boolean
   availableTags: Tag[]
+  availableTasks: Task[]
   lastEndTime?: string | null
 }>()
 
@@ -147,11 +169,13 @@ const form = reactive<{
   start_time: string
   end_time: string
   tag_id: number | ''
+  task_id: number | ''
   remarks: string
 }>({
   start_time: '',
   end_time: '',
   tag_id: '',
+  task_id: '',
   remarks: '',
 })
 
@@ -164,6 +188,7 @@ const resetForm = () => {
   }
   form.end_time = ''
   form.tag_id = ''
+  form.task_id = ''
   form.remarks = ''
 }
 
@@ -187,6 +212,7 @@ const loadEditingData = () => {
       ? formatUTCToLocal(props.editingLog.end_time)
       : ''
     form.tag_id = props.editingLog.tag_id
+    form.task_id = props.editingLog.task_id || ''
     form.remarks = props.editingLog.remarks
   } else {
     resetForm()
@@ -202,6 +228,7 @@ const handleSubmit = () => {
     start_time: formatLocalToUTC(form.start_time),
     end_time: form.end_time ? formatLocalToUTC(form.end_time) : undefined,
     tag_id: Number(form.tag_id),
+    task_id: form.task_id ? Number(form.task_id) : null,
     remarks: form.remarks,
   }
   
