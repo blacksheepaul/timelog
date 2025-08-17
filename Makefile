@@ -6,13 +6,13 @@ BIN_NAME := main
 BIN_NAME_ARM := main.arm
 
 ifeq ($(env),prod)
-	PORT := 8080
+	PORT := 8083
 	DOCKER_TAG := timelog-app
-	DOCKER_PORT := 8080
+	DOCKER_PORT := 8083
 else ifeq ($(env),test)
-	PORT := 18080
+	PORT := 18083
 	DOCKER_TAG := timelog-app-test
-	DOCKER_PORT := 8080
+	DOCKER_PORT := 8083
 else
 	$(error Unknown env: $(env))
 endif
