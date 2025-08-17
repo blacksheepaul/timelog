@@ -14,9 +14,9 @@ type TimeLog struct {
 	ID        uint           `gorm:"primaryKey" json:"id"`
 	UserID    uint           `gorm:"column:user_id" json:"user_id"`
 	StartTime time.Time      `gorm:"column:start_time" json:"start_time"`
-	EndTime   time.Time      `gorm:"column:end_time" json:"end_time"`
-	Tag       string         `gorm:"column:tag" json:"tag"`
-	Remark    string         `gorm:"column:remark" json:"remark"`
+	EndTime   *time.Time     `gorm:"column:end_time" json:"end_time"`
+	Tag       string         `gorm:"column:tag" json:"tags"`
+	Remark    string         `gorm:"column:remark" json:"remarks"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
