@@ -21,6 +21,7 @@
           v-if="showForm"
           :editing-log="editingLog"
           :submitting="submitting"
+          :available-tags="tags"
           @submit="handleSubmit"
           @cancel="handleCancel"
         />
@@ -68,10 +69,11 @@ import { ref, reactive, onMounted } from 'vue'
 import { PlusIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/vue/24/outline'
 import TimeLogList from '@/components/TimeLogList.vue'
 import TimeLogForm from '@/components/TimeLogForm.vue'
-import { timelogAPI } from '@/api'
-import type { TimeLog, CreateTimeLogRequest, UpdateTimeLogRequest } from '@/types'
+import { timelogAPI, tagAPI } from '@/api'
+import type { TimeLog, Tag, CreateTimeLogRequest, UpdateTimeLogRequest } from '@/types'
 
 const timeLogs = ref<TimeLog[]>([])
+const tags = ref<Tag[]>([])
 const loading = ref(false)
 const submitting = ref(false)
 const error = ref<string | null>(null)
@@ -107,6 +109,16 @@ const loadTimeLogs = async () => {
     showNotification('error', 'Failed to load time logs')
   } finally {
     loading.value = false
+  }
+}
+
+const loadTags = async () => {
+  try {
+    const response = await tagAPI.getAll()
+    tags.value = response.data || []
+  } catch (err) {
+    console.error('Error loading tags:', err)
+    showNotification('error', 'Failed to load tags')
   }
 }
 
@@ -167,5 +179,6 @@ const handleDelete = async (id: number) => {
 
 onMounted(() => {
   loadTimeLogs()
+  loadTags()
 })
 </script>

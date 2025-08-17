@@ -53,8 +53,13 @@
               {{ calculateDuration(log.start_time, log.end_time) }}
             </td>
             <td class="px-6 py-4 text-sm text-gray-900">
-              <span v-if="log.tags" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                {{ log.tags }}
+              <span 
+                v-if="log.tag" 
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
+                :style="{ backgroundColor: log.tag.color }"
+                :title="log.tag.description"
+              >
+                {{ log.tag.name }}
               </span>
             </td>
             <td class="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
