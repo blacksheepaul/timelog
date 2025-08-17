@@ -4,11 +4,12 @@ This file provides guidance to Claude Code when working with the Vue 3 frontend 
 
 ## Frontend Overview
 
-A modern Vue 3 + TypeScript + Tailwind CSS frontend for the TimeLog application, featuring a clean and responsive user interface for time tracking with structured tag management.
+A comprehensive Vue 3 + TypeScript + Tailwind CSS single-page application (SPA) for the TimeLog application. Features a modern, responsive interface for time tracking, task management, and productivity analytics with structured tag system and multi-page navigation.
 
 ## Technology Stack
 
 - **Framework**: Vue 3.4+ with Composition API
+- **Routing**: Vue Router 4.2+ for SPA navigation
 - **Language**: TypeScript 5.3+
 - **Build Tool**: Vite 5.0+
 - **Styling**: Tailwind CSS 3.4+
@@ -18,14 +19,21 @@ A modern Vue 3 + TypeScript + Tailwind CSS frontend for the TimeLog application,
 
 ## Features
 
-- ✅ Create, read, update, and delete time logs
-- ✅ Structured tag selection with color-coded labels
-- ✅ Real-time duration calculation
-- ✅ Modern responsive UI with Tailwind CSS
-- ✅ TypeScript for complete type safety
-- ✅ Form validation and error handling
-- ✅ Toast notification system
-- ✅ API error handling with user feedback
+### Core Functionality
+- ✅ **Time Logging**: Create, read, update, and delete time logs with timezone handling
+- ✅ **Task Management**: Complete task lifecycle management with deadlines and estimates
+- ✅ **Tag System**: Structured tag selection with color-coded labels and descriptions
+- ✅ **Analytics**: Statistics and reporting with duration calculations
+- ✅ **Multi-page SPA**: Five main pages with responsive navigation
+
+### Technical Features
+- ✅ **Real-time Calculations**: Duration and time tracking with proper timezone conversion
+- ✅ **"Set to Now"**: Quick time entry with current timestamp buttons
+- ✅ **Modern UI**: Responsive design with Tailwind CSS and smooth transitions
+- ✅ **TypeScript**: Complete type safety across all components and APIs
+- ✅ **Form Validation**: Client-side validation with error handling
+- ✅ **Toast Notifications**: Global notification system for user feedback
+- ✅ **API Integration**: Unified API client with error handling and loading states
 
 ## Development Setup
 
@@ -78,17 +86,27 @@ Built files go to `dist/` directory and are served by the Go backend at producti
 The frontend communicates with the Go backend through a unified API structure:
 
 ### TimeLog Endpoints
-- `GET /api/timelogs` - List all time logs with tag information
-- `POST /api/timelogs` - Create new time log
+- `GET /api/timelogs` - List all time logs with tag and task information
+- `POST /api/timelogs` - Create new time log (with optional task association)
 - `GET /api/timelogs/:id` - Get specific time log
 - `PUT /api/timelogs/:id` - Update time log
 - `DELETE /api/timelogs/:id` - Delete time log
 
+### Task Endpoints
+- `GET /api/tasks` - List all tasks with optional date filtering
+- `POST /api/tasks` - Create new task
+- `GET /api/tasks/:id` - Get specific task
+- `PUT /api/tasks/:id` - Update task
+- `DELETE /api/tasks/:id` - Delete task
+- `POST /api/tasks/:id/complete` - Mark task as completed
+- `POST /api/tasks/:id/incomplete` - Mark task as incomplete
+- `GET /api/tasks/stats/:date` - Get task completion statistics
+
 ### Tag Endpoints
 - `GET /api/tags` - List all available tags
-- `POST /api/tags` - Create new tag (future admin feature)
-- `PUT /api/tags/:id` - Update tag (future admin feature)
-- `DELETE /api/tags/:id` - Delete tag (future admin feature)
+- `POST /api/tags` - Create new tag
+- `PUT /api/tags/:id` - Update tag
+- `DELETE /api/tags/:id` - Delete tag
 
 ### API Response Format
 All endpoints return data in a consistent format:
