@@ -23,6 +23,13 @@
                 Time Logs
               </router-link>
               <router-link
+                to="/tasks"
+                class="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors"
+                :class="{ 'text-blue-600 font-semibold': $route.name === 'Tasks' }"
+              >
+                Tasks
+              </router-link>
+              <router-link
                 to="/tags"
                 class="text-gray-500 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors"
                 :class="{ 'text-blue-600 font-semibold': $route.name === 'Tags' }"
@@ -67,6 +74,14 @@
               @click="mobileMenuOpen = false"
             >
               Time Logs
+            </router-link>
+            <router-link
+              to="/tasks"
+              class="block px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+              :class="{ 'text-blue-600 bg-blue-50': $route.name === 'Tasks' }"
+              @click="mobileMenuOpen = false"
+            >
+              Tasks
             </router-link>
             <router-link
               to="/tags"
