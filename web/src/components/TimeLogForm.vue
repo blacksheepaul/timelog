@@ -91,7 +91,7 @@
 <script setup lang="ts">
 import { reactive, watch, computed } from 'vue'
 import type { TimeLog, Tag, CreateTimeLogRequest, UpdateTimeLogRequest } from '@/types'
-import { formatDateTimeLocal } from '@/utils/date'
+import { formatDateTimeLocal, formatUTCToLocal, formatLocalToUTC } from '@/utils/date'
 
 const props = defineProps<{
   editingLog?: TimeLog
@@ -127,9 +127,9 @@ const resetForm = () => {
 
 const loadEditingData = () => {
   if (props.editingLog) {
-    form.start_time = new Date(props.editingLog.start_time).toISOString().slice(0, 16)
+    form.start_time = formatUTCToLocal(props.editingLog.start_time)
     form.end_time = props.editingLog.end_time 
-      ? new Date(props.editingLog.end_time).toISOString().slice(0, 16) 
+      ? formatUTCToLocal(props.editingLog.end_time)
       : ''
     form.tag_id = props.editingLog.tag_id
     form.remarks = props.editingLog.remarks
@@ -144,8 +144,8 @@ const handleSubmit = () => {
   }
   
   const data = {
-    start_time: new Date(form.start_time).toISOString(),
-    end_time: form.end_time ? new Date(form.end_time).toISOString() : undefined,
+    start_time: formatLocalToUTC(form.start_time),
+    end_time: form.end_time ? formatLocalToUTC(form.end_time) : undefined,
     tag_id: Number(form.tag_id),
     remarks: form.remarks,
   }
