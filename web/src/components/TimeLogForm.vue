@@ -10,25 +10,60 @@
           <label for="start_time" class="block text-sm font-medium text-gray-700 mb-2">
             Start Time *
           </label>
-          <input
-            id="start_time"
-            v-model="form.start_time"
-            type="datetime-local"
-            required
-            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
+          <div class="flex space-x-2">
+            <input
+              id="start_time"
+              v-model="form.start_time"
+              type="datetime-local"
+              required
+              class="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+            <button
+              type="button"
+              @click="setCurrentTime('start')"
+              class="px-3 py-2 text-xs font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 whitespace-nowrap transition-colors"
+              title="Set to current time"
+            >
+              <div class="flex items-center space-x-1">
+                <ClockIcon class="h-4 w-4" />
+                <span class="hidden sm:inline">Now</span>
+              </div>
+            </button>
+          </div>
         </div>
         
         <div>
           <label for="end_time" class="block text-sm font-medium text-gray-700 mb-2">
             End Time
           </label>
-          <input
-            id="end_time"
-            v-model="form.end_time"
-            type="datetime-local"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
+          <div class="flex space-x-2">
+            <input
+              id="end_time"
+              v-model="form.end_time"
+              type="datetime-local"
+              class="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+            <button
+              type="button"
+              @click="setCurrentTime('end')"
+              class="px-3 py-2 text-xs font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 whitespace-nowrap transition-colors"
+              title="Set to current time"
+            >
+              <div class="flex items-center space-x-1">
+                <ClockIcon class="h-4 w-4" />
+                <span class="hidden sm:inline">Now</span>
+              </div>
+            </button>
+            <button
+              v-if="form.end_time"
+              type="button"
+              @click="clearEndTime"
+              class="px-3 py-2 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              title="Clear end time"
+            >
+              <XMarkIcon class="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
       
@@ -90,6 +125,7 @@
 
 <script setup lang="ts">
 import { reactive, watch, computed } from 'vue'
+import { ClockIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import type { TimeLog, Tag, CreateTimeLogRequest, UpdateTimeLogRequest } from '@/types'
 import { formatDateTimeLocal, formatUTCToLocal, formatLocalToUTC } from '@/utils/date'
 
@@ -123,6 +159,19 @@ const resetForm = () => {
   form.end_time = ''
   form.tag_id = ''
   form.remarks = ''
+}
+
+const setCurrentTime = (field: 'start' | 'end') => {
+  const currentTime = formatDateTimeLocal()
+  if (field === 'start') {
+    form.start_time = currentTime
+  } else {
+    form.end_time = currentTime
+  }
+}
+
+const clearEndTime = () => {
+  form.end_time = ''
 }
 
 const loadEditingData = () => {
