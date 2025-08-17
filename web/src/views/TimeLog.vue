@@ -16,6 +16,7 @@
       :editing-log="editingLog"
       :submitting="submitting"
       :available-tags="tags"
+      :available-tasks="tasks"
       :last-end-time="getLastEndTime()"
       @submit="handleSubmit"
       @cancel="handleCancel"
@@ -36,14 +37,15 @@ import { ref, onMounted, inject } from 'vue'
 import { PlusIcon } from '@heroicons/vue/24/outline'
 import TimeLogList from '@/components/TimeLogList.vue'
 import TimeLogForm from '@/components/TimeLogForm.vue'
-import { timelogAPI, tagAPI } from '@/api'
-import type { TimeLog, Tag, CreateTimeLogRequest, UpdateTimeLogRequest } from '@/types'
+import { timelogAPI, tagAPI, taskAPI } from '@/api'
+import type { TimeLog, Tag, Task, CreateTimeLogRequest, UpdateTimeLogRequest } from '@/types'
 
 // 注入全局通知功能
 const showNotification = inject('showNotification') as (type: 'success' | 'error', message: string) => void
 
 const timeLogs = ref<TimeLog[]>([])
 const tags = ref<Tag[]>([])
+const tasks = ref<Task[]>([])
 const loading = ref(false)
 const submitting = ref(false)
 const error = ref<string | null>(null)
@@ -73,6 +75,16 @@ const loadTags = async () => {
   } catch (err) {
     console.error('Error loading tags:', err)
     showNotification('error', 'Failed to load tags')
+  }
+}
+
+const loadTasks = async () => {
+  try {
+    const response = await taskAPI.getAll()
+    tasks.value = response.data || []
+  } catch (err) {
+    console.error('Error loading tasks:', err)
+    showNotification('error', 'Failed to load tasks')
   }
 }
 
@@ -146,5 +158,6 @@ const handleDelete = async (id: number) => {
 onMounted(() => {
   loadTimeLogs()
   loadTags()
+  loadTasks()
 })
 </script>

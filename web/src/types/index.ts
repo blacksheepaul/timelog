@@ -25,6 +25,7 @@ export interface CreateTimeLogRequest {
   start_time: string
   end_time?: string
   tag_id: number
+  task_id?: number | null
   remarks: string
 }
 
