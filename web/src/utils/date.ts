@@ -1,6 +1,7 @@
 import { format, parseISO, formatDuration, intervalToDuration } from 'date-fns'
 
-export const formatDateTime = (dateString: string): string => {
+export const formatDateTime = (dateString: string | null | undefined): string => {
+  if (!dateString) return 'N/A'
   try {
     return format(parseISO(dateString), 'yyyy-MM-dd HH:mm:ss')
   } catch {
@@ -24,7 +25,7 @@ export const formatTime = (dateString: string): string => {
   }
 }
 
-export const calculateDuration = (startTime: string, endTime?: string): string => {
+export const calculateDuration = (startTime: string, endTime?: string | null): string => {
   try {
     const start = parseISO(startTime)
     const end = endTime ? parseISO(endTime) : new Date()
