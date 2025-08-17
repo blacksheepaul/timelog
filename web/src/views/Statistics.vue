@@ -1,0 +1,326 @@
+<template>
+  <div class="space-y-6">
+    <h1 class="text-2xl font-bold text-gray-900">Statistics</h1>
+
+    <!-- 时间过滤器 -->
+    <div class="bg-white shadow rounded-lg p-6">
+      <h2 class="text-lg font-medium text-gray-900 mb-4">Time Range</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">
+            Start Date
+          </label>
+          <input
+            id="start_date"
+            v-model="dateRange.start"
+            type="date"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+        <div>
+          <label for="end_date" class="block text-sm font-medium text-gray-700 mb-2">
+            End Date
+          </label>
+          <input
+            id="end_date"
+            v-model="dateRange.end"
+            type="date"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+        <div class="flex items-end">
+          <button
+            @click="applyFilter"
+            class="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Apply Filter
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 加载状态 -->
+    <div v-if="loading" class="bg-white shadow rounded-lg p-6 text-center">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <p class="mt-2 text-gray-600">Loading statistics...</p>
+    </div>
+
+    <!-- 统计概览 -->
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <ClockIcon class="h-8 w-8 text-blue-600" />
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Total Logs</p>
+            <p class="text-2xl font-semibold text-gray-900">{{ statistics.totalLogs }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <ClockIcon class="h-8 w-8 text-green-600" />
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Total Time</p>
+            <p class="text-2xl font-semibold text-gray-900">{{ statistics.totalTime }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <ClockIcon class="h-8 w-8 text-yellow-600" />
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Average Session</p>
+            <p class="text-2xl font-semibold text-gray-900">{{ statistics.averageSession }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <PlayIcon class="h-8 w-8 text-red-600" />
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Active Sessions</p>
+            <p class="text-2xl font-semibold text-gray-900">{{ statistics.activeSessions }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 按标签统计 -->
+    <div v-if="!loading" class="bg-white shadow rounded-lg">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="text-lg font-medium text-gray-900">Time by Tags</h2>
+      </div>
+      <div v-if="tagStats.length === 0" class="p-6 text-center text-gray-500">
+        No data available for the selected time range.
+      </div>
+      <div v-else class="divide-y divide-gray-200">
+        <div v-for="stat in tagStats" :key="stat.tag.id" class="p-6">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center space-x-3">
+              <span
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
+                :style="{ backgroundColor: stat.tag.color }"
+              >
+                {{ stat.tag.name }}
+              </span>
+              <span class="text-sm text-gray-500">{{ stat.count }} sessions</span>
+            </div>
+            <span class="text-sm font-medium text-gray-900">{{ stat.totalTime }}</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div
+              class="h-2 rounded-full"
+              :style="{ 
+                backgroundColor: stat.tag.color, 
+                width: `${stat.percentage}%` 
+              }"
+            ></div>
+          </div>
+          <div class="mt-1 text-xs text-gray-500">{{ stat.percentage.toFixed(1) }}% of total time</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 每日时间分布 -->
+    <div v-if="!loading" class="bg-white shadow rounded-lg">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="text-lg font-medium text-gray-900">Daily Time Distribution</h2>
+      </div>
+      <div v-if="dailyStats.length === 0" class="p-6 text-center text-gray-500">
+        No data available for the selected time range.
+      </div>
+      <div v-else class="p-6">
+        <div class="space-y-4">
+          <div v-for="day in dailyStats" :key="day.date" class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <span class="text-sm font-medium text-gray-900 w-24">{{ day.date }}</span>
+              <div class="w-48 bg-gray-200 rounded-full h-2">
+                <div
+                  class="h-2 bg-blue-600 rounded-full"
+                  :style="{ width: `${(day.minutes / maxDailyMinutes) * 100}%` }"
+                ></div>
+              </div>
+            </div>
+            <span class="text-sm text-gray-500">{{ day.timeFormatted }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted, inject } from 'vue'
+import { ClockIcon, PlayIcon } from '@heroicons/vue/24/outline'
+import { timelogAPI } from '@/api'
+import { formatDate } from '@/utils/date'
+import type { TimeLog } from '@/types'
+
+// 注入全局通知功能
+const showNotification = inject('showNotification') as (type: 'success' | 'error', message: string) => void
+
+const loading = ref(false)
+const timeLogs = ref<TimeLog[]>([])
+
+// 日期范围
+const dateRange = ref({
+  start: formatDate(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)), // 30天前
+  end: formatDate(new Date())
+})
+
+// 过滤后的时间记录
+const filteredLogs = computed(() => {
+  if (!dateRange.value.start || !dateRange.value.end) return timeLogs.value
+  
+  const start = new Date(dateRange.value.start)
+  const end = new Date(dateRange.value.end)
+  end.setHours(23, 59, 59, 999) // 包含结束日期的整天
+  
+  return timeLogs.value.filter(log => {
+    const logDate = new Date(log.start_time)
+    return logDate >= start && logDate <= end
+  })
+})
+
+// 统计概览
+const statistics = computed(() => {
+  const logs = filteredLogs.value
+  const completedLogs = logs.filter(log => log.end_time)
+  
+  // 计算总时间（分钟）
+  const totalMinutes = completedLogs.reduce((total, log) => {
+    const start = new Date(log.start_time)
+    const end = new Date(log.end_time!)
+    return total + (end.getTime() - start.getTime()) / (1000 * 60)
+  }, 0)
+  
+  // 格式化总时间
+  const totalTime = totalMinutes > 60 
+    ? `${Math.floor(totalMinutes / 60)}h ${Math.round(totalMinutes % 60)}m`
+    : `${Math.round(totalMinutes)}m`
+  
+  // 平均会话时间
+  const averageMinutes = completedLogs.length > 0 ? totalMinutes / completedLogs.length : 0
+  const averageSession = averageMinutes > 60
+    ? `${Math.floor(averageMinutes / 60)}h ${Math.round(averageMinutes % 60)}m`
+    : `${Math.round(averageMinutes)}m`
+  
+  // 活跃会话数
+  const activeSessions = logs.filter(log => !log.end_time).length
+  
+  return {
+    totalLogs: logs.length,
+    totalTime,
+    averageSession,
+    activeSessions
+  }
+})
+
+// 按标签统计
+const tagStats = computed(() => {
+  const logs = filteredLogs.value.filter(log => log.end_time)
+  const tagMap = new Map<number, { tag: any, minutes: number, count: number }>()
+  
+  let totalMinutes = 0
+  
+  logs.forEach(log => {
+    if (!log.tag) return
+    
+    const start = new Date(log.start_time)
+    const end = new Date(log.end_time!)
+    const minutes = (end.getTime() - start.getTime()) / (1000 * 60)
+    
+    totalMinutes += minutes
+    
+    if (tagMap.has(log.tag_id)) {
+      const existing = tagMap.get(log.tag_id)!
+      existing.minutes += minutes
+      existing.count += 1
+    } else {
+      tagMap.set(log.tag_id, {
+        tag: log.tag,
+        minutes,
+        count: 1
+      })
+    }
+  })
+  
+  return Array.from(tagMap.values())
+    .map(stat => ({
+      ...stat,
+      totalTime: stat.minutes > 60 
+        ? `${Math.floor(stat.minutes / 60)}h ${Math.round(stat.minutes % 60)}m`
+        : `${Math.round(stat.minutes)}m`,
+      percentage: totalMinutes > 0 ? (stat.minutes / totalMinutes) * 100 : 0
+    }))
+    .sort((a, b) => b.minutes - a.minutes)
+})
+
+// 每日统计
+const dailyStats = computed(() => {
+  const logs = filteredLogs.value.filter(log => log.end_time)
+  const dailyMap = new Map<string, number>()
+  
+  logs.forEach(log => {
+    const date = new Date(log.start_time).toISOString().split('T')[0]
+    const start = new Date(log.start_time)
+    const end = new Date(log.end_time!)
+    const minutes = (end.getTime() - start.getTime()) / (1000 * 60)
+    
+    if (dailyMap.has(date)) {
+      dailyMap.set(date, dailyMap.get(date)! + minutes)
+    } else {
+      dailyMap.set(date, minutes)
+    }
+  })
+  
+  return Array.from(dailyMap.entries())
+    .map(([date, minutes]) => ({
+      date: new Date(date).toLocaleDateString(),
+      minutes,
+      timeFormatted: minutes > 60 
+        ? `${Math.floor(minutes / 60)}h ${Math.round(minutes % 60)}m`
+        : `${Math.round(minutes)}m`
+    }))
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+})
+
+// 每日最大分钟数（用于进度条）
+const maxDailyMinutes = computed(() => {
+  return Math.max(...dailyStats.value.map(day => day.minutes), 1)
+})
+
+const loadTimeLogs = async () => {
+  loading.value = true
+  
+  try {
+    const response = await timelogAPI.getAll()
+    timeLogs.value = response.data || []
+  } catch (err) {
+    console.error('Error loading time logs:', err)
+    showNotification('error', 'Failed to load time logs')
+  } finally {
+    loading.value = false
+  }
+}
+
+const applyFilter = () => {
+  // 过滤逻辑已经在computed中处理，这里只需要触发重新计算
+  console.log('Filter applied:', dateRange.value)
+}
+
+onMounted(() => {
+  loadTimeLogs()
+})
+</script>
