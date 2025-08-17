@@ -9,6 +9,35 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// ApiResponse 统一API响应结构
+type ApiResponse struct {
+	Data    interface{} `json:"data"`
+	Message string      `json:"message,omitempty"`
+	Status  int         `json:"status"`
+}
+
+// SuccessResponse 成功响应
+func SuccessResponse(data interface{}, message ...string) ApiResponse {
+	msg := "success"
+	if len(message) > 0 {
+		msg = message[0]
+	}
+	return ApiResponse{
+		Data:    data,
+		Message: msg,
+		Status:  http.StatusOK,
+	}
+}
+
+// ErrorResponse 错误响应
+func ErrorResponse(status int, message string) ApiResponse {
+	return ApiResponse{
+		Data:    nil,
+		Message: message,
+		Status:  status,
+	}
+}
+
 // RegisterTimeLogRoutes 注册 TimeLog 相关路由
 func RegisterTimeLogRoutes(group *gin.RouterGroup) {
 	group.POST("/timelogs", createTimeLogHandler)
@@ -32,14 +61,14 @@ func RegisterTimeLogRoutes(group *gin.RouterGroup) {
 func createTimeLogHandler(c *gin.Context) {
 	var tl model.TimeLog
 	if err := c.ShouldBindJSON(&tl); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
 	if err := service.CreateTimeLog(&tl); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, tl)
+	c.JSON(http.StatusOK, SuccessResponse(tl, "Time log created successfully"))
 }
 
 // ListTimeLogsHandler godoc
@@ -53,10 +82,10 @@ func createTimeLogHandler(c *gin.Context) {
 func listTimeLogsHandler(c *gin.Context) {
 	tls, err := service.ListTimeLogs()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, tls)
+	c.JSON(http.StatusOK, SuccessResponse(tls, "Time logs retrieved successfully"))
 }
 
 // GetTimeLogHandler godoc
@@ -72,15 +101,15 @@ func listTimeLogsHandler(c *gin.Context) {
 func getTimeLogHandler(c *gin.Context) {
 	var id uint
 	if err := parseUintParam(c, "id", &id); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
 	tl, err := service.GetTimeLogByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		c.JSON(http.StatusNotFound, ErrorResponse(http.StatusNotFound, err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, tl)
+	c.JSON(http.StatusOK, SuccessResponse(tl, "Time log retrieved successfully"))
 }
 
 // UpdateTimeLogHandler godoc
@@ -98,20 +127,20 @@ func getTimeLogHandler(c *gin.Context) {
 func updateTimeLogHandler(c *gin.Context) {
 	var id uint
 	if err := parseUintParam(c, "id", &id); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
 	var tl model.TimeLog
 	if err := c.ShouldBindJSON(&tl); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
 	tl.ID = id
 	if err := service.UpdateTimeLog(&tl); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, tl)
+	c.JSON(http.StatusOK, SuccessResponse(tl, "Time log updated successfully"))
 }
 
 // DeleteTimeLogHandler godoc
@@ -127,14 +156,14 @@ func updateTimeLogHandler(c *gin.Context) {
 func deleteTimeLogHandler(c *gin.Context) {
 	var id uint
 	if err := parseUintParam(c, "id", &id); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
 	if err := service.DeleteTimeLog(id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"deleted": id})
+	c.JSON(http.StatusOK, SuccessResponse(nil, "Time log deleted successfully"))
 }
 
 // parseUintParam 辅助函数
