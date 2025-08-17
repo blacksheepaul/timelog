@@ -55,3 +55,25 @@ export const formatDateTimeLocal = (date: Date = new Date()): string => {
   
   return `${year}-${month}-${day}T${hours}:${minutes}`
 }
+
+// 将UTC时间字符串转换为本地datetime-local格式
+export const formatUTCToLocal = (utcString: string): string => {
+  try {
+    const utcDate = new Date(utcString)
+    return formatDateTimeLocal(utcDate)
+  } catch {
+    return ''
+  }
+}
+
+// 将本地datetime-local值转换为UTC ISO字符串
+export const formatLocalToUTC = (localDateTimeString: string): string => {
+  try {
+    // datetime-local输入的值应该被当作用户的本地时间
+    // JavaScript的Date构造函数会正确处理这个转换
+    const localDate = new Date(localDateTimeString)
+    return localDate.toISOString()
+  } catch {
+    return new Date().toISOString()
+  }
+}
