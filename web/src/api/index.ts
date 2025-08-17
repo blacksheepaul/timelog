@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { TimeLog, CreateTimeLogRequest, UpdateTimeLogRequest, ApiResponse } from '@/types'
+import type { TimeLog, Tag, CreateTimeLogRequest, UpdateTimeLogRequest, ApiResponse } from '@/types'
 
 const api = axios.create({
   baseURL: '/api',
@@ -32,6 +32,23 @@ export const timelogAPI = {
   
   delete: (id: number): Promise<ApiResponse<null>> => 
     api.delete(`/timelogs/${id}`).then(res => res.data),
+}
+
+export const tagAPI = {
+  getAll: (): Promise<ApiResponse<Tag[]>> => 
+    api.get('/tags').then(res => res.data),
+  
+  getById: (id: number): Promise<ApiResponse<Tag>> => 
+    api.get(`/tags/${id}`).then(res => res.data),
+  
+  create: (data: Partial<Tag>): Promise<ApiResponse<Tag>> => 
+    api.post('/tags', data).then(res => res.data),
+  
+  update: (id: number, data: Partial<Tag>): Promise<ApiResponse<Tag>> => 
+    api.put(`/tags/${id}`, data).then(res => res.data),
+  
+  delete: (id: number): Promise<ApiResponse<null>> => 
+    api.delete(`/tags/${id}`).then(res => res.data),
 }
 
 export default api

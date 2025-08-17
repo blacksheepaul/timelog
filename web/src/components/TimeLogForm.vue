@@ -33,16 +33,25 @@
       </div>
       
       <div>
-        <label for="tags" class="block text-sm font-medium text-gray-700 mb-2">
-          Tags
+        <label for="tag_id" class="block text-sm font-medium text-gray-700 mb-2">
+          Tag *
         </label>
-        <input
-          id="tags"
-          v-model="form.tags"
-          type="text"
-          placeholder="e.g., work, meeting, development"
+        <select
+          id="tag_id"
+          v-model="form.tag_id"
+          required
           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        />
+        >
+          <option value="" disabled>Select a tag</option>
+          <option 
+            v-for="tag in availableTags" 
+            :key="tag.id" 
+            :value="tag.id"
+            :style="{ color: tag.color }"
+          >
+            {{ tag.name }} - {{ tag.description }}
+          </option>
+        </select>
       </div>
       
       <div>
@@ -80,13 +89,14 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watch } from 'vue'
-import type { TimeLog, CreateTimeLogRequest, UpdateTimeLogRequest } from '@/types'
+import { reactive, watch, computed } from 'vue'
+import type { TimeLog, Tag, CreateTimeLogRequest, UpdateTimeLogRequest } from '@/types'
 import { formatDateTimeLocal } from '@/utils/date'
 
 const props = defineProps<{
   editingLog?: TimeLog
   submitting: boolean
+  availableTags: Tag[]
 }>()
 
 const emit = defineEmits<{
@@ -99,19 +109,19 @@ const isEditing = computed(() => !!props.editingLog)
 const form = reactive<{
   start_time: string
   end_time: string
-  tags: string
+  tag_id: number | ''
   remarks: string
 }>({
   start_time: '',
   end_time: '',
-  tags: '',
+  tag_id: '',
   remarks: '',
 })
 
 const resetForm = () => {
   form.start_time = formatDateTimeLocal()
   form.end_time = ''
-  form.tags = ''
+  form.tag_id = ''
   form.remarks = ''
 }
 
@@ -121,7 +131,7 @@ const loadEditingData = () => {
     form.end_time = props.editingLog.end_time 
       ? new Date(props.editingLog.end_time).toISOString().slice(0, 16) 
       : ''
-    form.tags = props.editingLog.tags
+    form.tag_id = props.editingLog.tag_id
     form.remarks = props.editingLog.remarks
   } else {
     resetForm()
@@ -129,10 +139,14 @@ const loadEditingData = () => {
 }
 
 const handleSubmit = () => {
+  if (form.tag_id === '') {
+    return // Tag is required
+  }
+  
   const data = {
     start_time: new Date(form.start_time).toISOString(),
     end_time: form.end_time ? new Date(form.end_time).toISOString() : undefined,
-    tags: form.tags,
+    tag_id: Number(form.tag_id),
     remarks: form.remarks,
   }
   
@@ -145,6 +159,4 @@ const handleCancel = () => {
 }
 
 watch(() => props.editingLog, loadEditingData, { immediate: true })
-
-import { computed } from 'vue'
 </script>
