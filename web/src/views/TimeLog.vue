@@ -16,6 +16,7 @@
       :editing-log="editingLog"
       :submitting="submitting"
       :available-tags="tags"
+      :last-end-time="getLastEndTime()"
       @submit="handleSubmit"
       @cancel="handleCancel"
     />
@@ -113,6 +114,18 @@ const handleEdit = (log: TimeLog) => {
 const handleCancel = () => {
   showForm.value = false
   editingLog.value = undefined
+}
+
+const getLastEndTime = (): string | null => {
+  if (timeLogs.value.length === 0) {
+    return null
+  }
+  
+  // 按ID排序获取最新的 timelog（ID是自增的，能准确反映创建顺序）
+  const sortedLogs = [...timeLogs.value].sort((a, b) => b.id - a.id)
+  
+  const lastLog = sortedLogs[0]
+  return lastLog?.end_time || null
 }
 
 const handleDelete = async (id: number) => {

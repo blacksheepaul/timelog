@@ -133,6 +133,7 @@ const props = defineProps<{
   editingLog?: TimeLog
   submitting: boolean
   availableTags: Tag[]
+  lastEndTime?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -155,7 +156,12 @@ const form = reactive<{
 })
 
 const resetForm = () => {
-  form.start_time = formatDateTimeLocal()
+  // 如果有上一个 timelog 的结束时间，使用它作为默认的开始时间
+  if (props.lastEndTime) {
+    form.start_time = formatUTCToLocal(props.lastEndTime)
+  } else {
+    form.start_time = formatDateTimeLocal()
+  }
   form.end_time = ''
   form.tag_id = ''
   form.remarks = ''
