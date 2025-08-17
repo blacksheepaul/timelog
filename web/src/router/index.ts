@@ -4,6 +4,7 @@ import type { RouteRecordRaw } from 'vue-router'
 // 页面组件懒加载
 const Home = () => import('@/views/Home.vue')
 const TimeLog = () => import('@/views/TimeLog.vue')
+const Tasks = () => import('@/views/Tasks.vue')
 const Tags = () => import('@/views/Tags.vue')
 const Statistics = () => import('@/views/Statistics.vue')
 
@@ -22,6 +23,14 @@ const routes: RouteRecordRaw[] = [
     component: TimeLog,
     meta: {
       title: 'Time Logs'
+    }
+  },
+  {
+    path: '/tasks',
+    name: 'Tasks',
+    component: Tasks,
+    meta: {
+      title: 'Task Management'
     }
   },
   {
