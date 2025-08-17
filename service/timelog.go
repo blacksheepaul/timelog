@@ -35,3 +35,41 @@ func DeleteTimeLog(id uint) error {
 	db := model.GetDao().Db()
 	return model.DeleteTimeLog(db, id)
 }
+
+// --- Tag Service ---
+
+// CreateTag 新增一个标签
+func CreateTag(tag *model.Tag) error {
+	db := model.GetDao().Db()
+	return model.CreateTag(db, tag)
+}
+
+// GetTagByID 根据ID获取标签
+func GetTagByID(id uint) (*model.Tag, error) {
+	db := model.GetDao().Db()
+	return model.GetTagByID(db, id)
+}
+
+// GetTagByName 根据名称获取标签
+func GetTagByName(name string) (*model.Tag, error) {
+	db := model.GetDao().Db()
+	return model.GetTagByName(db, name)
+}
+
+// ListTags 查询标签列表
+func ListTags(conds ...interface{}) ([]model.Tag, error) {
+	db := model.GetDao().Db()
+	return model.ListTags(db, conds...)
+}
+
+// UpdateTag 更新一个标签
+func UpdateTag(tag *model.Tag) error {
+	db := model.GetDao().Db()
+	return model.UpdateTag(db, tag)
+}
+
+// DeleteTag 删除一个标签
+func DeleteTag(id uint) error {
+	db := model.GetDao().Db()
+	return model.DeleteTag(db, id)
+}

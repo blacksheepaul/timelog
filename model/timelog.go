@@ -15,7 +15,8 @@ type TimeLog struct {
 	UserID    uint           `gorm:"column:user_id" json:"user_id"`
 	StartTime time.Time      `gorm:"column:start_time" json:"start_time"`
 	EndTime   *time.Time     `gorm:"column:end_time" json:"end_time"`
-	Tag       string         `gorm:"column:tag" json:"tags"`
+	TagID     uint           `gorm:"column:tag_id" json:"tag_id"`
+	Tag       Tag            `gorm:"foreignKey:TagID" json:"tag"`
 	Remark    string         `gorm:"column:remark" json:"remarks"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
@@ -36,14 +37,14 @@ func CreateTimeLog(db *gorm.DB, tl *TimeLog) error {
 // GetTimeLogByID 根据ID获取时间日志
 func GetTimeLogByID(db *gorm.DB, id uint) (*TimeLog, error) {
 	var tl TimeLog
-	err := db.First(&tl, id).Error
+	err := db.Preload("Tag").First(&tl, id).Error
 	return &tl, err
 }
 
 // ListTimeLogs 查询时间日志（可扩展条件）
 func ListTimeLogs(db *gorm.DB, conds ...interface{}) ([]TimeLog, error) {
 	var tls []TimeLog
-	err := db.Find(&tls, conds...).Error
+	err := db.Preload("Tag").Find(&tls, conds...).Error
 	return tls, err
 }
 
