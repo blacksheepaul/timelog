@@ -9,11 +9,12 @@ export const formatDateTime = (dateString: string | null | undefined): string =>
   }
 }
 
-export const formatDate = (dateString: string): string => {
+export const formatDate = (input: string | Date): string => {
   try {
-    return format(parseISO(dateString), 'yyyy-MM-dd')
+    const date = typeof input === 'string' ? parseISO(input) : input
+    return format(date, 'yyyy-MM-dd')
   } catch {
-    return dateString
+    return typeof input === 'string' ? input : input.toISOString().split('T')[0]
   }
 }
 
