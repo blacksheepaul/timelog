@@ -33,10 +33,12 @@ export const calculateDuration = (startTime: string, endTime?: string | null): s
     
     const duration = intervalToDuration({ start, end })
     
-    return formatDuration(duration, {
-      format: ['hours', 'minutes'],
-      locale: { formatDistance: () => '' }
-    }) || '0 minutes'
+    // 使用正确的formatDuration配置
+    const result = formatDuration(duration, {
+      format: ['hours', 'minutes']
+    })
+    
+    return result || '0 minutes'
   } catch {
     return 'Invalid duration'
   }
