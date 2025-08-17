@@ -45,6 +45,13 @@ func RegisterTimeLogRoutes(group *gin.RouterGroup) {
 	group.GET("/timelogs/:id", getTimeLogHandler)
 	group.PUT("/timelogs/:id", updateTimeLogHandler)
 	group.DELETE("/timelogs/:id", deleteTimeLogHandler)
+	
+	// Tag 相关路由
+	group.GET("/tags", listTagsHandler)
+	group.POST("/tags", createTagHandler)
+	group.GET("/tags/:id", getTagHandler)
+	group.PUT("/tags/:id", updateTagHandler)
+	group.DELETE("/tags/:id", deleteTagHandler)
 }
 
 // CreateTimeLogHandler godoc
@@ -68,7 +75,15 @@ func createTimeLogHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, SuccessResponse(tl, "Time log created successfully"))
+	
+	// 重新查询以获取完整的Tag信息
+	createdLog, err := service.GetTimeLogByID(tl.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+	
+	c.JSON(http.StatusOK, SuccessResponse(createdLog, "Time log created successfully"))
 }
 
 // ListTimeLogsHandler godoc
@@ -140,7 +155,15 @@ func updateTimeLogHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, SuccessResponse(tl, "Time log updated successfully"))
+	
+	// 重新查询以获取完整的Tag信息
+	updatedLog, err := service.GetTimeLogByID(tl.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+	
+	c.JSON(http.StatusOK, SuccessResponse(updatedLog, "Time log updated successfully"))
 }
 
 // DeleteTimeLogHandler godoc
@@ -180,4 +203,125 @@ func parseUintParam(c *gin.Context, key string, out *uint) error {
 
 func parseUint(s string) (uint64, error) {
 	return strconv.ParseUint(s, 10, 64)
+}
+
+// --- Tag Handlers ---
+
+// listTagsHandler godoc
+// @Summary 查询标签列表
+// @Description 获取所有标签
+// @Tags tag
+// @Produce json
+// @Success 200 {array} model.Tag
+// @Failure 500 {object} map[string]string
+// @Router /api/tags [get]
+func listTagsHandler(c *gin.Context) {
+	tags, err := service.ListTags()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, SuccessResponse(tags, "Tags retrieved successfully"))
+}
+
+// createTagHandler godoc
+// @Summary 创建标签
+// @Description 新增一个标签
+// @Tags tag
+// @Accept json
+// @Produce json
+// @Param data body model.Tag true "标签数据"
+// @Success 200 {object} model.Tag
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/tags [post]
+func createTagHandler(c *gin.Context) {
+	var tag model.Tag
+	if err := c.ShouldBindJSON(&tag); err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
+		return
+	}
+	if err := service.CreateTag(&tag); err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, SuccessResponse(tag, "Tag created successfully"))
+}
+
+// getTagHandler godoc
+// @Summary 查询单个标签
+// @Description 根据ID获取标签
+// @Tags tag
+// @Produce json
+// @Param id path int true "标签ID"
+// @Success 200 {object} model.Tag
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /api/tags/{id} [get]
+func getTagHandler(c *gin.Context) {
+	var id uint
+	if err := parseUintParam(c, "id", &id); err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
+		return
+	}
+	tag, err := service.GetTagByID(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, ErrorResponse(http.StatusNotFound, err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, SuccessResponse(tag, "Tag retrieved successfully"))
+}
+
+// updateTagHandler godoc
+// @Summary 更新标签
+// @Description 根据ID更新标签
+// @Tags tag
+// @Accept json
+// @Produce json
+// @Param id path int true "标签ID"
+// @Param data body model.Tag true "标签数据"
+// @Success 200 {object} model.Tag
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/tags/{id} [put]
+func updateTagHandler(c *gin.Context) {
+	var id uint
+	if err := parseUintParam(c, "id", &id); err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
+		return
+	}
+	var tag model.Tag
+	if err := c.ShouldBindJSON(&tag); err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
+		return
+	}
+	tag.ID = id
+	if err := service.UpdateTag(&tag); err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, SuccessResponse(tag, "Tag updated successfully"))
+}
+
+// deleteTagHandler godoc
+// @Summary 删除标签
+// @Description 根据ID删除标签
+// @Tags tag
+// @Produce json
+// @Param id path int true "标签ID"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/tags/{id} [delete]
+func deleteTagHandler(c *gin.Context) {
+	var id uint
+	if err := parseUintParam(c, "id", &id); err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
+		return
+	}
+	if err := service.DeleteTag(id); err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, SuccessResponse(nil, "Tag deleted successfully"))
 }
