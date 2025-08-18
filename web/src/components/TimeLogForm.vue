@@ -13,6 +13,7 @@
           <div class="flex space-x-2">
             <input
               id="start_time"
+              ref="startTimeInput"
               v-model="form.start_time"
               type="datetime-local"
               required
@@ -145,7 +146,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watch, computed } from 'vue'
+import { reactive, watch, computed, ref, nextTick } from 'vue'
 import { ClockIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import type { TimeLog, Tag, Task, CreateTimeLogRequest, UpdateTimeLogRequest } from '@/types'
 import { formatDateTimeLocal, formatUTCToLocal, formatLocalToUTC } from '@/utils/date'
@@ -164,6 +165,9 @@ const emit = defineEmits<{
 }>()
 
 const isEditing = computed(() => !!props.editingLog)
+
+// Template ref for auto-focus
+const startTimeInput = ref<HTMLInputElement>()
 
 const form = reactive<{
   start_time: string
@@ -205,7 +209,7 @@ const clearEndTime = () => {
   form.end_time = ''
 }
 
-const loadEditingData = () => {
+const loadEditingData = async () => {
   if (props.editingLog) {
     form.start_time = formatUTCToLocal(props.editingLog.start_time)
     form.end_time = props.editingLog.end_time 
@@ -217,6 +221,10 @@ const loadEditingData = () => {
   } else {
     resetForm()
   }
+  
+  // Auto-focus the start time input
+  await nextTick()
+  startTimeInput.value?.focus()
 }
 
 const handleSubmit = () => {
