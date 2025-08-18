@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"embed"
 	"fmt"
 	"os"
 	"os/signal"
@@ -16,11 +17,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//go:embed web/dist
+var staticFiles embed.FS
+
 func main() {
 	cfg := config.GetConfig("config.yml")
 	logger := log.SetZapLogger(*cfg)
 
-	r := router.Register(gin.New(), cfg, logger)
+	r := router.Register(gin.New(), cfg, logger, staticFiles)
 	service.InitService(logger, cfg)
 
 	model.InitDao(cfg, logger)
