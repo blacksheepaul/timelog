@@ -1,4 +1,4 @@
--- úû¡h
+-- Create tasks table
 CREATE TABLE tasks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE tasks (
     FOREIGN KEY (tag_id) REFERENCES tags(id)
 );
 
--- ú"ÐØåâ'ý
+-- Create indexes for tasks table
 CREATE INDEX idx_tasks_tag_id ON tasks(tag_id);
 CREATE INDEX idx_tasks_due_date ON tasks(due_date);
 CREATE INDEX idx_tasks_is_completed ON tasks(is_completed);
