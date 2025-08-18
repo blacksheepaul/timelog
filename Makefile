@@ -39,9 +39,9 @@ clean:
 
 # Web frontend targets
 web-build:
-	cd web && npm install && npm run build
+	cd web && pnpm install && pnpm run build
 
 web-dev:
-	cd web && npm install && npm run dev
+	cd web && pnpm install && pnpm run dev
 
 web: web-build
