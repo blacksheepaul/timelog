@@ -32,7 +32,7 @@ export const timelogAPI = {
     api.get('/timelogs').then(res => res.data),
   
   getRecent: (limit: number = 5): Promise<ApiResponse<TimeLog[]>> => 
-    api.get(`/timelogs?limit=${limit}&order=${encodeURIComponent('id DESC')}`).then(res => res.data),
+    api.get(`/timelogs?limit=${limit}&order=${encodeURIComponent('created_at DESC')}`).then(res => res.data),
   
   getById: (id: number): Promise<ApiResponse<TimeLog>> => 
     api.get(`/timelogs/${id}`).then(res => res.data),
