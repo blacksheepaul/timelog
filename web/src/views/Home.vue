@@ -184,9 +184,8 @@ const todayStats = computed(() => {
 const loadRecentLogs = async () => {
   loading.value = true
   try {
-    const response = await timelogAPI.getAll()
-    // 只显示最近10条记录
-    recentLogs.value = (response.data || []).slice(0, 10)
+    const response = await timelogAPI.getRecent(5)
+    recentLogs.value = response.data || []
   } catch (err) {
     console.error('Error loading recent logs:', err)
   } finally {
