@@ -50,6 +50,27 @@ func ListTimeLogs(db *gorm.DB, conds ...interface{}) ([]TimeLog, error) {
 	return tls, err
 }
 
+// ListTimeLogsWithOptions 查询时间日志（支持排序和限制）
+func ListTimeLogsWithOptions(db *gorm.DB, limit int, orderBy string, conds ...interface{}) ([]TimeLog, error) {
+	var tls []TimeLog
+	query := db.Preload("Tag").Preload("Task")
+	
+	if len(conds) > 0 {
+		query = query.Where(conds[0], conds[1:]...)
+	}
+	
+	if orderBy != "" {
+		query = query.Order(orderBy)
+	}
+	
+	if limit > 0 {
+		query = query.Limit(limit)
+	}
+	
+	err := query.Find(&tls).Error
+	return tls, err
+}
+
 // UpdateTimeLog 更新时间日志
 func UpdateTimeLog(db *gorm.DB, tl *TimeLog) error {
 	return db.Save(tl).Error

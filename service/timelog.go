@@ -24,6 +24,12 @@ func ListTimeLogs(conds ...interface{}) ([]model.TimeLog, error) {
 	return model.ListTimeLogs(db, conds...)
 }
 
+// ListTimeLogsWithOptions 查询时间日志（支持排序和限制）
+func ListTimeLogsWithOptions(limit int, orderBy string, conds ...interface{}) ([]model.TimeLog, error) {
+	db := model.GetDao().Db()
+	return model.ListTimeLogsWithOptions(db, limit, orderBy, conds...)
+}
+
 // UpdateTimeLog 更新一条时间日志
 func UpdateTimeLog(tl *model.TimeLog) error {
 	db := model.GetDao().Db()
