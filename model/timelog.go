@@ -33,16 +33,6 @@ func (TimeLog) TableName() string {
 
 // BeforeCreate 在创建记录前执行，确保created_at不是零值并验证user_id
 func (tl *TimeLog) BeforeCreate(tx *gorm.DB) error {
-	// 验证UserID不能为0
-	if tl.UserID == 0 {
-		log := logger.GetLogger()
-		log.Errorw("TimeLog creation failed: UserID cannot be 0",
-			"user_id", tl.UserID,
-			"start_time", tl.StartTime,
-			"tag_id", tl.TagID)
-		return errors.New("user_id cannot be 0")
-	}
-
 	// Bug tracking: 确保CreatedAt不是零值
 	if tl.CreatedAt.IsZero() {
 		log := logger.GetLogger()
