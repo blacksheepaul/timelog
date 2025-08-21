@@ -1,8 +1,10 @@
 package model
 
 import (
+	"errors"
 	"time"
 
+	"github.com/blacksheepaul/timelog/core/logger"
 	"gorm.io/gorm"
 )
 
@@ -27,6 +29,31 @@ type TimeLog struct {
 
 func (TimeLog) TableName() string {
 	return "timelogs"
+}
+
+// BeforeCreate 在创建记录前执行，确保created_at不是零值并验证user_id
+func (tl *TimeLog) BeforeCreate(tx *gorm.DB) error {
+	// 验证UserID不能为0
+	if tl.UserID == 0 {
+		log := logger.GetLogger()
+		log.Errorw("TimeLog creation failed: UserID cannot be 0",
+			"user_id", tl.UserID,
+			"start_time", tl.StartTime,
+			"tag_id", tl.TagID)
+		return errors.New("user_id cannot be 0")
+	}
+
+	// Bug tracking: 确保CreatedAt不是零值
+	if tl.CreatedAt.IsZero() {
+		log := logger.GetLogger()
+		log.Errorw("TimeLog creation failed: CreatedAt cannot be zero",
+			"user_id", tl.UserID,
+			"start_time", tl.StartTime,
+			"tag_id", tl.TagID)
+		return errors.New("created_at cannot be zero")
+	}
+
+	return nil
 }
 
 // --- CRUD ---
@@ -54,19 +81,19 @@ func ListTimeLogs(db *gorm.DB, conds ...interface{}) ([]TimeLog, error) {
 func ListTimeLogsWithOptions(db *gorm.DB, limit int, orderBy string, conds ...interface{}) ([]TimeLog, error) {
 	var tls []TimeLog
 	query := db.Preload("Tag").Preload("Task")
-	
+
 	if len(conds) > 0 {
 		query = query.Where(conds[0], conds[1:]...)
 	}
-	
+
 	if orderBy != "" {
 		query = query.Order(orderBy)
 	}
-	
+
 	if limit > 0 {
 		query = query.Limit(limit)
 	}
-	
+
 	err := query.Find(&tls).Error
 	return tls, err
 }
