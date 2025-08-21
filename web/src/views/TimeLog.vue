@@ -58,7 +58,9 @@ const loadTimeLogs = async () => {
   
   try {
     const response = await timelogAPI.getAll()
-    timeLogs.value = response.data || []
+    const logs = response.data || []
+    // Sort by start_time in descending order (most recent first)
+    timeLogs.value = logs.sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())
   } catch (err) {
     error.value = 'Failed to load time logs'
     console.error('Error loading time logs:', err)
