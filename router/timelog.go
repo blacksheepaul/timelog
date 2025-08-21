@@ -91,11 +91,35 @@ func createTimeLogHandler(c *gin.Context) {
 // @Description 获取所有时间日志
 // @Tags timelog
 // @Produce json
+// @Param limit query int false "Limit number of results"
+// @Param order query string false "Order by field (default: created_at DESC)"
 // @Success 200 {array} model.TimeLog
 // @Failure 500 {object} map[string]string
 // @Router /api/timelogs [get]
 func listTimeLogsHandler(c *gin.Context) {
-	tls, err := service.ListTimeLogs()
+	limitStr := c.Query("limit")
+	orderBy := c.Query("order")
+	
+	var tls []model.TimeLog
+	var err error
+	
+	if limitStr != "" || orderBy != "" {
+		limit := 0
+		if limitStr != "" {
+			if l, parseErr := strconv.Atoi(limitStr); parseErr == nil && l > 0 {
+				limit = l
+			}
+		}
+		
+		if orderBy == "" {
+			orderBy = "created_at DESC"
+		}
+		
+		tls, err = service.ListTimeLogsWithOptions(limit, orderBy)
+	} else {
+		tls, err = service.ListTimeLogs()
+	}
+	
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
