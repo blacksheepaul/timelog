@@ -1,10 +1,8 @@
 package model
 
 import (
-	"errors"
 	"time"
 
-	"github.com/blacksheepaul/timelog/core/logger"
 	"gorm.io/gorm"
 )
 
@@ -13,37 +11,19 @@ import (
 // id, user_id, start_time, end_time, tag, remark
 
 type TimeLog struct {
-	ID        uint           `gorm:"primaryKey" json:"id"`
-	UserID    uint           `gorm:"column:user_id" json:"user_id"`
-	StartTime time.Time      `gorm:"column:start_time" json:"start_time"`
-	EndTime   *time.Time     `gorm:"column:end_time" json:"end_time"`
-	TagID     uint           `gorm:"column:tag_id" json:"tag_id"`
-	Tag       Tag            `gorm:"foreignKey:TagID" json:"tag"`
-	TaskID    *uint          `gorm:"column:task_id" json:"task_id,omitempty"`
-	Task      *Task          `gorm:"foreignKey:TaskID" json:"task,omitempty"`
-	Remark    string         `gorm:"column:remark" json:"remarks"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	gorm.Model
+	UserID    uint       `gorm:"column:user_id" json:"user_id"`
+	StartTime time.Time  `gorm:"column:start_time" json:"start_time"`
+	EndTime   *time.Time `gorm:"column:end_time" json:"end_time"`
+	TagID     uint       `gorm:"column:tag_id" json:"tag_id"`
+	Tag       Tag        `gorm:"foreignKey:TagID" json:"tag"`
+	TaskID    *uint      `gorm:"column:task_id" json:"task_id,omitempty"`
+	Task      *Task      `gorm:"foreignKey:TaskID" json:"task,omitempty"`
+	Remark    string     `gorm:"column:remark" json:"remarks"`
 }
 
 func (TimeLog) TableName() string {
 	return "timelogs"
-}
-
-// BeforeCreate 在创建记录前执行，确保created_at不是零值并验证user_id
-func (tl *TimeLog) BeforeCreate(tx *gorm.DB) error {
-	// Bug tracking: 确保CreatedAt不是零值
-	if tl.CreatedAt.IsZero() {
-		log := logger.GetLogger()
-		log.Errorw("TimeLog creation failed: CreatedAt cannot be zero",
-			"user_id", tl.UserID,
-			"start_time", tl.StartTime,
-			"tag_id", tl.TagID)
-		return errors.New("created_at cannot be zero")
-	}
-
-	return nil
 }
 
 // --- CRUD ---
