@@ -17,7 +17,7 @@ else
 	$(error Unknown env: $(env))
 endif
 
-.PHONY: all build build-linux docker run clean web web-build web-dev
+.PHONY: all build build-linux buildx docker run clean web web-build web-dev
 
 all: build
 
@@ -26,6 +26,8 @@ build:
 
 build-linux:
 	GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -o $(BIN_NAME_ARM)
+
+buildx: web-build build
 
 docker: build-linux
 	docker build -t $(DOCKER_TAG) .
