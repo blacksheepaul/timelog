@@ -8,7 +8,7 @@ export interface Tag {
 }
 
 export interface TimeLog {
-  id: number
+  ID: number
   start_time: string
   end_time?: string | null
   tag_id: number
@@ -16,9 +16,9 @@ export interface TimeLog {
   task_id?: number | null
   task?: Task | null
   remarks: string
-  created_at: string
-  updated_at: string
-  deleted_at?: string | null
+  CreatedAt: string
+  UpdatedAt: string
+  DeletedAt?: string | null
 }
 
 export interface CreateTimeLogRequest {

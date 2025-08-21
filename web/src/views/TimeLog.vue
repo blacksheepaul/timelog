@@ -102,7 +102,7 @@ const handleSubmit = async (data: CreateTimeLogRequest | UpdateTimeLogRequest) =
   
   try {
     if (editingLog.value) {
-      await timelogAPI.update(editingLog.value.id, data as UpdateTimeLogRequest)
+      await timelogAPI.update(editingLog.value.ID, data as UpdateTimeLogRequest)
       showNotification('success', 'Time log updated successfully')
     } else {
       await timelogAPI.create(data as CreateTimeLogRequest)
@@ -136,7 +136,7 @@ const getLastEndTime = (): string | null => {
   }
   
   // 按ID排序获取最新的 timelog（ID是自增的，能准确反映创建顺序）
-  const sortedLogs = [...timeLogs.value].sort((a, b) => b.id - a.id)
+  const sortedLogs = [...timeLogs.value].sort((a, b) => b.ID - a.ID)
   
   const lastLog = sortedLogs[0]
   return lastLog?.end_time || null
