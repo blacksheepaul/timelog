@@ -17,7 +17,7 @@ else
 	$(error Unknown env: $(env))
 endif
 
-.PHONY: all build build-linux buildx docker run clean web web-build web-dev
+.PHONY: all build build-linux buildx docker run clean web web-build web-dev mcp-server
 
 all: build
 
@@ -47,3 +47,7 @@ web-dev:
 	cd web && pnpm install && pnpm run dev
 
 web: web-build
+
+# MCP Server target
+mcp-server:
+	cd mcp && go build -o timelog-mcp-server server.go
