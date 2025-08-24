@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "timelog": {
+      "type": "stdio",
+      "command": "Your Path To mcp Server Binary,example: /Path/To/timelog-mcp-server",
+      "args": [],
+      "env": {
+        "TIMELOG_CONFIG_PATH": "Your Path To timelog config file, example: /Path/To/timelog-config.json"
+      }
+    }
+  }
+}
