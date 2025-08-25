@@ -50,4 +50,4 @@ web: web-build
 
 # MCP Server target
 mcp-server:
-	cd mcp && go build -o timelog-mcp-server server.go
+	cd mcp && go build -o timelog-mcp-server .
