@@ -30,14 +30,22 @@ export const calculateDuration = (startTime: string, endTime?: string | null): s
   try {
     const start = parseISO(startTime)
     const end = endTime ? parseISO(endTime) : new Date()
-    
+
     const duration = intervalToDuration({ start, end })
-    
-    // 使用正确的formatDuration配置
+
+    // 对于跨月记录，显示更完整的格式
+    if (duration.months || (duration.days && duration.days > 7)) {
+      const result = formatDuration(duration, {
+        format: ['months', 'days', 'hours']
+      })
+      return result || '0 hours'
+    }
+
+    // 对于普通记录，显示小时和分钟
     const result = formatDuration(duration, {
       format: ['hours', 'minutes']
     })
-    
+
     return result || '0 minutes'
   } catch {
     return 'Invalid duration'
