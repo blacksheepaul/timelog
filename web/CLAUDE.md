@@ -20,6 +20,7 @@ A comprehensive Vue 3 + TypeScript + Tailwind CSS single-page application (SPA) 
 ## Features
 
 ### Core Functionality
+
 - ✅ **Time Logging**: Create, read, update, and delete time logs with timezone handling
 - ✅ **Task Management**: Complete task lifecycle management with deadlines and estimates
 - ✅ **Tag System**: Structured tag selection with color-coded labels and descriptions
@@ -27,6 +28,7 @@ A comprehensive Vue 3 + TypeScript + Tailwind CSS single-page application (SPA) 
 - ✅ **Multi-page SPA**: Five main pages with responsive navigation
 
 ### Technical Features
+
 - ✅ **Real-time Calculations**: Duration and time tracking with proper timezone conversion
 - ✅ **"Set to Now"**: Quick time entry with current timestamp buttons
 - ✅ **Modern UI**: Responsive design with Tailwind CSS and smooth transitions
@@ -72,11 +74,13 @@ Built files go to `dist/` directory and are served by the Go backend at producti
 ## Usage Scenarios
 
 **Development Mode:**
+
 1. Start Go backend: `./main` (runs on port 8083)
 2. Start frontend dev server: `pnpm run dev` (runs on port 3000)
 3. Access at http://localhost:3000
 
 **Production Mode:**
+
 1. Build frontend: `pnpm run build`
 2. Start backend: `./main` (serves both API and frontend on port 8083)
 3. Access at http://localhost:8083
@@ -86,6 +90,7 @@ Built files go to `dist/` directory and are served by the Go backend at producti
 The frontend communicates with the Go backend through a unified API structure:
 
 ### TimeLog Endpoints
+
 - `GET /api/timelogs` - List all time logs with tag and task information
 - `POST /api/timelogs` - Create new time log (with optional task association)
 - `GET /api/timelogs/:id` - Get specific time log
@@ -93,6 +98,7 @@ The frontend communicates with the Go backend through a unified API structure:
 - `DELETE /api/timelogs/:id` - Delete time log
 
 ### Task Endpoints
+
 - `GET /api/tasks` - List all tasks with optional date filtering
 - `POST /api/tasks` - Create new task
 - `GET /api/tasks/:id` - Get specific task
@@ -103,13 +109,16 @@ The frontend communicates with the Go backend through a unified API structure:
 - `GET /api/tasks/stats/:date` - Get task completion statistics
 
 ### Tag Endpoints
+
 - `GET /api/tags` - List all available tags
 - `POST /api/tags` - Create new tag
 - `PUT /api/tags/:id` - Update tag
 - `DELETE /api/tags/:id` - Delete tag
 
 ### API Response Format
+
 All endpoints return data in a consistent format:
+
 ```typescript
 {
   data: T,           // The actual response data
@@ -139,18 +148,21 @@ src/
 ## Key Components
 
 ### TimeLogList.vue
+
 - Displays paginated list of time logs
 - Shows color-coded tags with hover descriptions
 - Calculates and displays duration for each entry
 - Handles edit/delete actions
 
 ### TimeLogForm.vue
+
 - Create/edit form for time logs
 - Tag selection dropdown with colors
 - DateTime pickers for start/end times
 - Form validation and submission
 
 ### App.vue
+
 - Main application layout
 - Manages global state (time logs, tags, loading states)
 - Handles API calls and error management
@@ -159,11 +171,12 @@ src/
 ## TypeScript Types
 
 ### Core Interfaces
+
 ```typescript
 interface Tag {
   id: number
   name: string
-  color: string        // Hex color code
+  color: string // Hex color code
   description: string
   created_at: string
   updated_at: string
@@ -174,7 +187,7 @@ interface TimeLog {
   start_time: string
   end_time?: string | null
   tag_id: number
-  tag: Tag            // Populated tag object
+  tag: Tag // Populated tag object
   remarks: string
   created_at: string
   updated_at: string

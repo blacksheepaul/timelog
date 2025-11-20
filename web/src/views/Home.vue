@@ -4,10 +4,10 @@
     <div class="bg-white shadow rounded-lg p-6">
       <h2 class="text-2xl font-bold text-gray-900 mb-4">Welcome to TimeLog Dashboard</h2>
       <p class="text-gray-600 mb-6">
-        Track your time efficiently with our intuitive time logging system. 
-        Get insights into your productivity and manage your daily activities.
+        Track your time efficiently with our intuitive time logging system. Get insights into your
+        productivity and manage your daily activities.
       </p>
-      
+
       <!-- 快速操作按钮 -->
       <div class="flex flex-wrap gap-4">
         <router-link
@@ -91,7 +91,9 @@
         <h3 class="text-lg font-medium text-gray-900">Recent Time Logs</h3>
       </div>
       <div v-if="loading" class="p-6 text-center">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div
+          class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"
+        ></div>
         <p class="mt-2 text-gray-600">Loading...</p>
       </div>
       <div v-else-if="recentLogs.length === 0" class="p-6 text-center text-gray-500">
@@ -111,7 +113,7 @@
               <div>
                 <p class="text-sm font-medium text-gray-900">{{ log.remarks || 'No remarks' }}</p>
                 <p class="text-xs text-gray-500">
-                  {{ formatDateTime(log.start_time) }} - 
+                  {{ formatDateTime(log.start_time) }} -
                   {{ log.end_time ? formatDateTime(log.end_time) : 'Ongoing' }}
                 </p>
               </div>
@@ -123,10 +125,7 @@
         </div>
       </div>
       <div class="px-6 py-3 bg-gray-50 text-center">
-        <router-link
-          to="/timelogs"
-          class="text-sm font-medium text-blue-600 hover:text-blue-500"
-        >
+        <router-link to="/timelogs" class="text-sm font-medium text-blue-600 hover:text-blue-500">
           View all time logs →
         </router-link>
       </div>
@@ -135,65 +134,60 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { 
-  ClockIcon, 
-  PlayIcon, 
-  StopIcon, 
-  TagIcon, 
-  ChartBarIcon 
-} from '@heroicons/vue/24/outline'
-import { timelogAPI } from '@/api'
-import { formatDateTime, calculateDuration } from '@/utils/date'
-import type { TimeLog } from '@/types'
+  import { ref, onMounted, computed } from 'vue'
+  import { ClockIcon, PlayIcon, StopIcon, TagIcon, ChartBarIcon } from '@heroicons/vue/24/outline'
+  import { timelogAPI } from '@/api'
+  import { formatDateTime, calculateDuration } from '@/utils/date'
+  import type { TimeLog } from '@/types'
 
-const loading = ref(false)
-const recentLogs = ref<TimeLog[]>([])
+  const loading = ref(false)
+  const recentLogs = ref<TimeLog[]>([])
 
-// 今日统计数据
-const todayStats = computed(() => {
-  const today = new Date().toDateString()
-  const todayLogs = recentLogs.value.filter(log => 
-    new Date(log.start_time).toDateString() === today
-  )
-  
-  const activeSessions = todayLogs.filter(log => !log.end_time).length
-  const tagsUsed = new Set(todayLogs.map(log => log.tag_id)).size
-  
-  // 计算总时间（小时）
-  const totalMinutes = todayLogs
-    .filter(log => log.end_time)
-    .reduce((total, log) => {
-      const start = new Date(log.start_time)
-      const end = new Date(log.end_time!)
-      return total + (end.getTime() - start.getTime()) / (1000 * 60)
-    }, 0)
-  
-  const totalTime = totalMinutes > 60 
-    ? `${Math.floor(totalMinutes / 60)}h ${Math.round(totalMinutes % 60)}m`
-    : `${Math.round(totalMinutes)}m`
+  // 今日统计数据
+  const todayStats = computed(() => {
+    const today = new Date().toDateString()
+    const todayLogs = recentLogs.value.filter(
+      log => new Date(log.start_time).toDateString() === today
+    )
 
-  return {
-    count: todayLogs.length,
-    activeSessions,
-    totalTime,
-    tagsUsed
+    const activeSessions = todayLogs.filter(log => !log.end_time).length
+    const tagsUsed = new Set(todayLogs.map(log => log.tag_id)).size
+
+    // 计算总时间（小时）
+    const totalMinutes = todayLogs
+      .filter(log => log.end_time)
+      .reduce((total, log) => {
+        const start = new Date(log.start_time)
+        const end = new Date(log.end_time!)
+        return total + (end.getTime() - start.getTime()) / (1000 * 60)
+      }, 0)
+
+    const totalTime =
+      totalMinutes > 60
+        ? `${Math.floor(totalMinutes / 60)}h ${Math.round(totalMinutes % 60)}m`
+        : `${Math.round(totalMinutes)}m`
+
+    return {
+      count: todayLogs.length,
+      activeSessions,
+      totalTime,
+      tagsUsed,
+    }
+  })
+
+  const loadRecentLogs = async () => {
+    loading.value = true
+    try {
+      const response = await timelogAPI.getRecent(5)
+      recentLogs.value = response.data || []
+    } catch (err) {
+      console.error('Error loading recent logs:', err)
+    } finally {
+      loading.value = false
+    }
   }
-})
 
-const loadRecentLogs = async () => {
-  loading.value = true
-  try {
-    const response = await timelogAPI.getRecent(5)
-    recentLogs.value = response.data || []
-  } catch (err) {
-    console.error('Error loading recent logs:', err)
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(() => {
-  loadRecentLogs()
-})
+  onMounted(() => {
+    loadRecentLogs()
+  })
 </script>

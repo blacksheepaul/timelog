@@ -74,7 +74,10 @@
           </div>
         </div>
 
-        <div v-if="isEditing && !constraint.is_active" class="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+        <div
+          v-if="isEditing && !constraint.is_active"
+          class="bg-yellow-50 border border-yellow-200 rounded-md p-4"
+        >
           <div class="flex">
             <div class="flex-shrink-0">
               <ExclamationTriangleIcon class="h-5 w-5 text-yellow-400" />
@@ -101,7 +104,7 @@
             :disabled="loading"
             class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {{ loading ? '保存中...' : (isEditing ? '更新约束' : '创建约束') }}
+            {{ loading ? '保存中...' : isEditing ? '更新约束' : '创建约束' }}
           </button>
         </div>
       </form>
@@ -189,9 +192,7 @@
                 <span v-if="constraint.end_date">
                   结束日期: {{ formatDate(constraint.end_date) }}
                 </span>
-                <span v-if="constraint.end_reason">
-                  结束理由: {{ constraint.end_reason }}
-                </span>
+                <span v-if="constraint.end_reason"> 结束理由: {{ constraint.end_reason }} </span>
               </div>
             </div>
 
@@ -233,172 +234,179 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-import { PlusIcon, PencilIcon, TrashIcon, CheckCircleIcon, ArrowPathIcon, ExclamationTriangleIcon, DocumentTextIcon } from '@heroicons/vue/24/outline'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { constraintAPI } from '@/api'
+  import { ref, reactive, computed, onMounted } from 'vue'
+  import {
+    PlusIcon,
+    PencilIcon,
+    TrashIcon,
+    CheckCircleIcon,
+    ArrowPathIcon,
+    ExclamationTriangleIcon,
+    DocumentTextIcon,
+  } from '@heroicons/vue/24/outline'
+  import { ElMessage, ElMessageBox } from 'element-plus'
+  import { constraintAPI } from '@/api'
 
-const loading = ref(false)
-const error = ref(null)
-const showForm = ref(false)
-const editingTask = ref(null)
-const constraints = ref([])
-const showOnlyActive = ref(true)
+  const loading = ref(false)
+  const error = ref(null)
+  const showForm = ref(false)
+  const editingTask = ref(null)
+  const constraints = ref([])
+  const showOnlyActive = ref(true)
 
-const isEditing = computed(() => !!editingTask.value)
+  const isEditing = computed(() => !!editingTask.value)
 
-const form = reactive({
-  description: '',
-  punishment_quote: '',
-  start_date: '',
-  end_date: '',
-})
+  const form = reactive({
+    description: '',
+    punishment_quote: '',
+    start_date: '',
+    end_date: '',
+  })
 
-const resetForm = () => {
-  form.description = ''
-  form.punishment_quote = ''
-  form.start_date = new Date().toISOString().split('T')[0] // Today's date
-  form.end_date = ''
-}
-
-const loadEditingData = () => {
-  if (editingTask.value) {
-    form.description = editingTask.value.description
-    form.punishment_quote = editingTask.value.punishment_quote
-    form.start_date = editingTask.value.start_date.split('T')[0]
-    form.end_date = editingTask.value.end_date ? editingTask.value.end_date.split('T')[0] : ''
-  } else {
-    resetForm()
+  const resetForm = () => {
+    form.description = ''
+    form.punishment_quote = ''
+    form.start_date = new Date().toISOString().split('T')[0] // Today's date
+    form.end_date = ''
   }
-}
 
-const loadConstraints = async () => {
-  loading.value = true
-  error.value = null
-
-  try {
-    const response = await constraintAPI.getAll(showOnlyActive.value)
-    constraints.value = response.data || []
-  } catch (err) {
-    error.value = err.response?.data?.message || '加载约束失败'
-    ElMessage.error(error.value)
-  } finally {
-    loading.value = false
-  }
-}
-
-const handleSubmit = async () => {
-  loading.value = true
-  error.value = null
-
-  try {
-    const formData = {
-      description: form.description,
-      punishment_quote: form.punishment_quote,
-      start_date: form.start_date,
-      end_date: form.end_date || null,
-    }
-
-    if (isEditing.value) {
-      await constraintAPI.update(editingTask.value.id, formData)
-      ElMessage.success('约束更新成功')
+  const loadEditingData = () => {
+    if (editingTask.value) {
+      form.description = editingTask.value.description
+      form.punishment_quote = editingTask.value.punishment_quote
+      form.start_date = editingTask.value.start_date.split('T')[0]
+      form.end_date = editingTask.value.end_date ? editingTask.value.end_date.split('T')[0] : ''
     } else {
-      await constraintAPI.create(formData)
-      ElMessage.success('约束创建成功')
+      resetForm()
     }
-
-    cancelEdit()
-    loadConstraints()
-  } catch (err) {
-    error.value = err.response?.data?.message || '保存失败'
-    ElMessage.error(error.value)
-  } finally {
-    loading.value = false
   }
-}
 
-const toggleForm = () => {
-  showForm.value = !showForm.value
-  if (showForm.value) {
+  const loadConstraints = async () => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await constraintAPI.getAll(showOnlyActive.value)
+      constraints.value = response.data || []
+    } catch (err) {
+      error.value = err.response?.data?.message || '加载约束失败'
+      ElMessage.error(error.value)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const handleSubmit = async () => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const formData = {
+        description: form.description,
+        punishment_quote: form.punishment_quote,
+        start_date: form.start_date,
+        end_date: form.end_date || null,
+      }
+
+      if (isEditing.value) {
+        await constraintAPI.update(editingTask.value.id, formData)
+        ElMessage.success('约束更新成功')
+      } else {
+        await constraintAPI.create(formData)
+        ElMessage.success('约束创建成功')
+      }
+
+      cancelEdit()
+      loadConstraints()
+    } catch (err) {
+      error.value = err.response?.data?.message || '保存失败'
+      ElMessage.error(error.value)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const toggleForm = () => {
+    showForm.value = !showForm.value
+    if (showForm.value) {
+      editingTask.value = null
+      resetForm()
+    }
+  }
+
+  const cancelEdit = () => {
+    showForm.value = false
     editingTask.value = null
     resetForm()
   }
-}
 
-const cancelEdit = () => {
-  showForm.value = false
-  editingTask.value = null
-  resetForm()
-}
+  const editConstraint = constraint => {
+    editingTask.value = constraint
+    loadEditingData()
+    showForm.value = true
+  }
 
-const editConstraint = (constraint) => {
-  editingTask.value = constraint
-  loadEditingData()
-  showForm.value = true
-}
+  const completeConstraint = async constraint => {
+    try {
+      await ElMessageBox.prompt('请输入完成此约束的理由：', '完成约束', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputPattern: /\S+/,
+        inputErrorMessage: '请输入完成理由',
+      }).then(async ({ value }) => {
+        await constraintAPI.complete(constraint.id, value)
+        ElMessage.success('约束已完成')
+        loadConstraints()
+      })
+    } catch (err) {
+      if (err !== 'cancel') {
+        ElMessage.error(err.response?.data?.message || '操作失败')
+      }
+    }
+  }
 
-const completeConstraint = async (constraint) => {
-  try {
-    await ElMessageBox.prompt('请输入完成此约束的理由：', '完成约束', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      inputPattern: /\S+/,
-      inputErrorMessage: '请输入完成理由',
-    })
-    .then(async ({ value }) => {
-      await constraintAPI.complete(constraint.id, value)
-      ElMessage.success('约束已完成')
+  const reactivateConstraint = async constraint => {
+    try {
+      await ElMessageBox.confirm('确定要重新激活此约束吗？', '重新激活', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+
+      await constraintAPI.reactivate(constraint.id)
+      ElMessage.success('约束已重新激活')
       loadConstraints()
-    })
-  } catch (err) {
-    if (err !== 'cancel') {
-      ElMessage.error(err.response?.data?.message || '操作失败')
+    } catch (err) {
+      if (err !== 'cancel') {
+        ElMessage.error(err.response?.data?.message || '操作失败')
+      }
     }
   }
-}
 
-const reactivateConstraint = async (constraint) => {
-  try {
-    await ElMessageBox.confirm('确定要重新激活此约束吗？', '重新激活', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning',
-    })
+  const deleteConstraint = async constraint => {
+    try {
+      await ElMessageBox.confirm('确定要删除此约束吗？此操作不可恢复。', '删除约束', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
 
-    await constraintAPI.reactivate(constraint.id)
-    ElMessage.success('约束已重新激活')
+      await constraintAPI.delete(constraint.id)
+      ElMessage.success('约束已删除')
+      loadConstraints()
+    } catch (err) {
+      if (err !== 'cancel') {
+        ElMessage.error(err.response?.data?.message || '删除失败')
+      }
+    }
+  }
+
+  const formatDate = dateString => {
+    if (!dateString) return ''
+    return new Date(dateString).toLocaleDateString('zh-CN')
+  }
+
+  onMounted(() => {
     loadConstraints()
-  } catch (err) {
-    if (err !== 'cancel') {
-      ElMessage.error(err.response?.data?.message || '操作失败')
-    }
-  }
-}
-
-const deleteConstraint = async (constraint) => {
-  try {
-    await ElMessageBox.confirm('确定要删除此约束吗？此操作不可恢复。', '删除约束', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning',
-    })
-
-    await constraintAPI.delete(constraint.id)
-    ElMessage.success('约束已删除')
-    loadConstraints()
-  } catch (err) {
-    if (err !== 'cancel') {
-      ElMessage.error(err.response?.data?.message || '删除失败')
-    }
-  }
-}
-
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  return new Date(dateString).toLocaleDateString('zh-CN')
-}
-
-onMounted(() => {
-  loadConstraints()
-})
+  })
 </script>

@@ -36,14 +36,14 @@ export const calculateDuration = (startTime: string, endTime?: string | null): s
     // 对于跨月记录，显示更完整的格式
     if (duration.months || (duration.days && duration.days > 7)) {
       const result = formatDuration(duration, {
-        format: ['months', 'days', 'hours']
+        format: ['months', 'days', 'hours'],
       })
       return result || '0 hours'
     }
 
     // 对于普通记录，显示小时和分钟
     const result = formatDuration(duration, {
-      format: ['hours', 'minutes']
+      format: ['hours', 'minutes'],
     })
 
     return result || '0 minutes'
@@ -62,7 +62,7 @@ export const formatDateTimeLocal = (date: Date = new Date()): string => {
   const day = String(date.getDate()).padStart(2, '0')
   const hours = String(date.getHours()).padStart(2, '0')
   const minutes = String(date.getMinutes()).padStart(2, '0')
-  
+
   return `${year}-${month}-${day}T${hours}:${minutes}`
 }
 

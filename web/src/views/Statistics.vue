@@ -121,13 +121,15 @@
           <div class="w-full bg-gray-200 rounded-full h-2">
             <div
               class="h-2 rounded-full"
-              :style="{ 
-                backgroundColor: stat.tag.color, 
-                width: `${stat.percentage}%` 
+              :style="{
+                backgroundColor: stat.tag.color,
+                width: `${stat.percentage}%`,
               }"
             ></div>
           </div>
-          <div class="mt-1 text-xs text-gray-500">{{ stat.percentage.toFixed(1) }}% of total time</div>
+          <div class="mt-1 text-xs text-gray-500">
+            {{ stat.percentage.toFixed(1) }}% of total time
+          </div>
         </div>
       </div>
     </div>
@@ -161,166 +163,173 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, inject } from 'vue'
-import { ClockIcon, PlayIcon } from '@heroicons/vue/24/outline'
-import { timelogAPI } from '@/api'
-import { formatDate } from '@/utils/date'
-import type { TimeLog } from '@/types'
+  import { ref, computed, onMounted, inject } from 'vue'
+  import { ClockIcon, PlayIcon } from '@heroicons/vue/24/outline'
+  import { timelogAPI } from '@/api'
+  import { formatDate } from '@/utils/date'
+  import type { TimeLog } from '@/types'
 
-// 注入全局通知功能
-const showNotification = inject('showNotification') as (type: 'success' | 'error', message: string) => void
+  // 注入全局通知功能
+  const showNotification = inject('showNotification') as (
+    type: 'success' | 'error',
+    message: string
+  ) => void
 
-const loading = ref(false)
-const timeLogs = ref<TimeLog[]>([])
+  const loading = ref(false)
+  const timeLogs = ref<TimeLog[]>([])
 
-// 日期范围
-const dateRange = ref({
-  start: formatDate(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)), // 30天前
-  end: formatDate(new Date())
-})
-
-// 过滤后的时间记录
-const filteredLogs = computed(() => {
-  if (!dateRange.value.start || !dateRange.value.end) return timeLogs.value
-  
-  const start = new Date(dateRange.value.start)
-  const end = new Date(dateRange.value.end)
-  end.setHours(23, 59, 59, 999) // 包含结束日期的整天
-  
-  return timeLogs.value.filter(log => {
-    const logDate = new Date(log.start_time)
-    return logDate >= start && logDate <= end
+  // 日期范围
+  const dateRange = ref({
+    start: formatDate(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)), // 30天前
+    end: formatDate(new Date()),
   })
-})
 
-// 统计概览
-const statistics = computed(() => {
-  const logs = filteredLogs.value
-  const completedLogs = logs.filter(log => log.end_time)
-  
-  // 计算总时间（分钟）
-  const totalMinutes = completedLogs.reduce((total, log) => {
-    const start = new Date(log.start_time)
-    const end = new Date(log.end_time!)
-    return total + (end.getTime() - start.getTime()) / (1000 * 60)
-  }, 0)
-  
-  // 格式化总时间
-  const totalTime = totalMinutes > 60 
-    ? `${Math.floor(totalMinutes / 60)}h ${Math.round(totalMinutes % 60)}m`
-    : `${Math.round(totalMinutes)}m`
-  
-  // 平均会话时间
-  const averageMinutes = completedLogs.length > 0 ? totalMinutes / completedLogs.length : 0
-  const averageSession = averageMinutes > 60
-    ? `${Math.floor(averageMinutes / 60)}h ${Math.round(averageMinutes % 60)}m`
-    : `${Math.round(averageMinutes)}m`
-  
-  // 活跃会话数
-  const activeSessions = logs.filter(log => !log.end_time).length
-  
-  return {
-    totalLogs: logs.length,
-    totalTime,
-    averageSession,
-    activeSessions
-  }
-})
+  // 过滤后的时间记录
+  const filteredLogs = computed(() => {
+    if (!dateRange.value.start || !dateRange.value.end) return timeLogs.value
 
-// 按标签统计
-const tagStats = computed(() => {
-  const logs = filteredLogs.value.filter(log => log.end_time)
-  const tagMap = new Map<number, { tag: any, minutes: number, count: number }>()
-  
-  let totalMinutes = 0
-  
-  logs.forEach(log => {
-    if (!log.tag) return
-    
-    const start = new Date(log.start_time)
-    const end = new Date(log.end_time!)
-    const minutes = (end.getTime() - start.getTime()) / (1000 * 60)
-    
-    totalMinutes += minutes
-    
-    if (tagMap.has(log.tag_id)) {
-      const existing = tagMap.get(log.tag_id)!
-      existing.minutes += minutes
-      existing.count += 1
-    } else {
-      tagMap.set(log.tag_id, {
-        tag: log.tag,
+    const start = new Date(dateRange.value.start)
+    const end = new Date(dateRange.value.end)
+    end.setHours(23, 59, 59, 999) // 包含结束日期的整天
+
+    return timeLogs.value.filter(log => {
+      const logDate = new Date(log.start_time)
+      return logDate >= start && logDate <= end
+    })
+  })
+
+  // 统计概览
+  const statistics = computed(() => {
+    const logs = filteredLogs.value
+    const completedLogs = logs.filter(log => log.end_time)
+
+    // 计算总时间（分钟）
+    const totalMinutes = completedLogs.reduce((total, log) => {
+      const start = new Date(log.start_time)
+      const end = new Date(log.end_time!)
+      return total + (end.getTime() - start.getTime()) / (1000 * 60)
+    }, 0)
+
+    // 格式化总时间
+    const totalTime =
+      totalMinutes > 60
+        ? `${Math.floor(totalMinutes / 60)}h ${Math.round(totalMinutes % 60)}m`
+        : `${Math.round(totalMinutes)}m`
+
+    // 平均会话时间
+    const averageMinutes = completedLogs.length > 0 ? totalMinutes / completedLogs.length : 0
+    const averageSession =
+      averageMinutes > 60
+        ? `${Math.floor(averageMinutes / 60)}h ${Math.round(averageMinutes % 60)}m`
+        : `${Math.round(averageMinutes)}m`
+
+    // 活跃会话数
+    const activeSessions = logs.filter(log => !log.end_time).length
+
+    return {
+      totalLogs: logs.length,
+      totalTime,
+      averageSession,
+      activeSessions,
+    }
+  })
+
+  // 按标签统计
+  const tagStats = computed(() => {
+    const logs = filteredLogs.value.filter(log => log.end_time)
+    const tagMap = new Map<number, { tag: any; minutes: number; count: number }>()
+
+    let totalMinutes = 0
+
+    logs.forEach(log => {
+      if (!log.tag) return
+
+      const start = new Date(log.start_time)
+      const end = new Date(log.end_time!)
+      const minutes = (end.getTime() - start.getTime()) / (1000 * 60)
+
+      totalMinutes += minutes
+
+      if (tagMap.has(log.tag_id)) {
+        const existing = tagMap.get(log.tag_id)!
+        existing.minutes += minutes
+        existing.count += 1
+      } else {
+        tagMap.set(log.tag_id, {
+          tag: log.tag,
+          minutes,
+          count: 1,
+        })
+      }
+    })
+
+    return Array.from(tagMap.values())
+      .map(stat => ({
+        ...stat,
+        totalTime:
+          stat.minutes > 60
+            ? `${Math.floor(stat.minutes / 60)}h ${Math.round(stat.minutes % 60)}m`
+            : `${Math.round(stat.minutes)}m`,
+        percentage: totalMinutes > 0 ? (stat.minutes / totalMinutes) * 100 : 0,
+      }))
+      .sort((a, b) => b.minutes - a.minutes)
+  })
+
+  // 每日统计
+  const dailyStats = computed(() => {
+    const logs = filteredLogs.value.filter(log => log.end_time)
+    const dailyMap = new Map<string, number>()
+
+    logs.forEach(log => {
+      const date = new Date(log.start_time).toISOString().split('T')[0]
+      const start = new Date(log.start_time)
+      const end = new Date(log.end_time!)
+      const minutes = (end.getTime() - start.getTime()) / (1000 * 60)
+
+      if (dailyMap.has(date)) {
+        dailyMap.set(date, dailyMap.get(date)! + minutes)
+      } else {
+        dailyMap.set(date, minutes)
+      }
+    })
+
+    return Array.from(dailyMap.entries())
+      .map(([date, minutes]) => ({
+        date: new Date(date).toLocaleDateString(),
         minutes,
-        count: 1
-      })
-    }
+        timeFormatted:
+          minutes > 60
+            ? `${Math.floor(minutes / 60)}h ${Math.round(minutes % 60)}m`
+            : `${Math.round(minutes)}m`,
+      }))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
   })
-  
-  return Array.from(tagMap.values())
-    .map(stat => ({
-      ...stat,
-      totalTime: stat.minutes > 60 
-        ? `${Math.floor(stat.minutes / 60)}h ${Math.round(stat.minutes % 60)}m`
-        : `${Math.round(stat.minutes)}m`,
-      percentage: totalMinutes > 0 ? (stat.minutes / totalMinutes) * 100 : 0
-    }))
-    .sort((a, b) => b.minutes - a.minutes)
-})
 
-// 每日统计
-const dailyStats = computed(() => {
-  const logs = filteredLogs.value.filter(log => log.end_time)
-  const dailyMap = new Map<string, number>()
-  
-  logs.forEach(log => {
-    const date = new Date(log.start_time).toISOString().split('T')[0]
-    const start = new Date(log.start_time)
-    const end = new Date(log.end_time!)
-    const minutes = (end.getTime() - start.getTime()) / (1000 * 60)
-    
-    if (dailyMap.has(date)) {
-      dailyMap.set(date, dailyMap.get(date)! + minutes)
-    } else {
-      dailyMap.set(date, minutes)
-    }
+  // 每日最大分钟数（用于进度条）
+  const maxDailyMinutes = computed(() => {
+    return Math.max(...dailyStats.value.map(day => day.minutes), 1)
   })
-  
-  return Array.from(dailyMap.entries())
-    .map(([date, minutes]) => ({
-      date: new Date(date).toLocaleDateString(),
-      minutes,
-      timeFormatted: minutes > 60 
-        ? `${Math.floor(minutes / 60)}h ${Math.round(minutes % 60)}m`
-        : `${Math.round(minutes)}m`
-    }))
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-})
 
-// 每日最大分钟数（用于进度条）
-const maxDailyMinutes = computed(() => {
-  return Math.max(...dailyStats.value.map(day => day.minutes), 1)
-})
+  const loadTimeLogs = async () => {
+    loading.value = true
 
-const loadTimeLogs = async () => {
-  loading.value = true
-  
-  try {
-    const response = await timelogAPI.getAll()
-    timeLogs.value = response.data || []
-  } catch (err) {
-    console.error('Error loading time logs:', err)
-    showNotification('error', 'Failed to load time logs')
-  } finally {
-    loading.value = false
+    try {
+      const response = await timelogAPI.getAll()
+      timeLogs.value = response.data || []
+    } catch (err) {
+      console.error('Error loading time logs:', err)
+      showNotification('error', 'Failed to load time logs')
+    } finally {
+      loading.value = false
+    }
   }
-}
 
-const applyFilter = () => {
-  // 过滤逻辑已经在computed中处理，这里只需要触发重新计算
-  console.log('Filter applied:', dateRange.value)
-}
+  const applyFilter = () => {
+    // 过滤逻辑已经在computed中处理，这里只需要触发重新计算
+    console.log('Filter applied:', dateRange.value)
+  }
 
-onMounted(() => {
-  loadTimeLogs()
-})
+  onMounted(() => {
+    loadTimeLogs()
+  })
 </script>

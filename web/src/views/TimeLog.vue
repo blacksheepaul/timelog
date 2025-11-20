@@ -22,7 +22,7 @@
       @submit="handleSubmit"
       @cancel="handleCancel"
     />
-    
+
     <TimeLogList
       :time-logs="timeLogs"
       :loading="loading"
@@ -34,146 +34,158 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, inject } from 'vue'
-import { PlusIcon } from '@heroicons/vue/24/outline'
-import TimeLogList from '@/components/TimeLogList.vue'
-import TimeLogForm from '@/components/TimeLogForm.vue'
-import { timelogAPI, tagAPI, taskAPI, constraintAPI } from '@/api'
-import type { TimeLog, Tag, Task, Constraint, CreateTimeLogRequest, UpdateTimeLogRequest } from '@/types'
+  import { ref, onMounted, inject } from 'vue'
+  import { PlusIcon } from '@heroicons/vue/24/outline'
+  import TimeLogList from '@/components/TimeLogList.vue'
+  import TimeLogForm from '@/components/TimeLogForm.vue'
+  import { timelogAPI, tagAPI, taskAPI, constraintAPI } from '@/api'
+  import type {
+    TimeLog,
+    Tag,
+    Task,
+    Constraint,
+    CreateTimeLogRequest,
+    UpdateTimeLogRequest,
+  } from '@/types'
 
-// 注入全局通知功能
-const showNotification = inject('showNotification') as (type: 'success' | 'error', message: string) => void
+  // 注入全局通知功能
+  const showNotification = inject('showNotification') as (
+    type: 'success' | 'error',
+    message: string
+  ) => void
 
-const timeLogs = ref<TimeLog[]>([])
-const tags = ref<Tag[]>([])
-const tasks = ref<Task[]>([])
-const constraints = ref<Constraint[]>([])
-const loading = ref(false)
-const submitting = ref(false)
-const error = ref<string | null>(null)
-const showForm = ref(false)
-const editingLog = ref<TimeLog | undefined>()
+  const timeLogs = ref<TimeLog[]>([])
+  const tags = ref<Tag[]>([])
+  const tasks = ref<Task[]>([])
+  const constraints = ref<Constraint[]>([])
+  const loading = ref(false)
+  const submitting = ref(false)
+  const error = ref<string | null>(null)
+  const showForm = ref(false)
+  const editingLog = ref<TimeLog | undefined>()
 
-const loadTimeLogs = async () => {
-  loading.value = true
-  error.value = null
-  
-  try {
-    const response = await timelogAPI.getAll()
-    const logs = response.data || []
-    // Sort by start_time in descending order (most recent first)
-    timeLogs.value = logs.sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())
-  } catch (err) {
-    error.value = 'Failed to load time logs'
-    console.error('Error loading time logs:', err)
-    showNotification('error', 'Failed to load time logs')
-  } finally {
-    loading.value = false
-  }
-}
+  const loadTimeLogs = async () => {
+    loading.value = true
+    error.value = null
 
-const loadTags = async () => {
-  try {
-    const response = await tagAPI.getAll()
-    tags.value = response.data || []
-  } catch (err) {
-    console.error('Error loading tags:', err)
-    showNotification('error', 'Failed to load tags')
-  }
-}
-
-const loadTasks = async () => {
-  try {
-    const response = await taskAPI.getAll()
-    // Filter out completed tasks when associating with timelogs
-    tasks.value = (response.data || []).filter(task => !task.is_completed)
-  } catch (err) {
-    console.error('Error loading tasks:', err)
-    showNotification('error', 'Failed to load tasks')
-  }
-}
-
-const loadConstraints = async () => {
-  try {
-    const response = await constraintAPI.getAll(true) // Get only active constraints
-    constraints.value = response.data || []
-  } catch (err) {
-    console.error('Error loading constraints:', err)
-    // Don't show notification for constraint loading errors, as it's optional
-  }
-}
-
-const toggleForm = () => {
-  showForm.value = !showForm.value
-  if (!showForm.value) {
-    editingLog.value = undefined
-  }
-}
-
-const handleSubmit = async (data: CreateTimeLogRequest | UpdateTimeLogRequest) => {
-  submitting.value = true
-  
-  try {
-    if (editingLog.value) {
-      await timelogAPI.update(editingLog.value.ID, data as UpdateTimeLogRequest)
-      showNotification('success', 'Time log updated successfully')
-    } else {
-      await timelogAPI.create(data as CreateTimeLogRequest)
-      showNotification('success', 'Time log created successfully')
+    try {
+      const response = await timelogAPI.getAll()
+      const logs = response.data || []
+      // Sort by start_time in descending order (most recent first)
+      timeLogs.value = logs.sort(
+        (a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime()
+      )
+    } catch (err) {
+      error.value = 'Failed to load time logs'
+      console.error('Error loading time logs:', err)
+      showNotification('error', 'Failed to load time logs')
+    } finally {
+      loading.value = false
     }
-    
-    await loadTimeLogs()
+  }
+
+  const loadTags = async () => {
+    try {
+      const response = await tagAPI.getAll()
+      tags.value = response.data || []
+    } catch (err) {
+      console.error('Error loading tags:', err)
+      showNotification('error', 'Failed to load tags')
+    }
+  }
+
+  const loadTasks = async () => {
+    try {
+      const response = await taskAPI.getAll()
+      // Filter out completed tasks when associating with timelogs
+      tasks.value = (response.data || []).filter(task => !task.is_completed)
+    } catch (err) {
+      console.error('Error loading tasks:', err)
+      showNotification('error', 'Failed to load tasks')
+    }
+  }
+
+  const loadConstraints = async () => {
+    try {
+      const response = await constraintAPI.getAll(true) // Get only active constraints
+      constraints.value = response.data || []
+    } catch (err) {
+      console.error('Error loading constraints:', err)
+      // Don't show notification for constraint loading errors, as it's optional
+    }
+  }
+
+  const toggleForm = () => {
+    showForm.value = !showForm.value
+    if (!showForm.value) {
+      editingLog.value = undefined
+    }
+  }
+
+  const handleSubmit = async (data: CreateTimeLogRequest | UpdateTimeLogRequest) => {
+    submitting.value = true
+
+    try {
+      if (editingLog.value) {
+        await timelogAPI.update(editingLog.value.ID, data as UpdateTimeLogRequest)
+        showNotification('success', 'Time log updated successfully')
+      } else {
+        await timelogAPI.create(data as CreateTimeLogRequest)
+        showNotification('success', 'Time log created successfully')
+      }
+
+      await loadTimeLogs()
+      showForm.value = false
+      editingLog.value = undefined
+    } catch (err) {
+      console.error('Error saving time log:', err)
+      showNotification('error', 'Failed to save time log')
+    } finally {
+      submitting.value = false
+    }
+  }
+
+  const handleEdit = (log: TimeLog) => {
+    editingLog.value = log
+    showForm.value = true
+  }
+
+  const handleCancel = () => {
     showForm.value = false
     editingLog.value = undefined
-  } catch (err) {
-    console.error('Error saving time log:', err)
-    showNotification('error', 'Failed to save time log')
-  } finally {
-    submitting.value = false
   }
-}
 
-const handleEdit = (log: TimeLog) => {
-  editingLog.value = log
-  showForm.value = true
-}
+  const getLastEndTime = (): string | null => {
+    if (timeLogs.value.length === 0) {
+      return null
+    }
 
-const handleCancel = () => {
-  showForm.value = false
-  editingLog.value = undefined
-}
+    // 按ID排序获取最新的 timelog（ID是自增的，能准确反映创建顺序）
+    const sortedLogs = [...timeLogs.value].sort((a, b) => b.ID - a.ID)
 
-const getLastEndTime = (): string | null => {
-  if (timeLogs.value.length === 0) {
-    return null
+    const lastLog = sortedLogs[0]
+    return lastLog?.end_time || null
   }
-  
-  // 按ID排序获取最新的 timelog（ID是自增的，能准确反映创建顺序）
-  const sortedLogs = [...timeLogs.value].sort((a, b) => b.ID - a.ID)
-  
-  const lastLog = sortedLogs[0]
-  return lastLog?.end_time || null
-}
 
-const handleDelete = async (id: number) => {
-  if (!confirm('Are you sure you want to delete this time log?')) {
-    return
-  }
-  
-  try {
-    await timelogAPI.delete(id)
-    showNotification('success', 'Time log deleted successfully')
-    await loadTimeLogs()
-  } catch (err) {
-    console.error('Error deleting time log:', err)
-    showNotification('error', 'Failed to delete time log')
-  }
-}
+  const handleDelete = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this time log?')) {
+      return
+    }
 
-onMounted(() => {
-  loadTimeLogs()
-  loadTags()
-  loadTasks()
-  loadConstraints()
-})
+    try {
+      await timelogAPI.delete(id)
+      showNotification('success', 'Time log deleted successfully')
+      await loadTimeLogs()
+    } catch (err) {
+      console.error('Error deleting time log:', err)
+      showNotification('error', 'Failed to delete time log')
+    }
+  }
+
+  onMounted(() => {
+    loadTimeLogs()
+    loadTags()
+    loadTasks()
+    loadConstraints()
+  })
 </script>

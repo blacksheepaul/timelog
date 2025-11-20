@@ -3,40 +3,52 @@
     <div class="px-6 py-4 border-b border-gray-200">
       <h2 class="text-lg font-medium text-gray-900">Time Logs</h2>
     </div>
-    
+
     <div v-if="loading" class="p-6 text-center">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       <p class="mt-2 text-gray-600">Loading...</p>
     </div>
-    
+
     <div v-else-if="error" class="p-6 text-center text-red-600">
       {{ error }}
     </div>
-    
+
     <div v-else-if="timeLogs.length === 0" class="p-6 text-center text-gray-500">
       No time logs found. Create your first one!
     </div>
-    
+
     <div v-else class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
               Start Time
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
               End Time
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
               Duration
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
               Tags
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
               Remarks
             </th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th
+              class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
               Actions
             </th>
           </tr>
@@ -53,8 +65,8 @@
               {{ calculateDuration(log.start_time, log.end_time) }}
             </td>
             <td class="px-6 py-4 text-sm text-gray-900">
-              <span 
-                v-if="log.tag" 
+              <span
+                v-if="log.tag"
                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
                 :style="{ backgroundColor: log.tag.color }"
                 :title="log.tag.description"
@@ -66,16 +78,10 @@
               {{ log.remarks }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-              <button
-                @click="$emit('edit', log)"
-                class="text-blue-600 hover:text-blue-900 mr-4"
-              >
+              <button @click="$emit('edit', log)" class="text-blue-600 hover:text-blue-900 mr-4">
                 Edit
               </button>
-              <button
-                @click="$emit('delete', log.ID)"
-                class="text-red-600 hover:text-red-900"
-              >
+              <button @click="$emit('delete', log.ID)" class="text-red-600 hover:text-red-900">
                 Delete
               </button>
             </td>
@@ -87,17 +93,17 @@
 </template>
 
 <script setup lang="ts">
-import type { TimeLog } from '@/types'
-import { formatDateTime, calculateDuration } from '@/utils/date'
+  import type { TimeLog } from '@/types'
+  import { formatDateTime, calculateDuration } from '@/utils/date'
 
-defineProps<{
-  timeLogs: TimeLog[]
-  loading: boolean
-  error: string | null
-}>()
+  defineProps<{
+    timeLogs: TimeLog[]
+    loading: boolean
+    error: string | null
+  }>()
 
-defineEmits<{
-  edit: [log: TimeLog]
-  delete: [id: number]
-}>()
+  defineEmits<{
+    edit: [log: TimeLog]
+    delete: [id: number]
+  }>()
 </script>
