@@ -83,7 +83,8 @@ const loadTags = async () => {
 const loadTasks = async () => {
   try {
     const response = await taskAPI.getAll()
-    tasks.value = response.data || []
+    // Filter out completed tasks when associating with timelogs
+    tasks.value = (response.data || []).filter(task => !task.is_completed)
   } catch (err) {
     console.error('Error loading tasks:', err)
     showNotification('error', 'Failed to load tasks')
