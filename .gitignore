@@ -33,7 +33,9 @@ config-test.yml
 
 docs/
 app.log
+mcp.log
 main
 .DS_STORE
 web/node_modules
 web/dist
+.claude/settings.json
