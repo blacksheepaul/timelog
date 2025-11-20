@@ -45,7 +45,7 @@ func RegisterTimeLogRoutes(group *gin.RouterGroup) {
 	group.GET("/timelogs/:id", getTimeLogHandler)
 	group.PUT("/timelogs/:id", updateTimeLogHandler)
 	group.DELETE("/timelogs/:id", deleteTimeLogHandler)
-	
+
 	// Tag 相关路由
 	group.GET("/tags", listTagsHandler)
 	group.POST("/tags", createTagHandler)
@@ -75,14 +75,14 @@ func createTimeLogHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
-	
+
 	// 重新查询以获取完整的Tag信息
 	createdLog, err := service.GetTimeLogByID(tl.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, SuccessResponse(createdLog, "Time log created successfully"))
 }
 
@@ -99,10 +99,10 @@ func createTimeLogHandler(c *gin.Context) {
 func listTimeLogsHandler(c *gin.Context) {
 	limitStr := c.Query("limit")
 	orderBy := c.Query("order")
-	
+
 	var tls []model.TimeLog
 	var err error
-	
+
 	if limitStr != "" || orderBy != "" {
 		limit := 0
 		if limitStr != "" {
@@ -110,16 +110,16 @@ func listTimeLogsHandler(c *gin.Context) {
 				limit = l
 			}
 		}
-		
+
 		if orderBy == "" {
 			orderBy = "created_at DESC"
 		}
-		
+
 		tls, err = service.ListTimeLogsWithOptions(limit, orderBy)
 	} else {
 		tls, err = service.ListTimeLogs()
 	}
-	
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
@@ -179,14 +179,14 @@ func updateTimeLogHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
-	
+
 	// 重新查询以获取完整的Tag信息
 	updatedLog, err := service.GetTimeLogByID(tl.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, SuccessResponse(updatedLog, "Time log updated successfully"))
 }
 

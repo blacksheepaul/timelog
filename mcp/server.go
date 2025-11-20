@@ -24,13 +24,13 @@ func main() {
 	}, GetRecentTimeLogs)
 
 	mcp.AddTool(mcpServer, &mcp.Tool{
-		Name:        "get_timelogs_by_date_range", 
+		Name:        "get_timelogs_by_date_range",
 		Description: "Get time logs within a specific date range",
 	}, GetTimeLogsByDateRange)
 
 	mcp.AddTool(mcpServer, &mcp.Tool{
 		Name:        "get_tasks_by_status",
-		Description: "Get tasks filtered by completion status", 
+		Description: "Get tasks filtered by completion status",
 	}, GetTasksByStatus)
 
 	mcp.AddTool(mcpServer, &mcp.Tool{
@@ -39,7 +39,7 @@ func main() {
 	}, GetProductivityStats)
 
 	mcp.AddTool(mcpServer, &mcp.Tool{
-		Name:        "get_task_completion_analysis", 
+		Name:        "get_task_completion_analysis",
 		Description: "Analyze task completion patterns and efficiency",
 	}, GetTaskCompletionAnalysis)
 
@@ -48,10 +48,15 @@ func main() {
 		Description: "Get currently active/running time logs",
 	}, GetCurrentActivity)
 
+	mcp.AddTool(mcpServer, &mcp.Tool{
+		Name:        "get_active_constraints",
+		Description: "Get all currently active constraints",
+	}, GetActiveConstraints)
+
 	// Run MCP server - no logging to avoid stdout contamination
 	ctx := context.Background()
 	transport := &mcp.StdioTransport{}
-	
+
 	// Run server (any error will exit the process)
 	mcpServer.Run(ctx, transport)
 }

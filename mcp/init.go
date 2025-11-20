@@ -15,19 +15,19 @@ func NewTimelogMCPServer() *TimelogMCPServer {
 	if configPath == "" {
 		configPath = "config.yml" // fallback to default relative path
 	}
-	
+
 	cfg := config.GetConfig(configPath)
-	
+
 	// Initialize MCP logger (file-only, configurable)
 	InitMCPLogger(cfg)
 	LogMCPDebug("MCP server initializing", map[string]interface{}{
-		"config_path": configPath,
+		"config_path":         configPath,
 		"mcp_logging_enabled": cfg.Log.MCP.Enabled,
 	})
-	
+
 	// Disable ORM logging to prevent ANSI escape codes in MCP output
 	cfg.Log.ORMLogLevel = 1 // Silent mode
-	
+
 	// Initialize database connection using existing DAO pattern
 	// Pass nil for logger to avoid stdout output that interferes with MCP protocol
 	model.InitDao(cfg, nil)

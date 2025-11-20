@@ -40,14 +40,14 @@ func GetRecentTimeLogs(ctx context.Context, req *mcp.CallToolRequest, args Recen
 		}
 
 		entry := map[string]interface{}{
-			"id":          tl.ID,
-			"start_time":  tl.StartTime.Format("2006-01-02 15:04:05"),
-			"end_time":    nil,
-			"duration":    duration,
-			"tag":         tl.Tag.Name,
-			"tag_color":   tl.Tag.Color,
-			"remarks":     tl.Remark,
-			"created_at":  tl.CreatedAt.Format("2006-01-02 15:04:05"),
+			"id":         tl.ID,
+			"start_time": tl.StartTime.Format("2006-01-02 15:04:05"),
+			"end_time":   nil,
+			"duration":   duration,
+			"tag":        tl.Tag.Name,
+			"tag_color":  tl.Tag.Color,
+			"remarks":    tl.Remark,
+			"created_at": tl.CreatedAt.Format("2006-01-02 15:04:05"),
 		}
 
 		if tl.EndTime != nil {
@@ -104,7 +104,7 @@ func GetTimeLogsByDateRange(ctx context.Context, req *mcp.CallToolRequest, args 
 	for _, tl := range timeLogs {
 		duration := time.Duration(0)
 		durationStr := ""
-		
+
 		if tl.EndTime != nil {
 			duration = tl.EndTime.Sub(tl.StartTime)
 			totalDuration += duration
@@ -116,13 +116,13 @@ func GetTimeLogsByDateRange(ctx context.Context, req *mcp.CallToolRequest, args 
 		}
 
 		entry := map[string]interface{}{
-			"id":          tl.ID,
-			"start_time":  tl.StartTime.Format("2006-01-02 15:04:05"),
-			"end_time":    nil,
-			"duration":    durationStr,
-			"tag":         tl.Tag.Name,
-			"tag_color":   tl.Tag.Color,
-			"remarks":     tl.Remark,
+			"id":         tl.ID,
+			"start_time": tl.StartTime.Format("2006-01-02 15:04:05"),
+			"end_time":   nil,
+			"duration":   durationStr,
+			"tag":        tl.Tag.Name,
+			"tag_color":  tl.Tag.Color,
+			"remarks":    tl.Remark,
 		}
 
 		if tl.EndTime != nil {
@@ -279,12 +279,12 @@ func GetProductivityStats(ctx context.Context, req *mcp.CallToolRequest, args St
 	avgDaily := totalDuration.Hours() / float64(days)
 
 	response := map[string]interface{}{
-		"period":           fmt.Sprintf("Last %d days", days),
-		"total_hours":      math.Round(totalDuration.Hours()*100) / 100,
-		"average_daily":    math.Round(avgDaily*100) / 100,
-		"daily_breakdown":  dailyArray,
-		"tag_breakdown":    tagArray,
-		"total_entries":    len(timeLogs),
+		"period":          fmt.Sprintf("Last %d days", days),
+		"total_hours":     math.Round(totalDuration.Hours()*100) / 100,
+		"average_daily":   math.Round(avgDaily*100) / 100,
+		"daily_breakdown": dailyArray,
+		"tag_breakdown":   tagArray,
+		"total_entries":   len(timeLogs),
 	}
 
 	return &mcp.CallToolResult{

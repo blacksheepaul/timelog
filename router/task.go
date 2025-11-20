@@ -39,12 +39,12 @@ func createTaskHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
-	
+
 	if err := service.CreateTask(&task); err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
-	
+
 	// 重新查询以获取完整的Tag信息
 	if createdTask, err := service.GetTaskByID(task.ID); err == nil {
 		c.JSON(http.StatusOK, SuccessResponse(createdTask, "Task created successfully"))
@@ -64,10 +64,10 @@ func createTaskHandler(c *gin.Context) {
 // @Router /api/tasks [get]
 func listTasksHandler(c *gin.Context) {
 	dateStr := c.Query("date")
-	
+
 	var tasks []model.Task
 	var err error
-	
+
 	if dateStr != "" {
 		// 解析日期
 		if date, parseErr := time.Parse("2006-01-02", dateStr); parseErr != nil {
@@ -79,12 +79,12 @@ func listTasksHandler(c *gin.Context) {
 	} else {
 		tasks, err = service.GetAllTasks()
 	}
-	
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, SuccessResponse(tasks, "Tasks retrieved successfully"))
 }
 
@@ -106,13 +106,13 @@ func getTaskHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "Invalid task ID"))
 		return
 	}
-	
+
 	task, err := service.GetTaskByID(uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, ErrorResponse(http.StatusNotFound, "Task not found"))
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, SuccessResponse(task, "Task retrieved successfully"))
 }
 
@@ -136,29 +136,29 @@ func updateTaskHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "Invalid task ID"))
 		return
 	}
-	
+
 	// 先检查任务是否存在
 	existingTask, err := service.GetTaskByID(uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, ErrorResponse(http.StatusNotFound, "Task not found"))
 		return
 	}
-	
+
 	var updateData model.Task
 	if err := c.ShouldBindJSON(&updateData); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
-	
+
 	// 保持ID不变
 	updateData.ID = existingTask.ID
 	updateData.CreatedAt = existingTask.CreatedAt
-	
+
 	if err := service.UpdateTask(&updateData); err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
-	
+
 	// 重新查询以获取完整信息
 	if updatedTask, err := service.GetTaskByID(uint(id)); err == nil {
 		c.JSON(http.StatusOK, SuccessResponse(updatedTask, "Task updated successfully"))
@@ -185,18 +185,18 @@ func deleteTaskHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "Invalid task ID"))
 		return
 	}
-	
+
 	// 先检查任务是否存在
 	if _, err := service.GetTaskByID(uint(id)); err != nil {
 		c.JSON(http.StatusNotFound, ErrorResponse(http.StatusNotFound, "Task not found"))
 		return
 	}
-	
+
 	if err := service.DeleteTask(uint(id)); err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, SuccessResponse(nil, "Task deleted successfully"))
 }
 
@@ -218,12 +218,12 @@ func completeTaskHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "Invalid task ID"))
 		return
 	}
-	
+
 	if err := service.MarkTaskAsCompleted(uint(id)); err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, SuccessResponse(nil, "Task marked as completed"))
 }
 
@@ -245,12 +245,12 @@ func incompleteTaskHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "Invalid task ID"))
 		return
 	}
-	
+
 	if err := service.MarkTaskAsIncomplete(uint(id)); err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, SuccessResponse(nil, "Task marked as incomplete"))
 }
 
@@ -271,12 +271,12 @@ func getTaskStatsHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "Invalid date format, expected YYYY-MM-DD"))
 		return
 	}
-	
+
 	stats, err := service.GetTaskStats(date)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, SuccessResponse(stats, "Task stats retrieved successfully"))
 }

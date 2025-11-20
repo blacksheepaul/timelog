@@ -67,7 +67,7 @@ func GetTasksByDate(db *gorm.DB, date time.Time) ([]Task, error) {
 	var tasks []Task
 	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
 	endOfDay := startOfDay.Add(24 * time.Hour)
-	
+
 	err := db.Preload("Tag").Where("due_date >= ? AND due_date < ?", startOfDay, endOfDay).Find(&tasks).Error
 	return tasks, err
 }
@@ -109,7 +109,7 @@ func MarkTaskAsIncomplete(db *gorm.DB, taskID uint) error {
 // GetCompletedTasksInDateRange 获取指定日期范围内的已完成任务
 func GetCompletedTasksInDateRange(db *gorm.DB, startDate, endDate time.Time) ([]Task, error) {
 	var tasks []Task
-	err := db.Preload("Tag").Where("is_completed = ? AND completed_at >= ? AND completed_at <= ?", 
+	err := db.Preload("Tag").Where("is_completed = ? AND completed_at >= ? AND completed_at <= ?",
 		true, startDate, endDate).Find(&tasks).Error
 	return tasks, err
 }
@@ -118,28 +118,28 @@ func GetCompletedTasksInDateRange(db *gorm.DB, startDate, endDate time.Time) ([]
 func GetTaskStats(db *gorm.DB, date time.Time) (map[string]interface{}, error) {
 	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
 	endOfDay := startOfDay.Add(24 * time.Hour)
-	
+
 	var totalTasks, completedTasks int64
-	
+
 	// 获取当天的总任务数
 	err := db.Model(&Task{}).Where("due_date >= ? AND due_date < ?", startOfDay, endOfDay).Count(&totalTasks).Error
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// 获取当天已完成的任务数
-	err = db.Model(&Task{}).Where("due_date >= ? AND due_date < ? AND is_completed = ?", 
+	err = db.Model(&Task{}).Where("due_date >= ? AND due_date < ? AND is_completed = ?",
 		startOfDay, endOfDay, true).Count(&completedTasks).Error
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// 计算完成率
 	completionRate := float64(0)
 	if totalTasks > 0 {
 		completionRate = float64(completedTasks) / float64(totalTasks) * 100
 	}
-	
+
 	return map[string]interface{}{
 		"total_tasks":     totalTasks,
 		"completed_tasks": completedTasks,

@@ -44,7 +44,7 @@ func Register(r *gin.Engine, cfg *config.Config, l logger.Logger, staticFiles em
 
 	// 注册 TimeLog 路由
 	RegisterTimeLogRoutes(api)
-	
+
 	// 注册 Task 路由
 	setupTaskRoutes(api)
 
@@ -56,18 +56,18 @@ func Register(r *gin.Engine, cfg *config.Config, l logger.Logger, staticFiles em
 	if err != nil {
 		log.Fatal("Failed to create sub filesystem", err)
 	}
-	
+
 	// 创建assets子目录的文件系统
 	assetsFS, err := fs.Sub(distFS, "assets")
 	if err != nil {
 		log.Fatal("Failed to create assets sub filesystem", err)
 	}
-	
+
 	// 服务静态资源文件 (JS, CSS, images等)
 	r.StaticFS("/assets", http.FS(assetsFS))
 	r.StaticFileFS("/favicon.ico", "favicon.ico", http.FS(distFS))
 	r.StaticFileFS("/vite.svg", "vite.svg", http.FS(distFS))
-	
+
 	// SPA路由 - 对于所有未匹配的路由返回index.html
 	r.NoRoute(func(c *gin.Context) {
 		// 如果是API请求，返回404
@@ -75,7 +75,7 @@ func Register(r *gin.Engine, cfg *config.Config, l logger.Logger, staticFiles em
 			c.JSON(http.StatusNotFound, gin.H{"error": "API endpoint not found"})
 			return
 		}
-		
+
 		// 其他所有路由返回index.html给Vue Router处理
 		indexData, err := distFS.Open("index.html")
 		if err != nil {
@@ -83,7 +83,7 @@ func Register(r *gin.Engine, cfg *config.Config, l logger.Logger, staticFiles em
 			return
 		}
 		defer indexData.Close()
-		
+
 		c.DataFromReader(http.StatusOK, -1, "text/html; charset=utf-8", indexData, nil)
 	})
 
