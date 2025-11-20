@@ -16,54 +16,54 @@ const routes: RouteRecordRaw[] = [
     name: 'Home',
     component: Home,
     meta: {
-      title: 'Dashboard'
-    }
+      title: 'Dashboard',
+    },
   },
   {
     path: '/timelogs',
     name: 'TimeLog',
     component: TimeLog,
     meta: {
-      title: 'Time Logs'
-    }
+      title: 'Time Logs',
+    },
   },
   {
     path: '/tasks',
     name: 'Tasks',
     component: Tasks,
     meta: {
-      title: 'Task Management'
-    }
+      title: 'Task Management',
+    },
   },
   {
     path: '/tags',
     name: 'Tags',
     component: Tags,
     meta: {
-      title: 'Tag Management'
-    }
+      title: 'Tag Management',
+    },
   },
   {
     path: '/statistics',
     name: 'Statistics',
     component: Statistics,
     meta: {
-      title: 'Statistics'
-    }
+      title: 'Statistics',
+    },
   },
   {
     path: '/constraints',
     name: 'Constraints',
     component: Constraints,
     meta: {
-      title: '约束'
-    }
+      title: '约束',
+    },
   },
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
-    redirect: '/'
-  }
+    redirect: '/',
+  },
 ]
 
 const router = createRouter({
@@ -75,7 +75,7 @@ const router = createRouter({
     } else {
       return { top: 0 }
     }
-  }
+  },
 })
 
 // 路由守卫 - 设置页面标题
