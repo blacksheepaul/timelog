@@ -140,14 +140,7 @@
 <script setup lang="ts">
   import { reactive, watch, computed, ref, nextTick } from 'vue'
   import { ClockIcon, XMarkIcon } from '@heroicons/vue/24/outline'
-  import type {
-    TimeLog,
-    Tag,
-    Task,
-    Constraint,
-    CreateTimeLogRequest,
-    UpdateTimeLogRequest,
-  } from '@/types'
+  import type { TimeLog, Tag, Task, CreateTimeLogRequest, UpdateTimeLogRequest } from '@/types'
   import { formatDateTimeLocal, formatUTCToLocal, formatLocalToUTC } from '@/utils/date'
 
   const props = defineProps<{
