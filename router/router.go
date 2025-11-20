@@ -48,6 +48,9 @@ func Register(r *gin.Engine, cfg *config.Config, l logger.Logger, staticFiles em
 	// 注册 Task 路由
 	setupTaskRoutes(api)
 
+	// 注册 Constraint 路由
+	setupConstraintRoutes(api)
+
 	// 注册 Swagger 文档路由
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
