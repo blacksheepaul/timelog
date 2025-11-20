@@ -422,3 +422,42 @@ func GetCurrentActivity(ctx context.Context, req *mcp.CallToolRequest, args Curr
 		}},
 	}, response, nil
 }
+
+func GetActiveConstraints(ctx context.Context, req *mcp.CallToolRequest, args ConstraintParams) (*mcp.CallToolResult, interface{}, error) {
+	constraints, err := model.GetActiveConstraints(server.db)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get active constraints: %w", err)
+	}
+
+	var result []map[string]interface{}
+	for _, constraint := range constraints {
+		entry := map[string]interface{}{
+			"id":               constraint.ID,
+			"description":      constraint.Description,
+			"punishment_quote": constraint.PunishmentQuote,
+			"start_date":       constraint.StartDate.Format("2006-01-02"),
+			"is_active":        constraint.IsActive,
+			"created_at":       constraint.CreatedAt.Format("2006-01-02 15:04:05"),
+		}
+
+		if constraint.EndDate != nil {
+			entry["end_date"] = constraint.EndDate.Format("2006-01-02")
+		}
+		if constraint.EndReason != "" {
+			entry["end_reason"] = constraint.EndReason
+		}
+
+		result = append(result, entry)
+	}
+
+	response := map[string]interface{}{
+		"constraints": result,
+		"count":       len(result),
+	}
+
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{&mcp.TextContent{
+			Text: fmt.Sprintf("Found %d active constraints", len(result)),
+		}},
+	}, response, nil
+}
