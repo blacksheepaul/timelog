@@ -51,3 +51,8 @@ web: web-build
 # MCP Server target
 mcp-server:
 	cd mcp && go build -o timelog-mcp-server .
+
+# fmt
+fmt:
+	go fmt ./...
+	cd mcp && go fmt ./...
