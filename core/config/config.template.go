@@ -18,7 +18,7 @@ type Config struct {
 			MaxAge     int `yaml:"max_age"`
 		} `yaml:"rotation"`
 		ORMLogLevel int `yaml:"orm_log_level"`
-		MCP struct {
+		MCP         struct {
 			Enabled bool   `yaml:"enabled" env-default:"false"`
 			Level   string `yaml:"level" env-default:"debug"`
 			Path    string `yaml:"path" env-default:"logs/mcp.log"`

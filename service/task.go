@@ -54,7 +54,7 @@ func MarkTaskAsCompleted(taskID uint) error {
 	return model.MarkTaskAsCompleted(dao.Db(), taskID)
 }
 
-// MarkTaskAsIncomplete 标记任务为未完成  
+// MarkTaskAsIncomplete 标记任务为未完成
 func MarkTaskAsIncomplete(taskID uint) error {
 	dao := model.GetDao()
 	return model.MarkTaskAsIncomplete(dao.Db(), taskID)
@@ -76,7 +76,7 @@ func GetTaskStats(date time.Time) (map[string]interface{}, error) {
 // 这是一个组合操作，将任务标记为完成，并可选地创建关联的时间记录
 func CompleteTaskWithTimelog(taskID uint, createTimelog bool, timelogData *model.TimeLog) error {
 	dao := model.GetDao()
-	
+
 	// 开始事务
 	tx := dao.Begin()
 	defer func() {
@@ -85,13 +85,13 @@ func CompleteTaskWithTimelog(taskID uint, createTimelog bool, timelogData *model
 			panic(r)
 		}
 	}()
-	
+
 	// 标记任务为完成
 	if err := model.MarkTaskAsCompleted(tx.Db(), taskID); err != nil {
 		tx.Rollback()
 		return err
 	}
-	
+
 	// 如果需要创建时间记录
 	if createTimelog && timelogData != nil {
 		timelogData.TaskID = &taskID
@@ -100,6 +100,6 @@ func CompleteTaskWithTimelog(taskID uint, createTimelog bool, timelogData *model
 			return err
 		}
 	}
-	
+
 	return tx.Commit()
 }

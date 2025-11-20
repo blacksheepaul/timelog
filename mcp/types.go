@@ -34,3 +34,7 @@ type TaskAnalysisParams struct {
 type CurrentActivityParams struct {
 	// No parameters needed
 }
+
+type ConstraintParams struct {
+	// No parameters needed
+}
