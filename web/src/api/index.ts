@@ -1,14 +1,17 @@
 import axios from 'axios'
-import type { 
-  TimeLog, 
-  Tag, 
+import type {
+  TimeLog,
+  Tag,
   Task,
-  CreateTimeLogRequest, 
+  CreateTimeLogRequest,
   UpdateTimeLogRequest,
   CreateTaskRequest,
   UpdateTaskRequest,
   TaskStats,
-  ApiResponse 
+  ApiResponse,
+  Constraint,
+  CreateConstraintRequest,
+  UpdateConstraintRequest
 } from '@/types'
 
 const api = axios.create({
@@ -90,6 +93,31 @@ export const taskAPI = {
   
   getStats: (date: string): Promise<ApiResponse<TaskStats>> => 
     api.get(`/tasks/stats/${date}`).then(res => res.data),
+}
+
+export const constraintAPI = {
+  getAll: (active?: boolean): Promise<ApiResponse<Constraint[]>> => {
+    const url = active !== undefined ? `/constraints?active=${active}` : '/constraints'
+    return api.get(url).then(res => res.data)
+  },
+
+  getById: (id: number): Promise<ApiResponse<Constraint>> =>
+    api.get(`/constraints/${id}`).then(res => res.data),
+
+  create: (data: CreateConstraintRequest): Promise<ApiResponse<Constraint>> =>
+    api.post('/constraints', data).then(res => res.data),
+
+  update: (id: number, data: UpdateConstraintRequest): Promise<ApiResponse<Constraint>> =>
+    api.put(`/constraints/${id}`, data).then(res => res.data),
+
+  delete: (id: number): Promise<ApiResponse<null>> =>
+    api.delete(`/constraints/${id}`).then(res => res.data),
+
+  complete: (id: number, endReason: string): Promise<ApiResponse<null>> =>
+    api.post(`/constraints/${id}/complete`, { end_reason: endReason }).then(res => res.data),
+
+  reactivate: (id: number): Promise<ApiResponse<null>> =>
+    api.post(`/constraints/${id}/reactivate`).then(res => res.data),
 }
 
 export default api

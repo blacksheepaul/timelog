@@ -79,3 +79,29 @@ export interface ApiResponse<T> {
   message?: string
   status: number
 }
+
+export interface Constraint {
+  id: number
+  description: string
+  end_reason?: string
+  punishment_quote: string
+  start_date: string
+  end_date?: string | null
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface CreateConstraintRequest {
+  description: string
+  punishment_quote: string
+  start_date: string
+  end_date?: string
+}
+
+export interface UpdateConstraintRequest {
+  description?: string
+  punishment_quote?: string
+  start_date?: string
+  end_date?: string
+}

@@ -7,6 +7,8 @@ const TimeLog = () => import('@/views/TimeLog.vue')
 const Tasks = () => import('@/views/Tasks.vue')
 const Tags = () => import('@/views/Tags.vue')
 const Statistics = () => import('@/views/Statistics.vue')
+// @ts-ignore
+const Constraints = () => import('@/views/Constraints.vue') as Promise<{ default: any }>
 
 const routes: RouteRecordRaw[] = [
   {
@@ -47,6 +49,14 @@ const routes: RouteRecordRaw[] = [
     component: Statistics,
     meta: {
       title: 'Statistics'
+    }
+  },
+  {
+    path: '/constraints',
+    name: 'Constraints',
+    component: Constraints,
+    meta: {
+      title: '约束'
     }
   },
   {
