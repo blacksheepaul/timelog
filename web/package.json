@@ -12,6 +12,7 @@
     "@heroicons/vue": "^2.0.0",
     "axios": "^1.6.0",
     "date-fns": "^3.0.0",
+    "element-plus": "^2.11.8",
     "vue": "^3.4.0",
     "vue-router": "^4.2.0"
   },

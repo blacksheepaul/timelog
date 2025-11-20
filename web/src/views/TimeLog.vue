@@ -17,6 +17,7 @@
       :submitting="submitting"
       :available-tags="tags"
       :available-tasks="tasks"
+      :available-constraints="constraints"
       :last-end-time="getLastEndTime()"
       @submit="handleSubmit"
       @cancel="handleCancel"
@@ -37,8 +38,8 @@ import { ref, onMounted, inject } from 'vue'
 import { PlusIcon } from '@heroicons/vue/24/outline'
 import TimeLogList from '@/components/TimeLogList.vue'
 import TimeLogForm from '@/components/TimeLogForm.vue'
-import { timelogAPI, tagAPI, taskAPI } from '@/api'
-import type { TimeLog, Tag, Task, CreateTimeLogRequest, UpdateTimeLogRequest } from '@/types'
+import { timelogAPI, tagAPI, taskAPI, constraintAPI } from '@/api'
+import type { TimeLog, Tag, Task, Constraint, CreateTimeLogRequest, UpdateTimeLogRequest } from '@/types'
 
 // 注入全局通知功能
 const showNotification = inject('showNotification') as (type: 'success' | 'error', message: string) => void
@@ -46,6 +47,7 @@ const showNotification = inject('showNotification') as (type: 'success' | 'error
 const timeLogs = ref<TimeLog[]>([])
 const tags = ref<Tag[]>([])
 const tasks = ref<Task[]>([])
+const constraints = ref<Constraint[]>([])
 const loading = ref(false)
 const submitting = ref(false)
 const error = ref<string | null>(null)
@@ -88,6 +90,16 @@ const loadTasks = async () => {
   } catch (err) {
     console.error('Error loading tasks:', err)
     showNotification('error', 'Failed to load tasks')
+  }
+}
+
+const loadConstraints = async () => {
+  try {
+    const response = await constraintAPI.getAll(true) // Get only active constraints
+    constraints.value = response.data || []
+  } catch (err) {
+    console.error('Error loading constraints:', err)
+    // Don't show notification for constraint loading errors, as it's optional
   }
 }
 
@@ -162,5 +174,6 @@ onMounted(() => {
   loadTimeLogs()
   loadTags()
   loadTasks()
+  loadConstraints()
 })
 </script>

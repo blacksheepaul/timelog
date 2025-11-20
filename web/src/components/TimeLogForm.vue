@@ -101,16 +101,16 @@
         >
           <option value="" disabled>Select a task (optional)</option>
           <option value="">No task</option>
-          <option 
-            v-for="task in availableTasks" 
-            :key="task.id" 
+          <option
+            v-for="task in availableTasks"
+            :key="task.id"
             :value="task.id"
           >
             {{ task.title }} ({{ task.tag?.name }})
           </option>
         </select>
       </div>
-      
+
       <div>
         <label for="remarks" class="block text-sm font-medium text-gray-700 mb-2">
           Remarks
@@ -148,7 +148,7 @@
 <script setup lang="ts">
 import { reactive, watch, computed, ref, nextTick } from 'vue'
 import { ClockIcon, XMarkIcon } from '@heroicons/vue/24/outline'
-import type { TimeLog, Tag, Task, CreateTimeLogRequest, UpdateTimeLogRequest } from '@/types'
+import type { TimeLog, Tag, Task, Constraint, CreateTimeLogRequest, UpdateTimeLogRequest } from '@/types'
 import { formatDateTimeLocal, formatUTCToLocal, formatLocalToUTC } from '@/utils/date'
 
 const props = defineProps<{
@@ -212,7 +212,7 @@ const clearEndTime = () => {
 const loadEditingData = async () => {
   if (props.editingLog) {
     form.start_time = formatUTCToLocal(props.editingLog.start_time)
-    form.end_time = props.editingLog.end_time 
+    form.end_time = props.editingLog.end_time
       ? formatUTCToLocal(props.editingLog.end_time)
       : ''
     form.tag_id = props.editingLog.tag_id
@@ -221,7 +221,7 @@ const loadEditingData = async () => {
   } else {
     resetForm()
   }
-  
+
   // Auto-focus the start time input
   await nextTick()
   startTimeInput.value?.focus()
@@ -231,7 +231,7 @@ const handleSubmit = () => {
   if (form.tag_id === '') {
     return // Tag is required
   }
-  
+
   const data = {
     start_time: formatLocalToUTC(form.start_time),
     end_time: form.end_time ? formatLocalToUTC(form.end_time) : undefined,
@@ -239,7 +239,7 @@ const handleSubmit = () => {
     task_id: form.task_id ? Number(form.task_id) : null,
     remarks: form.remarks,
   }
-  
+
   emit('submit', data)
 }
 
