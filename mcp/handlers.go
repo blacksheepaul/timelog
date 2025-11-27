@@ -10,6 +10,17 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
+var singaporeLocation *time.Location
+
+func init() {
+	var err error
+	singaporeLocation, err = time.LoadLocation("Asia/Singapore")
+	if err != nil {
+		// Fallback to UTC+8 if timezone data is not available
+		singaporeLocation = time.FixedZone("SGT", 8*60*60)
+	}
+}
+
 // Tool handlers with correct MCP signature
 func GetRecentTimeLogs(ctx context.Context, req *mcp.CallToolRequest, args RecentTimeLogsParams) (*mcp.CallToolResult, interface{}, error) {
 	limit := args.Limit
@@ -39,29 +50,29 @@ func GetRecentTimeLogs(ctx context.Context, req *mcp.CallToolRequest, args Recen
 			duration = fmt.Sprintf("%dh %dm (ongoing)", hours, minutes)
 		}
 
-		entry := map[string]interface{}{
-			"id":         tl.ID,
-			"start_time": tl.StartTime.Format("2006-01-02 15:04:05"),
-			"end_time":   nil,
-			"duration":   duration,
-			"tag":        tl.Tag.Name,
-			"tag_color":  tl.Tag.Color,
-			"remarks":    tl.Remark,
-			"created_at": tl.CreatedAt.Format("2006-01-02 15:04:05"),
-		}
+	entry := map[string]interface{}{
+		"id":         tl.ID,
+		"start_time": tl.StartTime.In(singaporeLocation).Format("2006-01-02 15:04:05"),
+		"end_time":   nil,
+		"duration":   duration,
+		"tag":        tl.Tag.Name,
+		"tag_color":  tl.Tag.Color,
+		"remarks":    tl.Remark,
+		"created_at": tl.CreatedAt.In(singaporeLocation).Format("2006-01-02 15:04:05"),
+	}
 
-		if tl.EndTime != nil {
-			entry["end_time"] = tl.EndTime.Format("2006-01-02 15:04:05")
-		}
+	if tl.EndTime != nil {
+		entry["end_time"] = tl.EndTime.In(singaporeLocation).Format("2006-01-02 15:04:05")
+	}
 
-		if tl.Task != nil {
-			entry["task"] = map[string]interface{}{
-				"id":    tl.Task.ID,
-				"title": tl.Task.Title,
-			}
+	if tl.Task != nil {
+		entry["task"] = map[string]interface{}{
+			"id":    tl.Task.ID,
+			"title": tl.Task.Title,
 		}
+	}
 
-		result = append(result, entry)
+	result = append(result, entry)
 	}
 
 	response := map[string]interface{}{
@@ -115,29 +126,29 @@ func GetTimeLogsByDateRange(ctx context.Context, req *mcp.CallToolRequest, args 
 			durationStr = "ongoing"
 		}
 
-		entry := map[string]interface{}{
-			"id":         tl.ID,
-			"start_time": tl.StartTime.Format("2006-01-02 15:04:05"),
-			"end_time":   nil,
-			"duration":   durationStr,
-			"tag":        tl.Tag.Name,
-			"tag_color":  tl.Tag.Color,
-			"remarks":    tl.Remark,
-		}
-
-		if tl.EndTime != nil {
-			entry["end_time"] = tl.EndTime.Format("2006-01-02 15:04:05")
-		}
-
-		if tl.Task != nil {
-			entry["task"] = map[string]interface{}{
-				"id":    tl.Task.ID,
-				"title": tl.Task.Title,
-			}
-		}
-
-		result = append(result, entry)
+	entry := map[string]interface{}{
+		"id":         tl.ID,
+		"start_time": tl.StartTime.In(singaporeLocation).Format("2006-01-02 15:04:05"),
+		"end_time":   nil,
+		"duration":   durationStr,
+		"tag":        tl.Tag.Name,
+		"tag_color":  tl.Tag.Color,
+		"remarks":    tl.Remark,
 	}
+
+	if tl.EndTime != nil {
+		entry["end_time"] = tl.EndTime.In(singaporeLocation).Format("2006-01-02 15:04:05")
+	}
+
+	if tl.Task != nil {
+		entry["task"] = map[string]interface{}{
+			"id":    tl.Task.ID,
+			"title": tl.Task.Title,
+		}
+	}
+
+	result = append(result, entry)
+}
 
 	totalHours := int(totalDuration.Hours())
 	totalMinutes := int(totalDuration.Minutes()) % 60
@@ -180,14 +191,14 @@ func GetTasksByStatus(ctx context.Context, req *mcp.CallToolRequest, args TaskSt
 			"description":       task.Description,
 			"tag":               task.Tag.Name,
 			"tag_color":         task.Tag.Color,
-			"due_date":          task.DueDate.Format("2006-01-02"),
+			"due_date":          task.DueDate.In(singaporeLocation).Format("2006-01-02"),
 			"estimated_minutes": task.EstimatedMinutes,
 			"is_completed":      task.IsCompleted,
-			"created_at":        task.CreatedAt.Format("2006-01-02 15:04:05"),
+			"created_at":        task.CreatedAt.In(singaporeLocation).Format("2006-01-02 15:04:05"),
 		}
 
 		if task.CompletedAt != nil {
-			entry["completed_at"] = task.CompletedAt.Format("2006-01-02 15:04:05")
+			entry["completed_at"] = task.CompletedAt.In(singaporeLocation).Format("2006-01-02 15:04:05")
 		}
 
 		result = append(result, entry)
@@ -234,7 +245,7 @@ func GetProductivityStats(ctx context.Context, req *mcp.CallToolRequest, args St
 		duration := tl.EndTime.Sub(tl.StartTime)
 		totalDuration += duration
 
-		date := tl.StartTime.Format("2006-01-02")
+		date := tl.StartTime.In(singaporeLocation).Format("2006-01-02")
 		if _, exists := dailyStats[date]; !exists {
 			dailyStats[date] = map[string]interface{}{
 				"date":     date,
@@ -394,7 +405,7 @@ func GetCurrentActivity(ctx context.Context, req *mcp.CallToolRequest, args Curr
 
 		entry := map[string]interface{}{
 			"id":         tl.ID,
-			"start_time": tl.StartTime.Format("2006-01-02 15:04:05"),
+			"start_time": tl.StartTime.In(singaporeLocation).Format("2006-01-02 15:04:05"),
 			"duration":   fmt.Sprintf("%dh %dm", hours, minutes),
 			"tag":        tl.Tag.Name,
 			"tag_color":  tl.Tag.Color,
@@ -435,13 +446,13 @@ func GetActiveConstraints(ctx context.Context, req *mcp.CallToolRequest, args Co
 			"id":               constraint.ID,
 			"description":      constraint.Description,
 			"punishment_quote": constraint.PunishmentQuote,
-			"start_date":       constraint.StartDate.Format("2006-01-02"),
+			"start_date":       constraint.StartDate.In(singaporeLocation).Format("2006-01-02"),
 			"is_active":        constraint.IsActive,
-			"created_at":       constraint.CreatedAt.Format("2006-01-02 15:04:05"),
+			"created_at":       constraint.CreatedAt.In(singaporeLocation).Format("2006-01-02 15:04:05"),
 		}
 
 		if constraint.EndDate != nil {
-			entry["end_date"] = constraint.EndDate.Format("2006-01-02")
+			entry["end_date"] = constraint.EndDate.In(singaporeLocation).Format("2006-01-02")
 		}
 		if constraint.EndReason != "" {
 			entry["end_reason"] = constraint.EndReason
