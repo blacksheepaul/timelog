@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math"
 	"time"
@@ -19,6 +20,29 @@ func init() {
 		// Fallback to UTC+8 if timezone data is not available
 		singaporeLocation = time.FixedZone("SGT", 8*60*60)
 	}
+}
+
+// formatMCPResponse wraps the response in the standard format to prevent LLM hallucinations
+func formatMCPResponse(summaryText string, data interface{}) (*mcp.CallToolResult, interface{}, error) {
+	// Add summary to data
+	dataMap, ok := data.(map[string]interface{})
+	if !ok {
+		return nil, nil, fmt.Errorf("data must be a map[string]interface{}")
+	}
+	dataMap["_summary"] = summaryText
+
+	jsonBytes, err := json.MarshalIndent(dataMap, "", "  ")
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to marshal response: %w", err)
+	}
+
+	responseText := fmt.Sprintf("<STRICT_JSON>\n%s\n</STRICT_JSON>", string(jsonBytes))
+
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{&mcp.TextContent{
+			Text: responseText,
+		}},
+	}, nil, nil
 }
 
 // Tool handlers with correct MCP signature
@@ -80,11 +104,8 @@ func GetRecentTimeLogs(ctx context.Context, req *mcp.CallToolRequest, args Recen
 		"count":     len(result),
 	}
 
-	return &mcp.CallToolResult{
-		Content: []mcp.Content{&mcp.TextContent{
-			Text: fmt.Sprintf("Found %d recent time logs", len(result)),
-		}},
-	}, response, nil
+	summaryText := fmt.Sprintf("Found %d recent time logs", len(result))
+	return formatMCPResponse(summaryText, response)
 }
 
 func GetTimeLogsByDateRange(ctx context.Context, req *mcp.CallToolRequest, args DateRangeParams) (*mcp.CallToolResult, interface{}, error) {
@@ -160,11 +181,8 @@ func GetTimeLogsByDateRange(ctx context.Context, req *mcp.CallToolRequest, args 
 		"total_duration": fmt.Sprintf("%dh %dm", totalHours, totalMinutes),
 	}
 
-	return &mcp.CallToolResult{
-		Content: []mcp.Content{&mcp.TextContent{
-			Text: fmt.Sprintf("Found %d time logs from %s to %s, total duration: %dh %dm", len(result), startDateStr, endDateStr[:10], totalHours, totalMinutes),
-		}},
-	}, response, nil
+	summaryText := fmt.Sprintf("Found %d time logs from %s to %s, total duration: %dh %dm", len(result), startDateStr, endDateStr[:10], totalHours, totalMinutes)
+	return formatMCPResponse(summaryText, response)
 }
 
 func GetTasksByStatus(ctx context.Context, req *mcp.CallToolRequest, args TaskStatusParams) (*mcp.CallToolResult, interface{}, error) {
@@ -210,11 +228,8 @@ func GetTasksByStatus(ctx context.Context, req *mcp.CallToolRequest, args TaskSt
 		"status": statusStr,
 	}
 
-	return &mcp.CallToolResult{
-		Content: []mcp.Content{&mcp.TextContent{
-			Text: fmt.Sprintf("Found %d %s tasks", len(result), statusStr),
-		}},
-	}, response, nil
+	summaryText := fmt.Sprintf("Found %d %s tasks", len(result), statusStr)
+	return formatMCPResponse(summaryText, response)
 }
 
 func GetProductivityStats(ctx context.Context, req *mcp.CallToolRequest, args StatsParams) (*mcp.CallToolResult, interface{}, error) {
@@ -298,11 +313,8 @@ func GetProductivityStats(ctx context.Context, req *mcp.CallToolRequest, args St
 		"total_entries":   len(timeLogs),
 	}
 
-	return &mcp.CallToolResult{
-		Content: []mcp.Content{&mcp.TextContent{
-			Text: fmt.Sprintf("Productivity stats for last %d days: %.1f total hours, %.1f average daily hours, %d entries", days, totalDuration.Hours(), avgDaily, len(timeLogs)),
-		}},
-	}, response, nil
+	summaryText := fmt.Sprintf("Productivity stats for last %d days: %.1f total hours, %.1f average daily hours, %d entries", days, totalDuration.Hours(), avgDaily, len(timeLogs))
+	return formatMCPResponse(summaryText, response)
 }
 
 func GetTaskCompletionAnalysis(ctx context.Context, req *mcp.CallToolRequest, args TaskAnalysisParams) (*mcp.CallToolResult, interface{}, error) {
@@ -384,11 +396,8 @@ func GetTaskCompletionAnalysis(ctx context.Context, req *mcp.CallToolRequest, ar
 		"tag_breakdown":             tagArray,
 	}
 
-	return &mcp.CallToolResult{
-		Content: []mcp.Content{&mcp.TextContent{
-			Text: fmt.Sprintf("Task completion analysis for last %d days: %d total tasks, %d completed (%.1f%% rate), %d overdue", days, totalTasks, completedTasks, completionRate, overdueTasks),
-		}},
-	}, response, nil
+	summaryText := fmt.Sprintf("Task completion analysis for last %d days: %d total tasks, %d completed (%.1f%% rate), %d overdue", days, totalTasks, completedTasks, completionRate, overdueTasks)
+	return formatMCPResponse(summaryText, response)
 }
 
 func GetCurrentActivity(ctx context.Context, req *mcp.CallToolRequest, args CurrentActivityParams) (*mcp.CallToolResult, interface{}, error) {
@@ -427,11 +436,8 @@ func GetCurrentActivity(ctx context.Context, req *mcp.CallToolRequest, args Curr
 		"count":       len(result),
 	}
 
-	return &mcp.CallToolResult{
-		Content: []mcp.Content{&mcp.TextContent{
-			Text: fmt.Sprintf("Found %d active time logs", len(result)),
-		}},
-	}, response, nil
+	summaryText := fmt.Sprintf("Found %d active time logs", len(result))
+	return formatMCPResponse(summaryText, response)
 }
 
 func GetActiveConstraints(ctx context.Context, req *mcp.CallToolRequest, args ConstraintParams) (*mcp.CallToolResult, interface{}, error) {
@@ -466,9 +472,6 @@ func GetActiveConstraints(ctx context.Context, req *mcp.CallToolRequest, args Co
 		"count":       len(result),
 	}
 
-	return &mcp.CallToolResult{
-		Content: []mcp.Content{&mcp.TextContent{
-			Text: fmt.Sprintf("Found %d active constraints", len(result)),
-		}},
-	}, response, nil
+	summaryText := fmt.Sprintf("Found %d active constraints", len(result))
+	return formatMCPResponse(summaryText, response)
 }
