@@ -17,11 +17,12 @@ func main() {
 		Version: "1.0.0",
 	}, nil)
 
+	// 不需要这个
 	// Register tools using the correct API
-	mcp.AddTool(mcpServer, &mcp.Tool{
-		Name:        "get_recent_timelogs",
-		Description: "Get recent time logs with optional limit",
-	}, GetRecentTimeLogs)
+	// mcp.AddTool(mcpServer, &mcp.Tool{
+	// 	Name:        "get_recent_timelogs",
+	// 	Description: "Get recent time logs with optional limit",
+	// }, GetRecentTimeLogs)
 
 	mcp.AddTool(mcpServer, &mcp.Tool{
 		Name:        "get_timelogs_by_date_range",
@@ -33,15 +34,17 @@ func main() {
 		Description: "Get tasks filtered by completion status",
 	}, GetTasksByStatus)
 
-	mcp.AddTool(mcpServer, &mcp.Tool{
-		Name:        "get_productivity_stats",
-		Description: "Analyze productivity patterns and time allocation",
-	}, GetProductivityStats)
+	// 数据不对，暂时停用
+	// mcp.AddTool(mcpServer, &mcp.Tool{
+	// 	Name:        "get_productivity_stats",
+	// 	Description: "Analyze productivity patterns and time allocation",
+	// }, GetProductivityStats)
 
-	mcp.AddTool(mcpServer, &mcp.Tool{
-		Name:        "get_task_completion_analysis",
-		Description: "Analyze task completion patterns and efficiency",
-	}, GetTaskCompletionAnalysis)
+	// 不符合实际需求，暂时停用
+	// mcp.AddTool(mcpServer, &mcp.Tool{
+	// 	Name:        "get_task_completion_analysis",
+	// 	Description: "Analyze task completion patterns and efficiency",
+	// }, GetTaskCompletionAnalysis)
 
 	mcp.AddTool(mcpServer, &mcp.Tool{
 		Name:        "get_current_activity",
