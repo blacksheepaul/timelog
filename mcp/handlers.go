@@ -108,6 +108,34 @@ func GetRecentTimeLogs(ctx context.Context, req *mcp.CallToolRequest, args Recen
 	return formatMCPResponse(summaryText, response)
 }
 
+	// 新增：获取当前日期、时间、今天、昨天、本周日期范围
+	type DateInfoParams struct{}
+
+	func GetDateInfo(ctx context.Context, req *mcp.CallToolRequest, args DateInfoParams) (*mcp.CallToolResult, interface{}, error) {
+		now := time.Now().In(singaporeLocation)
+		today := now.Format("2006-01-02")
+		yesterday := now.AddDate(0, 0, -1).Format("2006-01-02")
+		weekday := now.Weekday()
+		// 以周一为一周的开始
+		daysSinceMonday := (int(weekday) + 6) % 7
+		monday := now.AddDate(0, 0, -daysSinceMonday)
+		sunday := monday.AddDate(0, 0, 6)
+		weekRange := []string{
+			monday.Format("2006-01-02"),
+			sunday.Format("2006-01-02"),
+		}
+
+		response := map[string]interface{}{
+			"now": now.Format("2006-01-02 15:04:05"),
+			"today": today,
+			"yesterday": yesterday,
+			"weekday": weekday.String(),
+			"week_range": weekRange,
+		}
+		summaryText := "当前日期和时间信息，包括今天、昨天和本周日期范围"
+		return formatMCPResponse(summaryText, response)
+	}
+
 func GetTimeLogsByDateRange(ctx context.Context, req *mcp.CallToolRequest, args DateRangeParams) (*mcp.CallToolResult, interface{}, error) {
 	startDateStr := args.StartDate
 	endDateStr := args.EndDate
