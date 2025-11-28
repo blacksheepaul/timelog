@@ -126,10 +126,11 @@ func GetRecentTimeLogs(ctx context.Context, req *mcp.CallToolRequest, args Recen
 		}
 
 		response := map[string]interface{}{
-			"now": now.Format("2006-01-02 15:04:05"),
-			"today": today,
-			"yesterday": yesterday,
-			"weekday": weekday.String(),
+			"timezone":   "Asia/Singapore (SGT, UTC+8)",
+			"now":        now.Format("2006-01-02 15:04:05"),
+			"today":      today,
+			"yesterday":  yesterday,
+			"weekday":    weekday.String(),
 			"week_range": weekRange,
 		}
 		summaryText := "当前日期和时间信息，包括今天、昨天和本周日期范围"
@@ -140,17 +141,20 @@ func GetTimeLogsByDateRange(ctx context.Context, req *mcp.CallToolRequest, args 
 	startDateStr := args.StartDate
 	endDateStr := args.EndDate
 
-	startDate, err := time.Parse("2006-01-02", startDateStr)
+	// 解析为新加坡时区的日期
+	startDate, err := time.ParseInLocation("2006-01-02", startDateStr, singaporeLocation)
 	if err != nil {
 		return nil, nil, fmt.Errorf("invalid start_date format, use YYYY-MM-DD: %w", err)
 	}
 
-	endDate, err := time.Parse("2006-01-02", endDateStr)
+	endDate, err := time.ParseInLocation("2006-01-02", endDateStr, singaporeLocation)
 	if err != nil {
 		return nil, nil, fmt.Errorf("invalid end_date format, use YYYY-MM-DD: %w", err)
 	}
 
-	// Set time to cover full day
+	// Set time to cover full day in local timezone
+	// startDate 已经是当天 00:00:00 SGT
+	// endDate 需要设置为当天 23:59:59 SGT
 	endDate = endDate.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
 
 	timeLogs, err := model.ListTimeLogsWithOptions(server.db, 0, "start_time ASC", "start_time >= ? AND start_time <= ?", startDate, endDate)
