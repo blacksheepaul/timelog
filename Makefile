@@ -2,6 +2,7 @@
 
 # Default values
 env ?= prod
+migrate_env ?= dev
 BIN_NAME := main
 BIN_NAME_ARM := main.arm
 
@@ -9,15 +10,22 @@ ifeq ($(env),prod)
 	PORT := 8083
 	DOCKER_TAG := timelog-app
 	DOCKER_PORT := 8083
-else ifeq ($(env),test)
+else ifeq ($(env),dev)
 	PORT := 18083
-	DOCKER_TAG := timelog-app-test
+	DOCKER_TAG := timelog-app-dev
 	DOCKER_PORT := 8083
 else
 	$(error Unknown env: $(env))
 endif
 
-.PHONY: all build build-linux buildx docker run clean web web-build web-dev mcp-server
+# Set DB file for migrate target
+ifeq ($(migrate_env),prod)
+	MIGRATE_DB_FILE := prod.db
+else
+	MIGRATE_DB_FILE := dev.db
+endif
+
+.PHONY: all build build-linux buildx docker run clean web web-build web-dev mcp-server migrate
 
 all: build
 
@@ -51,6 +59,10 @@ web: web-build
 # MCP Server target
 mcp-server:
 	cd mcp && go build -o timelog-mcp-server .
+
+# Migrate target
+migrate:
+	migrate -database "sqlite3://$(MIGRATE_DB_FILE)" --path model/migrations/ up
 
 # fmt
 fmt:
