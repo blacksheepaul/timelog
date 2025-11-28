@@ -141,26 +141,14 @@ func GetTimeLogsByDateRange(ctx context.Context, req *mcp.CallToolRequest, args 
 	startDateStr := args.StartDate
 	endDateStr := args.EndDate
 
-	// 解析为新加坡时区的日期
-	startDate, err := time.ParseInLocation("2006-01-02", startDateStr, singaporeLocation)
-	if err != nil {
-		return nil, nil, fmt.Errorf("invalid start_date format, use YYYY-MM-DD: %w", err)
-	}
-
-	endDate, err := time.ParseInLocation("2006-01-02", endDateStr, singaporeLocation)
-	if err != nil {
-		return nil, nil, fmt.Errorf("invalid end_date format, use YYYY-MM-DD: %w", err)
-	}
-
-	// Set time to cover full day in local timezone
-	// startDate 已经是当天 00:00:00 SGT
-	// endDate 需要设置为当天 23:59:59 SGT
-	endDate = endDate.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
-
-	timeLogs, err := model.ListTimeLogsWithOptions(server.db, 0, "start_time ASC", "start_time >= ? AND start_time <= ?", startDate, endDate)
+	// 使用 model 层的函数，自动处理时区转换
+	timeLogs, err := model.ListTimeLogsByLocalDateRange(server.db, startDateStr, endDateStr)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get time logs by date range: %w", err)
 	}
+
+	// 获取新加坡时区用于格式化输出
+	sgLocation := model.GetSingaporeLocation()
 
 	var result []map[string]interface{}
 	totalDuration := time.Duration(0)
@@ -181,7 +169,7 @@ func GetTimeLogsByDateRange(ctx context.Context, req *mcp.CallToolRequest, args 
 
 	entry := map[string]interface{}{
 		"id":         tl.ID,
-		"start_time": tl.StartTime.In(singaporeLocation).Format("2006-01-02 15:04:05"),
+		"start_time": tl.StartTime.In(sgLocation).Format("2006-01-02 15:04:05"),
 		"end_time":   nil,
 		"duration":   durationStr,
 		"tag":        tl.Tag.Name,
@@ -190,7 +178,7 @@ func GetTimeLogsByDateRange(ctx context.Context, req *mcp.CallToolRequest, args 
 	}
 
 	if tl.EndTime != nil {
-		entry["end_time"] = tl.EndTime.In(singaporeLocation).Format("2006-01-02 15:04:05")
+		entry["end_time"] = tl.EndTime.In(sgLocation).Format("2006-01-02 15:04:05")
 	}
 
 	if tl.Task != nil {

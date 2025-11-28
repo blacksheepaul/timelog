@@ -77,3 +77,44 @@ func UpdateTimeLog(db *gorm.DB, tl *TimeLog) error {
 func DeleteTimeLog(db *gorm.DB, id uint) error {
 	return db.Delete(&TimeLog{}, id).Error
 }
+
+// 定义新加坡时区
+var singaporeLocation *time.Location
+
+func init() {
+	var err error
+	singaporeLocation, err = time.LoadLocation("Asia/Singapore")
+	if err != nil {
+		// Fallback to UTC+8 if timezone data is not available
+		singaporeLocation = time.FixedZone("SGT", 8*60*60)
+	}
+}
+
+// GetSingaporeLocation 返回新加坡时区，供其他包使用
+func GetSingaporeLocation() *time.Location {
+	return singaporeLocation
+}
+
+// ListTimeLogsByLocalDateRange 根据本地日期范围查询时间日志
+// startDateStr 和 endDateStr 格式为 "YYYY-MM-DD"，会被解析为新加坡时区
+// 数据库存储的是 UTC 时间，该函数会自动转换
+func ListTimeLogsByLocalDateRange(db *gorm.DB, startDateStr, endDateStr string) ([]TimeLog, error) {
+	startDate, err := time.ParseInLocation("2006-01-02", startDateStr, singaporeLocation)
+	if err != nil {
+		return nil, err
+	}
+
+	endDate, err := time.ParseInLocation("2006-01-02", endDateStr, singaporeLocation)
+	if err != nil {
+		return nil, err
+	}
+
+	// endDate 设置为当天 23:59:59 SGT
+	endDate = endDate.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
+
+	// 转换为 UTC 进行数据库查询
+	startUTC := startDate.UTC()
+	endUTC := endDate.UTC()
+
+	return ListTimeLogsWithOptions(db, 0, "start_time ASC", "start_time >= ? AND start_time <= ?", startUTC, endUTC)
+}
