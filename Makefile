@@ -19,7 +19,7 @@ else
 endif
 
 # Set DB file for migrate target
-ifeq ($(migrate_env),prod)
+ifeq ($(env),prod)
 	MIGRATE_DB_FILE := prod.db
 else
 	MIGRATE_DB_FILE := dev.db

@@ -21,8 +21,8 @@ migrate -database "sqlite3://dev.db" --path model/migrations/ up
 # or use make target (defaults to dev environment)
 make migrate
 # or explicitly specify environment
-make migrate migrate_env=prod
-make migrate migrate_env=dev
+make migrate env=prod
+make migrate env=dev
 ```
 
 # Launch
