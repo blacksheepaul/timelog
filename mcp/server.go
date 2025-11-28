@@ -53,6 +53,11 @@ func main() {
 		Description: "Get all currently active constraints",
 	}, GetActiveConstraints)
 
+	mcp.AddTool(mcpServer, &mcp.Tool{
+		Name:        "get_date_info",
+		Description: "Get current date, time, today, yesterday, and this week's date range",
+	}, GetDateInfo)
+
 	// Run MCP server - no logging to avoid stdout contamination
 	ctx := context.Background()
 	transport := &mcp.StdioTransport{}
