@@ -16,10 +16,12 @@ MCP server that gives Claude Code access to your TimeLog data for productivity a
 
 ```bash
 # From the project root directory
-cd mcp && go build -o timelog-mcp-server *.go
+make mcp-server
 ```
 
-### 2. Configure Claude Code
+### 2. Configure your LLM client
+
+Example for Claude Code as below.
 
 Add to your Claude Code configuration file:
 
@@ -65,8 +67,9 @@ log:
 ### 4. Test the Setup
 
 Ask Claude Code:
+
 - "Show me my recent time logs"
-- "Analyze my productivity this week" 
+- "Analyze my productivity this week"
 - "What tasks are currently pending?"
 
 ## What You Can Ask Claude Code
@@ -77,6 +80,7 @@ Ask Claude Code:
 - "How am I spending time across different activities?"
 - "What's my task completion rate this month?"
 - "Are there any active time logs running?"
+- "What is the best I can do under the existing constraints today"
 
 ## Troubleshooting
 
@@ -91,15 +95,13 @@ Ask Claude Code:
        level: debug
        path: logs/mcp.log
    ```
-3. **Test manually**:
-   ```bash
-   cd /path/to/timelog/mcp
-   ./timelog-mcp-server
-   ```
-4. **Check the debug log** at `logs/mcp.log` for error details
+3. **Test manually and watch your logs!**
+
+After my personal testing, the support for Claude Desktop, Claude Code, VSCode and Cherry Studio is very good, but opencat and jan need some prompt engineer.
 
 ### Common Issues:
 
+- **Config not found**: Make sure you have defined environment variable `TIMELOG_CONFIG_PATH`
 - **Server not found**: Use absolute paths in Claude Code config
 - **Database errors**: Ensure your TimeLog app works normally
 - **Permission errors**: Make sure the binary is executable (`chmod +x timelog-mcp-server`)
