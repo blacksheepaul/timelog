@@ -18,6 +18,11 @@ forward
 
 ```bash
 migrate -database "sqlite3://dev.db" --path model/migrations/ up
+# or use make target (defaults to dev environment)
+make migrate
+# or explicitly specify environment
+make migrate migrate_env=prod
+make migrate migrate_env=dev
 ```
 
 # Launch
@@ -26,11 +31,11 @@ migrate -database "sqlite3://dev.db" --path model/migrations/ up
 # Build binary
 make build env=prod
 # or
-make build-linux env=test
+make build-linux env=dev
 # Build image
 docker build -t timelog-app .
 # Prod
 docker run --rm -e ENV=prod -p 8080:8080 timelog-app
-# Test
-docker run --rm -e ENV=test -p 18080:8080 timelog-app
+# Dev
+docker run --rm -e ENV=dev -p 18080:8080 timelog-app
 ```
