@@ -1,14 +1,15 @@
 # TimeLog MCP Server
 
-MCP server that gives Claude Code access to your TimeLog data for productivity analysis and insights.
+MCP server that gives LLM access to your TimeLog data for analysis and insights.
 
 ## What You Can Do
 
-- Ask Claude Code about your work patterns and productivity trends
+- Ask LLM about your work patterns and productivity trends
 - Analyze time allocation across different activities
 - Review task completion rates and efficiency
 - Monitor current active time tracking sessions
 - Get productivity insights for any time period
+- Anything else based on your timelog, use your imagination to the fullest
 
 ## Setup
 
@@ -45,7 +46,7 @@ Add to your Claude Code configuration file:
 }
 ```
 
-### 3. Enable Debug Logging (for troubleshooting)
+### 3. (optional) Enable Debug Logging
 
 Add MCP logging configuration to your `config.yml`:
 
@@ -66,13 +67,13 @@ log:
 
 ### 4. Test the Setup
 
-Ask Claude Code:
+Ask from your LLM client:
 
 - "Show me my recent time logs"
 - "Analyze my productivity this week"
 - "What tasks are currently pending?"
 
-## What You Can Ask Claude Code
+## What You Can Ask
 
 - "Show me my recent time logs"
 - "Analyze my productivity this week"
@@ -81,6 +82,7 @@ Ask Claude Code:
 - "What's my task completion rate this month?"
 - "Are there any active time logs running?"
 - "What is the best I can do under the existing constraints today"
+- ...
 
 ## Troubleshooting
 
