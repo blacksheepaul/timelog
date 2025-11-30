@@ -12,7 +12,7 @@
     </div>
 
     <!-- 任务创建/编辑表单 -->
-    <div v-if="showForm" class="bg-white shadow rounded-lg p-6">
+    <div v-if="showForm" ref="taskFormRef" class="bg-white shadow rounded-lg p-6">
       <h2 class="text-lg font-medium text-gray-900 mb-6">
         {{ isEditing ? 'Edit Task' : 'Create New Task' }}
       </h2>
@@ -119,6 +119,14 @@
         <div class="flex justify-between items-center">
           <h2 class="text-lg font-medium text-gray-900">Tasks</h2>
           <div class="flex items-center space-x-4">
+            <label class="flex items-center text-sm text-gray-700 cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="showCompleted"
+                class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              {{ switchBtnText }}
+            </label>
             <select
               v-model="dateFilter"
               @change="loadTasks"
@@ -144,13 +152,13 @@
         {{ error }}
       </div>
 
-      <div v-else-if="tasks.length === 0" class="p-6 text-center text-gray-500">
+      <div v-else-if="filteredTasks.length === 0" class="p-6 text-center text-gray-500">
         No tasks found. Create your first one!
       </div>
 
       <div v-else class="divide-y divide-gray-200">
         <div
-          v-for="task in tasks"
+          v-for="task in filteredTasks"
           :key="task.id"
           class="p-6 hover:bg-gray-50"
           :class="{ 'opacity-60': task.is_completed }"
@@ -228,7 +236,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive, onMounted, computed, inject } from 'vue'
+  import { ref, reactive, onMounted, computed, inject, nextTick } from 'vue'
   import { PlusIcon } from '@heroicons/vue/24/outline'
   import { formatDate, formatDateTime } from '@/utils/date'
   import { taskAPI, tagAPI } from '@/api'
@@ -248,8 +256,18 @@
   const showForm = ref(false)
   const editingTask = ref<Task | undefined>()
   const dateFilter = ref('')
+  const taskFormRef = ref<HTMLElement | null>(null)
+  const showCompleted = ref(false)
+  const switchBtnText = computed(() => (showCompleted.value ? 'Hide' : 'Show'))
 
   const isEditing = computed(() => !!editingTask.value)
+
+  const filteredTasks = computed(() => {
+    if (showCompleted.value) {
+      return tasks.value
+    }
+    return tasks.value.filter(task => !task.is_completed)
+  })
 
   const form = reactive({
     title: '',
@@ -362,6 +380,16 @@
     editingTask.value = task
     showForm.value = true
     loadEditingData()
+
+    // 滚动到表单位置
+    nextTick(() => {
+      if (taskFormRef.value) {
+        taskFormRef.value.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        })
+      }
+    })
   }
 
   const handleCancel = () => {
