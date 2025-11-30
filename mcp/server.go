@@ -34,7 +34,7 @@ func main() {
 
 	mcp.AddTool(mcpServer, &mcp.Tool{
 		Name:        "get_active_constraints",
-		Description: "Get all currently active constraints",
+		Description: "To know self discipline and external conditions",
 	}, GetActiveConstraints)
 
 	mcp.AddTool(mcpServer, &mcp.Tool{
