@@ -11,6 +11,31 @@
       </button>
     </div>
 
+    <!-- Time Filter -->
+    <div class="bg-white shadow rounded-lg p-4">
+      <div class="flex flex-wrap items-center gap-4">
+        <span class="text-sm font-medium text-gray-700">Filter:</span>
+        <div class="flex gap-2">
+          <button
+            v-for="option in filterOptions"
+            :key="option.value"
+            @click="setFilter(option.value)"
+            :class="[
+              'px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
+              activeFilter === option.value
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            ]"
+          >
+            {{ option.label }}
+          </button>
+        </div>
+        <span class="text-sm text-gray-500 ml-auto">
+          {{ filteredTimeLogs.length }} entries
+        </span>
+      </div>
+    </div>
+
     <TimeLogForm
       v-if="showForm"
       :editing-log="editingLog"
@@ -24,7 +49,7 @@
     />
 
     <TimeLogList
-      :time-logs="timeLogs"
+      :time-logs="filteredTimeLogs"
       :loading="loading"
       :error="error"
       @edit="handleEdit"
@@ -34,8 +59,9 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted, inject } from 'vue'
+  import { ref, onMounted, inject, computed } from 'vue'
   import { PlusIcon } from '@heroicons/vue/24/outline'
+  import { startOfDay, startOfWeek, isAfter, parseISO } from 'date-fns'
   import TimeLogList from '@/components/TimeLogList.vue'
   import TimeLogForm from '@/components/TimeLogForm.vue'
   import { timelogAPI, tagAPI, taskAPI, constraintAPI } from '@/api'
@@ -63,6 +89,40 @@
   const error = ref<string | null>(null)
   const showForm = ref(false)
   const editingLog = ref<TimeLog | undefined>()
+
+  // Filter state
+  type FilterValue = 'today' | 'week' | 'all'
+  const activeFilter = ref<FilterValue>('today')
+  const filterOptions: { label: string; value: FilterValue }[] = [
+    { label: 'Today', value: 'today' },
+    { label: 'This Week', value: 'week' },
+    { label: 'All', value: 'all' },
+  ]
+
+  const setFilter = (value: FilterValue) => {
+    activeFilter.value = value
+  }
+
+  const filteredTimeLogs = computed(() => {
+    if (activeFilter.value === 'all') {
+      return timeLogs.value
+    }
+
+    const now = new Date()
+    let filterDate: Date
+
+    if (activeFilter.value === 'today') {
+      filterDate = startOfDay(now)
+    } else {
+      // week - start from Monday
+      filterDate = startOfWeek(now, { weekStartsOn: 1 })
+    }
+
+    return timeLogs.value.filter(log => {
+      const logDate = parseISO(log.start_time)
+      return isAfter(logDate, filterDate) || logDate.getTime() === filterDate.getTime()
+    })
+  })
 
   const loadTimeLogs = async () => {
     loading.value = true
