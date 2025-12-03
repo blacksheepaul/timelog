@@ -1,39 +1,5 @@
 <template>
   <div class="space-y-6">
-    <!-- 欢迎信息 -->
-    <div class="bg-white shadow rounded-lg p-6">
-      <h2 class="text-2xl font-bold text-gray-900 mb-4">Welcome to TimeLog Dashboard</h2>
-      <p class="text-gray-600 mb-6">
-        Track your time efficiently with our intuitive time logging system. Get insights into your
-        productivity and manage your daily activities.
-      </p>
-
-      <!-- 快速操作按钮 -->
-      <div class="flex flex-wrap gap-4">
-        <router-link
-          to="/timelogs"
-          class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <ClockIcon class="h-5 w-5 mr-2" />
-          View Time Logs
-        </router-link>
-        <router-link
-          to="/tags"
-          class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <TagIcon class="h-5 w-5 mr-2" />
-          Manage Tags
-        </router-link>
-        <router-link
-          to="/statistics"
-          class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <ChartBarIcon class="h-5 w-5 mr-2" />
-          View Statistics
-        </router-link>
-      </div>
-    </div>
-
     <!-- 今日概览 -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <div class="bg-white shadow rounded-lg p-6">
@@ -135,7 +101,7 @@
 
 <script setup lang="ts">
   import { ref, onMounted, computed } from 'vue'
-  import { ClockIcon, PlayIcon, StopIcon, TagIcon, ChartBarIcon } from '@heroicons/vue/24/outline'
+  import { ClockIcon, PlayIcon, StopIcon, TagIcon } from '@heroicons/vue/24/outline'
   import { timelogAPI } from '@/api'
   import { formatDateTime, calculateDuration } from '@/utils/date'
   import type { TimeLog } from '@/types'
