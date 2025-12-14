@@ -306,7 +306,7 @@
   const {
     taskShowCompleted: showCompleted,
     taskShowSuspended: showSuspended,
-    taskDateFilter: dateFilter
+    taskDateFilter: dateFilter,
   } = useSettings()
 
   const isEditing = computed(() => !!editingTask.value)

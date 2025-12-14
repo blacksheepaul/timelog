@@ -9,34 +9,34 @@ export function useSettings() {
   // Task-related settings
   const taskShowCompleted = computed({
     get: () => settings.value.taskShowCompleted,
-    set: (value) => settingsStore.updateSetting('taskShowCompleted', value)
+    set: value => settingsStore.updateSetting('taskShowCompleted', value),
   })
 
   const taskShowSuspended = computed({
     get: () => settings.value.taskShowSuspended,
-    set: (value) => settingsStore.updateSetting('taskShowSuspended', value)
+    set: value => settingsStore.updateSetting('taskShowSuspended', value),
   })
 
   const taskDateFilter = computed({
     get: () => settings.value.taskDateFilter,
-    set: (value) => settingsStore.updateSetting('taskDateFilter', value)
+    set: value => settingsStore.updateSetting('taskDateFilter', value),
   })
 
   // Time log settings
   const timeLogShowOnlyActive = computed({
     get: () => settings.value.timeLogShowOnlyActive,
-    set: (value) => settingsStore.updateSetting('timeLogShowOnlyActive', value)
+    set: value => settingsStore.updateSetting('timeLogShowOnlyActive', value),
   })
 
   // UI settings
   const theme = computed({
     get: () => settings.value.theme,
-    set: (value) => settingsStore.updateSetting('theme', value)
+    set: value => settingsStore.updateSetting('theme', value),
   })
 
   const itemsPerPage = computed({
     get: () => settings.value.itemsPerPage,
-    set: (value) => settingsStore.updateSetting('itemsPerPage', value)
+    set: value => settingsStore.updateSetting('itemsPerPage', value),
   })
 
   return {
@@ -58,6 +58,6 @@ export function useSettings() {
     // Methods
     updateSetting: settingsStore.updateSetting,
     loadSettings: settingsStore.loadSettings,
-    saveSettings: settingsStore.saveSettings
+    saveSettings: settingsStore.saveSettings,
   }
 }
