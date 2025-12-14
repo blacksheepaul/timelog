@@ -59,12 +59,17 @@ func GetTaskByID(db *gorm.DB, id uint) (*Task, error) {
 
 // GetAllTasks 获取所有任务
 // includeSuspended: 是否包含暂停的任务
-func GetAllTasks(db *gorm.DB, includeSuspended bool) ([]Task, error) {
+// includeCompleted: 是否包含已完成的任务
+func GetAllTasks(db *gorm.DB, includeSuspended bool, includeCompleted bool) ([]Task, error) {
 	var tasks []Task
 	query := db.Preload("Tag")
 
 	if !includeSuspended {
 		query = query.Where("is_suspended = ?", false)
+	}
+
+	if !includeCompleted {
+		query = query.Where("is_completed = ?", false)
 	}
 
 	err := query.Find(&tasks).Error
@@ -73,7 +78,8 @@ func GetAllTasks(db *gorm.DB, includeSuspended bool) ([]Task, error) {
 
 // GetTasksByDate 根据日期获取任务
 // includeSuspended: 是否包含暂停的任务
-func GetTasksByDate(db *gorm.DB, date time.Time, includeSuspended bool) ([]Task, error) {
+// includeCompleted: 是否包含已完成的任务
+func GetTasksByDate(db *gorm.DB, date time.Time, includeSuspended bool, includeCompleted bool) ([]Task, error) {
 	var tasks []Task
 	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
 	endOfDay := startOfDay.Add(24 * time.Hour)
@@ -82,6 +88,10 @@ func GetTasksByDate(db *gorm.DB, date time.Time, includeSuspended bool) ([]Task,
 
 	if !includeSuspended {
 		query = query.Where("is_suspended = ?", false)
+	}
+
+	if !includeCompleted {
+		query = query.Where("is_completed = ?", false)
 	}
 
 	err := query.Find(&tasks).Error

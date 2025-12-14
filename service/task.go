@@ -20,16 +20,18 @@ func GetTaskByID(id uint) (*model.Task, error) {
 
 // GetAllTasks 获取所有任务
 // includeSuspended: 是否包含暂停的任务
-func GetAllTasks(includeSuspended bool) ([]model.Task, error) {
+// includeCompleted: 是否包含已完成的任务
+func GetAllTasks(includeSuspended bool, includeCompleted bool) ([]model.Task, error) {
 	dao := model.GetDao()
-	return model.GetAllTasks(dao.Db(), includeSuspended)
+	return model.GetAllTasks(dao.Db(), includeSuspended, includeCompleted)
 }
 
 // GetTasksByDate 根据日期获取任务
 // includeSuspended: 是否包含暂停的任务
-func GetTasksByDate(date time.Time, includeSuspended bool) ([]model.Task, error) {
+// includeCompleted: 是否包含已完成的任务
+func GetTasksByDate(date time.Time, includeSuspended bool, includeCompleted bool) ([]model.Task, error) {
 	dao := model.GetDao()
-	return model.GetTasksByDate(dao.Db(), date, includeSuspended)
+	return model.GetTasksByDate(dao.Db(), date, includeSuspended, includeCompleted)
 }
 
 // GetTasksByDateRange 根据日期范围获取任务
