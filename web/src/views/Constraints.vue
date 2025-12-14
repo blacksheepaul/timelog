@@ -235,6 +235,7 @@
 
 <script setup>
   import { ref, reactive, computed, onMounted } from 'vue'
+  import { useSettings } from '@/composables/useSettings'
   import {
     PlusIcon,
     PencilIcon,
@@ -252,7 +253,9 @@
   const showForm = ref(false)
   const editingTask = ref(null)
   const constraints = ref([])
-  const showOnlyActive = ref(true)
+
+  // Use settings from composable
+  const { timeLogShowOnlyActive: showOnlyActive } = useSettings()
 
   const isEditing = computed(() => !!editingTask.value)
 

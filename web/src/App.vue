@@ -178,8 +178,9 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive, provide } from 'vue'
+  import { ref, reactive, provide, onMounted } from 'vue'
   import { CheckCircleIcon, XCircleIcon, Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline'
+  import { useSettings } from '@/composables/useSettings'
 
   // 移动端菜单状态
   const mobileMenuOpen = ref(false)
@@ -203,4 +204,10 @@
 
   // 通过provide向子组件提供全局通知功能
   provide('showNotification', showNotification)
+
+  // Initialize settings on app mount
+  onMounted(() => {
+    const { loadSettings } = useSettings()
+    loadSettings()
+  })
 </script>
