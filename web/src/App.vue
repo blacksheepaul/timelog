@@ -178,7 +178,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive, provide, onMounted } from 'vue'
+  import { ref, reactive, provide, onMounted, onUnmounted } from 'vue'
   import { CheckCircleIcon, XCircleIcon, Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline'
   import { useSettings } from '@/composables/useSettings'
 
@@ -205,9 +205,63 @@
   // 通过provide向子组件提供全局通知功能
   provide('showNotification', showNotification)
 
+  const REMINDER_INTERVAL_MS = 25 * 60 * 1000
+  let reminderTimer: number | undefined
+
+  const sendReminderNotification = () => {
+    try {
+      new Notification('该记录TimeLog了', {
+        body: '又过去了25分钟，别忘了记录你的时间日志。',
+        tag: 'timelog-reminder',
+      })
+    } catch (error) {
+      console.error('Failed to send reminder notification', error)
+    }
+  }
+
+  const startReminderTimer = () => {
+    if (reminderTimer) {
+      window.clearInterval(reminderTimer)
+    }
+    reminderTimer = window.setInterval(sendReminderNotification, REMINDER_INTERVAL_MS)
+  }
+
+  const initSystemNotifications = () => {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      showNotification('error', '当前浏览器不支持系统通知提醒')
+      return
+    }
+
+    if (Notification.permission === 'granted') {
+      startReminderTimer()
+      return
+    }
+
+    if (Notification.permission === 'denied') {
+      showNotification('error', '请在浏览器设置中允许通知以启用提醒')
+      return
+    }
+
+    Notification.requestPermission().then(permission => {
+      if (permission === 'granted') {
+        startReminderTimer()
+        showNotification('success', '已启用每25分钟一次的记录提醒')
+      } else {
+        showNotification('error', '未授予通知权限，无法启用提醒')
+      }
+    })
+  }
+
   // Initialize settings on app mount
   onMounted(() => {
     const { loadSettings } = useSettings()
     loadSettings()
+    initSystemNotifications()
+  })
+
+  onUnmounted(() => {
+    if (reminderTimer) {
+      window.clearInterval(reminderTimer)
+    }
   })
 </script>
