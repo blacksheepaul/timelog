@@ -24,15 +24,13 @@
               'px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
               activeFilter === option.value
                 ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200',
             ]"
           >
             {{ option.label }}
           </button>
         </div>
-        <span class="text-sm text-gray-500 ml-auto">
-          {{ filteredTimeLogs.length }} entries
-        </span>
+        <span class="text-sm text-gray-500 ml-auto"> {{ filteredTimeLogs.length }} entries </span>
       </div>
     </div>
 

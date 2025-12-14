@@ -67,7 +67,11 @@ export const tagAPI = {
 }
 
 export const taskAPI = {
-  getAll: (date?: string, includeSuspended?: boolean, includeCompleted?: boolean): Promise<ApiResponse<Task[]>> => {
+  getAll: (
+    date?: string,
+    includeSuspended?: boolean,
+    includeCompleted?: boolean
+  ): Promise<ApiResponse<Task[]>> => {
     const params = new URLSearchParams()
     if (date) params.append('date', date)
     if (includeSuspended) params.append('include_suspended', 'true')
