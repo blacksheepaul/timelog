@@ -19,6 +19,8 @@ func setupTaskRoutes(group *gin.RouterGroup) {
 	group.DELETE("/tasks/:id", deleteTaskHandler)
 	group.POST("/tasks/:id/complete", completeTaskHandler)
 	group.POST("/tasks/:id/incomplete", incompleteTaskHandler)
+	group.POST("/tasks/:id/suspend", suspendTaskHandler)
+	group.POST("/tasks/:id/unsuspend", unsuspendTaskHandler)
 	group.GET("/tasks/stats/:date", getTaskStatsHandler)
 }
 
@@ -55,15 +57,17 @@ func createTaskHandler(c *gin.Context) {
 
 // ListTasksHandler godoc
 // @Summary 获取任务列表
-// @Description 获取所有任务，支持按日期过滤
+// @Description 获取所有任务，支持按日期过滤和是否包含暂停的任务
 // @Tags task
 // @Produce json
 // @Param date query string false "日期过滤 (YYYY-MM-DD格式)"
+// @Param include_suspended query boolean false "是否包含暂停的任务 (默认false)"
 // @Success 200 {array} model.Task
 // @Failure 500 {object} map[string]string
 // @Router /api/tasks [get]
 func listTasksHandler(c *gin.Context) {
 	dateStr := c.Query("date")
+	includeSuspended := c.Query("include_suspended") == "true"
 
 	var tasks []model.Task
 	var err error
@@ -74,10 +78,10 @@ func listTasksHandler(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "Invalid date format, expected YYYY-MM-DD"))
 			return
 		} else {
-			tasks, err = service.GetTasksByDate(date)
+			tasks, err = service.GetTasksByDate(date, includeSuspended)
 		}
 	} else {
-		tasks, err = service.GetAllTasks()
+		tasks, err = service.GetAllTasks(includeSuspended)
 	}
 
 	if err != nil {
@@ -252,6 +256,72 @@ func incompleteTaskHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, SuccessResponse(nil, "Task marked as incomplete"))
+}
+
+// SuspendTaskHandler godoc
+// @Summary 暂停任务
+// @Description 将任务标记为暂停状态
+// @Tags task
+// @Produce json
+// @Param id path int true "任务ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/tasks/{id}/suspend [post]
+func suspendTaskHandler(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "Invalid task ID"))
+		return
+	}
+
+	// 先检查任务是否存在
+	if _, err := service.GetTaskByID(uint(id)); err != nil {
+		c.JSON(http.StatusNotFound, ErrorResponse(http.StatusNotFound, "Task not found"))
+		return
+	}
+
+	if err := service.SuspendTask(uint(id)); err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, SuccessResponse(nil, "Task suspended successfully"))
+}
+
+// UnsuspendTaskHandler godoc
+// @Summary 取消暂停任务
+// @Description 将任务取消暂停状态
+// @Tags task
+// @Produce json
+// @Param id path int true "任务ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/tasks/{id}/unsuspend [post]
+func unsuspendTaskHandler(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "Invalid task ID"))
+		return
+	}
+
+	// 先检查任务是否存在
+	if _, err := service.GetTaskByID(uint(id)); err != nil {
+		c.JSON(http.StatusNotFound, ErrorResponse(http.StatusNotFound, "Task not found"))
+		return
+	}
+
+	if err := service.UnsuspendTask(uint(id)); err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, SuccessResponse(nil, "Task unsuspended successfully"))
 }
 
 // GetTaskStatsHandler godoc

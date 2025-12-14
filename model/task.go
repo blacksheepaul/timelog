@@ -17,6 +17,7 @@ import (
 // - estimated_minutes: 预估完成时间(分钟) (必填)
 // - is_completed: 是否完成 (默认false)
 // - completed_at: 完成时间 (完成时自动设置)
+// - is_suspended: 是否暂停 (默认false)
 // - created_at, updated_at, deleted_at: ORM基础字段
 
 type Task struct {
@@ -29,6 +30,7 @@ type Task struct {
 	EstimatedMinutes int            `gorm:"column:estimated_minutes;not null" json:"estimated_minutes"`
 	IsCompleted      bool           `gorm:"column:is_completed;default:false" json:"is_completed"`
 	CompletedAt      *time.Time     `gorm:"column:completed_at" json:"completed_at"`
+	IsSuspended      bool           `gorm:"column:is_suspended;default:false" json:"is_suspended"`
 	CreatedAt        time.Time      `json:"created_at"`
 	UpdatedAt        time.Time      `json:"updated_at"`
 	DeletedAt        gorm.DeletedAt `gorm:"index" json:"-"`
@@ -56,19 +58,33 @@ func GetTaskByID(db *gorm.DB, id uint) (*Task, error) {
 }
 
 // GetAllTasks 获取所有任务
-func GetAllTasks(db *gorm.DB) ([]Task, error) {
+// includeSuspended: 是否包含暂停的任务
+func GetAllTasks(db *gorm.DB, includeSuspended bool) ([]Task, error) {
 	var tasks []Task
-	err := db.Preload("Tag").Find(&tasks).Error
+	query := db.Preload("Tag")
+
+	if !includeSuspended {
+		query = query.Where("is_suspended = ?", false)
+	}
+
+	err := query.Find(&tasks).Error
 	return tasks, err
 }
 
 // GetTasksByDate 根据日期获取任务
-func GetTasksByDate(db *gorm.DB, date time.Time) ([]Task, error) {
+// includeSuspended: 是否包含暂停的任务
+func GetTasksByDate(db *gorm.DB, date time.Time, includeSuspended bool) ([]Task, error) {
 	var tasks []Task
 	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
 	endOfDay := startOfDay.Add(24 * time.Hour)
 
-	err := db.Preload("Tag").Where("due_date >= ? AND due_date < ?", startOfDay, endOfDay).Find(&tasks).Error
+	query := db.Preload("Tag").Where("due_date >= ? AND due_date < ?", startOfDay, endOfDay)
+
+	if !includeSuspended {
+		query = query.Where("is_suspended = ?", false)
+	}
+
+	err := query.Find(&tasks).Error
 	return tasks, err
 }
 
@@ -104,6 +120,16 @@ func MarkTaskAsIncomplete(db *gorm.DB, taskID uint) error {
 		"is_completed": false,
 		"completed_at": nil,
 	}).Error
+}
+
+// SuspendTask 暂停任务
+func SuspendTask(db *gorm.DB, taskID uint) error {
+	return db.Model(&Task{}).Where("id = ?", taskID).Update("is_suspended", true).Error
+}
+
+// UnsuspendTask 取消暂停任务
+func UnsuspendTask(db *gorm.DB, taskID uint) error {
+	return db.Model(&Task{}).Where("id = ?", taskID).Update("is_suspended", false).Error
 }
 
 // GetCompletedTasksInDateRange 获取指定日期范围内的已完成任务
