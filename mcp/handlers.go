@@ -47,31 +47,31 @@ func formatMCPResponse(summaryText string, data interface{}) (*mcp.CallToolResul
 // Tool handlers with correct MCP signature
 type DateInfoParams struct{}
 
-	func GetDateInfo(ctx context.Context, req *mcp.CallToolRequest, args DateInfoParams) (*mcp.CallToolResult, interface{}, error) {
-		now := time.Now().In(singaporeLocation)
-		today := now.Format("2006-01-02")
-		yesterday := now.AddDate(0, 0, -1).Format("2006-01-02")
-		weekday := now.Weekday()
-		// 以周一为一周的开始
-		daysSinceMonday := (int(weekday) + 6) % 7
-		monday := now.AddDate(0, 0, -daysSinceMonday)
-		sunday := monday.AddDate(0, 0, 6)
-		weekRange := []string{
-			monday.Format("2006-01-02"),
-			sunday.Format("2006-01-02"),
-		}
-
-		response := map[string]interface{}{
-			"timezone":   "Asia/Singapore (SGT, UTC+8)",
-			"now":        now.Format("2006-01-02 15:04:05"),
-			"today":      today,
-			"yesterday":  yesterday,
-			"weekday":    weekday.String(),
-			"week_range": weekRange,
-		}
-		summaryText := "当前日期和时间信息，包括今天、昨天和本周日期范围"
-		return formatMCPResponse(summaryText, response)
+func GetDateInfo(ctx context.Context, req *mcp.CallToolRequest, args DateInfoParams) (*mcp.CallToolResult, interface{}, error) {
+	now := time.Now().In(singaporeLocation)
+	today := now.Format("2006-01-02")
+	yesterday := now.AddDate(0, 0, -1).Format("2006-01-02")
+	weekday := now.Weekday()
+	// 以周一为一周的开始
+	daysSinceMonday := (int(weekday) + 6) % 7
+	monday := now.AddDate(0, 0, -daysSinceMonday)
+	sunday := monday.AddDate(0, 0, 6)
+	weekRange := []string{
+		monday.Format("2006-01-02"),
+		sunday.Format("2006-01-02"),
 	}
+
+	response := map[string]interface{}{
+		"timezone":   "Asia/Singapore (SGT, UTC+8)",
+		"now":        now.Format("2006-01-02 15:04:05"),
+		"today":      today,
+		"yesterday":  yesterday,
+		"weekday":    weekday.String(),
+		"week_range": weekRange,
+	}
+	summaryText := "当前日期和时间信息，包括今天、昨天和本周日期范围"
+	return formatMCPResponse(summaryText, response)
+}
 
 func GetTimeLogsByDateRange(ctx context.Context, req *mcp.CallToolRequest, args DateRangeParams) (*mcp.CallToolResult, interface{}, error) {
 	startDateStr := args.StartDate
@@ -103,29 +103,29 @@ func GetTimeLogsByDateRange(ctx context.Context, req *mcp.CallToolRequest, args 
 			durationStr = "ongoing"
 		}
 
-	entry := map[string]interface{}{
-		"id":         tl.ID,
-		"start_time": tl.StartTime.In(sgLocation).Format("2006-01-02 15:04:05"),
-		"end_time":   nil,
-		"duration":   durationStr,
-		"tag":        tl.Tag.Name,
-		"tag_color":  tl.Tag.Color,
-		"remarks":    tl.Remark,
-	}
-
-	if tl.EndTime != nil {
-		entry["end_time"] = tl.EndTime.In(sgLocation).Format("2006-01-02 15:04:05")
-	}
-
-	if tl.Task != nil {
-		entry["task"] = map[string]interface{}{
-			"id":    tl.Task.ID,
-			"title": tl.Task.Title,
+		entry := map[string]interface{}{
+			"id":         tl.ID,
+			"start_time": tl.StartTime.In(sgLocation).Format("2006-01-02 15:04:05"),
+			"end_time":   nil,
+			"duration":   durationStr,
+			"tag":        tl.Tag.Name,
+			"tag_color":  tl.Tag.Color,
+			"remarks":    tl.Remark,
 		}
-	}
 
-	result = append(result, entry)
-}
+		if tl.EndTime != nil {
+			entry["end_time"] = tl.EndTime.In(sgLocation).Format("2006-01-02 15:04:05")
+		}
+
+		if tl.Task != nil {
+			entry["task"] = map[string]interface{}{
+				"id":    tl.Task.ID,
+				"title": tl.Task.Title,
+			}
+		}
+
+		result = append(result, entry)
+	}
 
 	totalHours := int(totalDuration.Hours())
 	totalMinutes := int(totalDuration.Minutes()) % 60

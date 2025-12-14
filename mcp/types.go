@@ -19,7 +19,7 @@ type TaskStatusParams struct {
 	Status string `json:"status" jsonschema:"Task status filter (completed/pending/all),required"`
 }
 
-type CurrentActivityParams struct{
+type CurrentActivityParams struct {
 	// No parameters needed
 }
 
