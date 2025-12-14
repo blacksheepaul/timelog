@@ -57,17 +57,19 @@ func createTaskHandler(c *gin.Context) {
 
 // ListTasksHandler godoc
 // @Summary 获取任务列表
-// @Description 获取所有任务，支持按日期过滤和是否包含暂停的任务
+// @Description 获取所有任务，支持按日期过滤、是否包含暂停的任务和是否包含已完成的任务
 // @Tags task
 // @Produce json
 // @Param date query string false "日期过滤 (YYYY-MM-DD格式)"
 // @Param include_suspended query boolean false "是否包含暂停的任务 (默认false)"
+// @Param include_completed query boolean false "是否包含已完成的任务 (默认false)"
 // @Success 200 {array} model.Task
 // @Failure 500 {object} map[string]string
 // @Router /api/tasks [get]
 func listTasksHandler(c *gin.Context) {
 	dateStr := c.Query("date")
 	includeSuspended := c.Query("include_suspended") == "true"
+	includeCompleted := c.Query("include_completed") == "true"
 
 	var tasks []model.Task
 	var err error
@@ -78,10 +80,10 @@ func listTasksHandler(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "Invalid date format, expected YYYY-MM-DD"))
 			return
 		} else {
-			tasks, err = service.GetTasksByDate(date, includeSuspended)
+			tasks, err = service.GetTasksByDate(date, includeSuspended, includeCompleted)
 		}
 	} else {
-		tasks, err = service.GetAllTasks(includeSuspended)
+		tasks, err = service.GetAllTasks(includeSuspended, includeCompleted)
 	}
 
 	if err != nil {
