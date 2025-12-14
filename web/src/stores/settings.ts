@@ -29,7 +29,7 @@ export const useSettingsStore = defineStore('settings', () => {
     taskDateFilter: '',
     timeLogShowOnlyActive: true,
     theme: 'auto',
-    itemsPerPage: 20
+    itemsPerPage: 20,
   })
 
   // Load settings from localStorage
@@ -56,10 +56,7 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   // Update a specific setting
-  const updateSetting = <K extends keyof SettingsState>(
-    key: K,
-    value: SettingsState[K]
-  ) => {
+  const updateSetting = <K extends keyof SettingsState>(key: K, value: SettingsState[K]) => {
     settings.value[key] = value
   }
 
@@ -79,6 +76,6 @@ export const useSettingsStore = defineStore('settings', () => {
     settings,
     updateSetting,
     loadSettings,
-    saveSettings
+    saveSettings,
   }
 })
