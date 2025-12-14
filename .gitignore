@@ -39,3 +39,4 @@ main
 web/node_modules
 web/dist
 .claude/settings.json
+dev.db.bk*
