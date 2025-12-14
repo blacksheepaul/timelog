@@ -285,6 +285,7 @@
   import { formatDate, formatDateTime } from '@/utils/date'
   import { taskAPI, tagAPI } from '@/api'
   import type { Task, Tag, CreateTaskRequest, UpdateTaskRequest } from '@/types'
+  import { useSettings } from '@/composables/useSettings'
 
   // 注入全局通知功能
   const showNotification = inject('showNotification') as (
@@ -299,10 +300,14 @@
   const error = ref<string | null>(null)
   const showForm = ref(false)
   const editingTask = ref<Task | undefined>()
-  const dateFilter = ref('')
   const taskFormRef = ref<HTMLElement | null>(null)
-  const showCompleted = ref(false)
-  const showSuspended = ref(false)
+
+  // Use settings from composable
+  const {
+    taskShowCompleted: showCompleted,
+    taskShowSuspended: showSuspended,
+    taskDateFilter: dateFilter
+  } = useSettings()
 
   const isEditing = computed(() => !!editingTask.value)
 
