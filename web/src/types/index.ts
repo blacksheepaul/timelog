@@ -47,6 +47,7 @@ export interface Task {
   estimated_minutes: number
   is_completed: boolean
   completed_at?: string | null
+  is_suspended: boolean
   created_at: string
   updated_at: string
 }

@@ -67,8 +67,12 @@ export const tagAPI = {
 }
 
 export const taskAPI = {
-  getAll: (date?: string): Promise<ApiResponse<Task[]>> => {
-    const url = date ? `/tasks?date=${date}` : '/tasks'
+  getAll: (date?: string, includeSuspended?: boolean, includeCompleted?: boolean): Promise<ApiResponse<Task[]>> => {
+    const params = new URLSearchParams()
+    if (date) params.append('date', date)
+    if (includeSuspended) params.append('include_suspended', 'true')
+    if (includeCompleted) params.append('include_completed', 'true')
+    const url = `/tasks${params.toString() ? '?' + params.toString() : ''}`
     return api.get(url).then(res => res.data)
   },
 
@@ -89,6 +93,12 @@ export const taskAPI = {
 
   incomplete: (id: number): Promise<ApiResponse<null>> =>
     api.post(`/tasks/${id}/incomplete`).then(res => res.data),
+
+  suspend: (id: number): Promise<ApiResponse<null>> =>
+    api.post(`/tasks/${id}/suspend`).then(res => res.data),
+
+  unsuspend: (id: number): Promise<ApiResponse<null>> =>
+    api.post(`/tasks/${id}/unsuspend`).then(res => res.data),
 
   getStats: (date: string): Promise<ApiResponse<TaskStats>> =>
     api.get(`/tasks/stats/${date}`).then(res => res.data),

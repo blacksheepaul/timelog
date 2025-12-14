@@ -119,14 +119,28 @@
         <div class="flex justify-between items-center">
           <h2 class="text-lg font-medium text-gray-900">Tasks</h2>
           <div class="flex items-center space-x-4">
-            <label class="flex items-center text-sm text-gray-700 cursor-pointer">
-              <input
-                type="checkbox"
-                v-model="showCompleted"
-                class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              {{ switchBtnText }}
-            </label>
+            <button
+              @click="showSuspended = !showSuspended"
+              class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors"
+              :class="
+                showSuspended
+                  ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                  : 'bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200'
+              "
+            >
+              ⏸️ Suspended
+            </button>
+            <button
+              @click="showCompleted = !showCompleted"
+              class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors"
+              :class="
+                showCompleted
+                  ? 'bg-green-100 text-green-800 border border-green-200'
+                  : 'bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200'
+              "
+            >
+              ✅ Completed
+            </button>
             <select
               v-model="dateFilter"
               @change="loadTasks"
@@ -161,14 +175,24 @@
           v-for="task in filteredTasks"
           :key="task.id"
           class="p-6 hover:bg-gray-50"
-          :class="{ 'opacity-60': task.is_completed }"
+          :class="{
+            'opacity-60': task.is_completed,
+            'bg-yellow-50': task.is_suspended,
+            'hover:bg-yellow-100': task.is_suspended,
+          }"
         >
           <div class="flex items-start justify-between">
             <div class="flex-1">
               <div class="flex items-center space-x-3 mb-2">
                 <h3
                   class="text-lg font-medium"
-                  :class="task.is_completed ? 'line-through text-gray-500' : 'text-gray-900'"
+                  :class="
+                    task.is_completed
+                      ? 'line-through text-gray-500'
+                      : task.is_suspended
+                        ? 'text-yellow-800'
+                        : 'text-gray-900'
+                  "
                 >
                   {{ task.title }}
                 </h3>
@@ -184,6 +208,12 @@
                   class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
                 >
                   ✓ Completed
+                </span>
+                <span
+                  v-if="task.is_suspended"
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800"
+                >
+                  ⏸ Suspended
                 </span>
               </div>
 
@@ -202,14 +232,28 @@
 
             <div class="flex items-center space-x-2 ml-4">
               <button
-                v-if="!task.is_completed"
+                v-if="!task.is_suspended && !task.is_completed"
+                @click="suspendTask(task.id)"
+                class="px-3 py-1 text-xs font-medium text-yellow-700 bg-yellow-100 rounded-md hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              >
+                Suspend
+              </button>
+              <button
+                v-if="task.is_suspended"
+                @click="unsuspendTask(task.id)"
+                class="px-3 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                Unsuspend
+              </button>
+              <button
+                v-if="!task.is_completed && !task.is_suspended"
                 @click="completeTask(task.id)"
                 class="px-3 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-md hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-500"
               >
                 Complete
               </button>
               <button
-                v-else
+                v-if="task.is_completed"
                 @click="incompleteTask(task.id)"
                 class="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
               >
@@ -236,7 +280,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive, onMounted, computed, inject, nextTick } from 'vue'
+  import { ref, reactive, onMounted, computed, inject, nextTick, watch } from 'vue'
   import { PlusIcon } from '@heroicons/vue/24/outline'
   import { formatDate, formatDateTime } from '@/utils/date'
   import { taskAPI, tagAPI } from '@/api'
@@ -258,15 +302,13 @@
   const dateFilter = ref('')
   const taskFormRef = ref<HTMLElement | null>(null)
   const showCompleted = ref(false)
-  const switchBtnText = computed(() => (showCompleted.value ? 'Hide' : 'Show'))
+  const showSuspended = ref(false)
 
   const isEditing = computed(() => !!editingTask.value)
 
   const filteredTasks = computed(() => {
-    if (showCompleted.value) {
-      return tasks.value
-    }
-    return tasks.value.filter(task => !task.is_completed)
+    // Since we're now filtering on the backend, just return all tasks
+    return tasks.value
   })
 
   const form = reactive({
@@ -315,7 +357,7 @@
         dateParam = tomorrow.toISOString().split('T')[0]
       }
 
-      const response = await taskAPI.getAll(dateParam)
+      const response = await taskAPI.getAll(dateParam, showSuspended.value, showCompleted.value)
       tasks.value = response.data || []
     } catch (err) {
       error.value = 'Failed to load tasks'
@@ -434,6 +476,36 @@
       showNotification('error', 'Failed to reopen task')
     }
   }
+
+  const suspendTask = async (id: number) => {
+    try {
+      await taskAPI.suspend(id)
+      showNotification('success', 'Task suspended')
+      await loadTasks()
+    } catch (err) {
+      console.error('Error suspending task:', err)
+      showNotification('error', 'Failed to suspend task')
+    }
+  }
+
+  const unsuspendTask = async (id: number) => {
+    try {
+      await taskAPI.unsuspend(id)
+      showNotification('success', 'Task unsuspended')
+      await loadTasks()
+    } catch (err) {
+      console.error('Error unsuspending task:', err)
+      showNotification('error', 'Failed to unsuspend task')
+    }
+  }
+
+  watch(showCompleted, () => {
+    loadTasks()
+  })
+
+  watch(showSuspended, () => {
+    loadTasks()
+  })
 
   onMounted(() => {
     loadTasks()
