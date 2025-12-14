@@ -19,15 +19,17 @@ func GetTaskByID(id uint) (*model.Task, error) {
 }
 
 // GetAllTasks 获取所有任务
-func GetAllTasks() ([]model.Task, error) {
+// includeSuspended: 是否包含暂停的任务
+func GetAllTasks(includeSuspended bool) ([]model.Task, error) {
 	dao := model.GetDao()
-	return model.GetAllTasks(dao.Db())
+	return model.GetAllTasks(dao.Db(), includeSuspended)
 }
 
 // GetTasksByDate 根据日期获取任务
-func GetTasksByDate(date time.Time) ([]model.Task, error) {
+// includeSuspended: 是否包含暂停的任务
+func GetTasksByDate(date time.Time, includeSuspended bool) ([]model.Task, error) {
 	dao := model.GetDao()
-	return model.GetTasksByDate(dao.Db(), date)
+	return model.GetTasksByDate(dao.Db(), date, includeSuspended)
 }
 
 // GetTasksByDateRange 根据日期范围获取任务
@@ -58,6 +60,18 @@ func MarkTaskAsCompleted(taskID uint) error {
 func MarkTaskAsIncomplete(taskID uint) error {
 	dao := model.GetDao()
 	return model.MarkTaskAsIncomplete(dao.Db(), taskID)
+}
+
+// SuspendTask 暂停任务
+func SuspendTask(taskID uint) error {
+	dao := model.GetDao()
+	return model.SuspendTask(dao.Db(), taskID)
+}
+
+// UnsuspendTask 取消暂停任务
+func UnsuspendTask(taskID uint) error {
+	dao := model.GetDao()
+	return model.UnsuspendTask(dao.Db(), taskID)
 }
 
 // GetCompletedTasksInDateRange 获取指定日期范围内的已完成任务
