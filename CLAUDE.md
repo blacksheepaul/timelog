@@ -67,6 +67,12 @@ go test ./test/...
 # The test setup uses config-test.yml and can flush the database if configured
 ```
 
+### Code Formatting
+```bash
+# After making modifications and completing tests, reformat the code
+make fmt
+```
+
 ## Architecture
 
 ### Layer Structure
