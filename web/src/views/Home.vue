@@ -161,9 +161,7 @@
       // 获取所有时间记录，然后筛选今天的
       const response = await timelogAPI.getAll()
       if (response.data) {
-        todayLogs.value = response.data.filter(log =>
-          log.start_time.startsWith(todayStr)
-        )
+        todayLogs.value = response.data.filter(log => log.start_time.startsWith(todayStr))
       }
     } catch (err) {
       console.error('Error loading today logs:', err)

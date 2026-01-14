@@ -5,6 +5,29 @@
     <!-- 时间过滤器 -->
     <div class="bg-white shadow rounded-lg p-6">
       <h2 class="text-lg font-medium text-gray-900 mb-4">Time Range</h2>
+
+      <!-- 快捷选项 -->
+      <div class="flex flex-wrap gap-2 mb-4">
+        <button
+          @click="setToday"
+          class="px-3 py-1 text-sm font-medium text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          Today
+        </button>
+        <button
+          @click="setThisWeek"
+          class="px-3 py-1 text-sm font-medium text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          This Week
+        </button>
+        <button
+          @click="setLast30Days"
+          class="px-3 py-1 text-sm font-medium text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          Last 30 Days
+        </button>
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">
@@ -327,6 +350,48 @@
   const applyFilter = () => {
     // 过滤逻辑已经在computed中处理，这里只需要触发重新计算
     console.log('Filter applied:', dateRange.value)
+  }
+
+  // 设置今天的日期范围
+  const setToday = () => {
+    const today = new Date()
+    dateRange.value = {
+      start: formatDate(today),
+      end: formatDate(today),
+    }
+  }
+
+  // 设置本周的日期范围（周一到周日）
+  const setThisWeek = () => {
+    const today = new Date()
+    const dayOfWeek = today.getDay() // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+
+    // 计算本周一的日期
+    const monday = new Date(today)
+    monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
+    monday.setHours(0, 0, 0, 0)
+
+    // 计算本周日的日期
+    const sunday = new Date(monday)
+    sunday.setDate(monday.getDate() + 6)
+    sunday.setHours(23, 59, 59, 999)
+
+    dateRange.value = {
+      start: formatDate(monday),
+      end: formatDate(sunday),
+    }
+  }
+
+  // 设置最近30天的日期范围
+  const setLast30Days = () => {
+    const today = new Date()
+    const thirtyDaysAgo = new Date(today)
+    thirtyDaysAgo.setDate(today.getDate() - 30)
+
+    dateRange.value = {
+      start: formatDate(thirtyDaysAgo),
+      end: formatDate(today),
+    }
   }
 
   onMounted(() => {
