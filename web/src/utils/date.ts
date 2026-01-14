@@ -29,6 +29,7 @@ export const formatTime = (dateString: string): string => {
 export const calculateDuration = (startTime: string, endTime?: string | null): string => {
   try {
     const start = parseISO(startTime)
+    // 当endTime为null时，使用当前时间的UTC字符串，确保与start_time的时区一致
     const end = endTime ? parseISO(endTime) : new Date()
 
     const duration = intervalToDuration({ start, end })

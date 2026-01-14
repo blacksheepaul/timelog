@@ -51,6 +51,48 @@
       </div>
     </div>
 
+    <!-- 标签时长统计 -->
+    <div class="bg-white shadow rounded-lg">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-medium text-gray-900">Tag Duration Stats</h3>
+      </div>
+      <div v-if="loading" class="p-6 text-center">
+        <div
+          class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"
+        ></div>
+        <p class="mt-2 text-gray-600">Loading...</p>
+      </div>
+      <div v-else-if="tagStats.length === 0" class="p-6 text-center text-gray-500">
+        No tag statistics available.
+      </div>
+      <div v-else class="divide-y divide-gray-200">
+        <div v-for="stat in tagStats" :key="stat.tag.id" class="p-6 hover:bg-gray-50">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+              <span
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
+                :style="{ backgroundColor: stat.tag.color }"
+              >
+                {{ stat.tag.name }}
+              </span>
+              <div>
+                <p class="text-sm font-medium text-gray-900">{{ stat.duration }}</p>
+                <div class="mt-1 w-48 bg-gray-200 rounded-full h-2">
+                  <div
+                    class="bg-blue-600 h-2 rounded-full"
+                    :style="{ width: stat.percentage + '%' }"
+                  ></div>
+                </div>
+              </div>
+            </div>
+            <span class="text-sm font-semibold text-gray-700">
+              {{ stat.percentage }}%
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 最近的时间记录 -->
     <div class="bg-white shadow rounded-lg">
       <div class="px-6 py-4 border-b border-gray-200">
@@ -104,6 +146,7 @@
   import { ClockIcon, PlayIcon, StopIcon, TagIcon } from '@heroicons/vue/24/outline'
   import { timelogAPI } from '@/api'
   import { formatDateTime, calculateDuration } from '@/utils/date'
+import { parseISO } from 'date-fns'
   import type { TimeLog } from '@/types'
 
   const loading = ref(false)
@@ -115,14 +158,12 @@
     const activeSessions = todayLogs.value.filter(log => !log.end_time).length
     const tagsUsed = new Set(todayLogs.value.map(log => log.tag_id)).size
 
-    // 计算总时间（小时）
-    const totalMinutes = todayLogs.value
-      .filter(log => log.end_time)
-      .reduce((total, log) => {
-        const start = new Date(log.start_time)
-        const end = new Date(log.end_time!)
-        return total + (end.getTime() - start.getTime()) / (1000 * 60)
-      }, 0)
+    // 计算总时间（包括ongoing记录）
+    const totalMinutes = todayLogs.value.reduce((total, log) => {
+      const start = parseISO(log.start_time)
+      const end = log.end_time ? parseISO(log.end_time) : new Date()
+      return total + (end.getTime() - start.getTime()) / (1000 * 60)
+    }, 0)
 
     const totalTime =
       totalMinutes > 60
@@ -135,6 +176,50 @@
       totalTime,
       tagsUsed,
     }
+  })
+
+  // 标签时长统计
+  const tagStats = computed(() => {
+    const stats: Record<number, { tag: any; minutes: number }> = {}
+
+    // 计算每个标签的总时长
+    todayLogs.value.forEach(log => {
+      if (!log.tag) return
+
+      const start = parseISO(log.start_time)
+      const end = log.end_time ? parseISO(log.end_time) : new Date()
+      const minutes = (end.getTime() - start.getTime()) / (1000 * 60)
+
+      if (!stats[log.tag_id]) {
+        stats[log.tag_id] = {
+          tag: log.tag,
+          minutes: 0,
+        }
+      }
+      stats[log.tag_id].minutes += minutes
+    })
+
+    // 计算总时长
+    const totalMinutes = Object.values(stats).reduce((sum, stat) => sum + stat.minutes, 0)
+
+    // 转换为显示格式并排序（时长长的在前）
+    return Object.values(stats)
+      .map(stat => {
+        const percentage = totalMinutes > 0 ? Math.round((stat.minutes / totalMinutes) * 100) : 0
+        const duration =
+          stat.minutes > 60
+            ? `${Math.floor(stat.minutes / 60)}h ${Math.round(stat.minutes % 60)}m`
+            : `${Math.round(stat.minutes)}m`
+
+        return {
+          tag: stat.tag,
+          minutes: stat.minutes,
+          duration,
+          percentage,
+        }
+      })
+      .filter(stat => stat.minutes > 0) // 只显示时长大于0的标签
+      .sort((a, b) => b.minutes - a.minutes) // 按时长降序排列
   })
 
   const loadRecentLogs = async () => {
@@ -154,14 +239,33 @@
 
   const loadTodayLogs = async () => {
     try {
-      // 获取今天的日期（格式：YYYY-MM-DD）
+      // 获取今天的开始时间和结束时间（UTC）
       const today = new Date()
-      const todayStr = today.toISOString().split('T')[0]
+      const todayLocalStr = today.toISOString().split('T')[0] // YYYY-MM-DD 本地日期
 
-      // 获取所有时间记录，然后筛选今天的
+      // 创建今天的开始时间（本地时间00:00:00）
+      const todayStart = new Date(todayLocalStr + 'T00:00:00')
+      const todayEnd = new Date(todayLocalStr + 'T23:59:59.999')
+
+      // 转换为ISO字符串用于比较
+      const todayStartIso = todayStart.toISOString()
+      const todayEndIso = todayEnd.toISOString()
+
+      // 获取所有时间记录，筛选在今天的记录（考虑跨天情况）
       const response = await timelogAPI.getAll()
       if (response.data) {
-        todayLogs.value = response.data.filter(log => log.start_time.startsWith(todayStr))
+        todayLogs.value = response.data.filter(log => {
+          // 只要记录的开始时间或结束时间在今天的范围内，就包含它
+          const logStart = log.start_time
+          const logEnd = log.end_time || new Date().toISOString()
+
+          // 记录在今天开始，或者今天结束，或者在今天的范围内
+          return (
+            (logStart >= todayStartIso && logStart <= todayEndIso) || // 今天开始
+            (logEnd >= todayStartIso && logEnd <= todayEndIso) || // 今天结束
+            (logStart < todayStartIso && logEnd > todayEndIso) // 跨越今天
+          )
+        })
       }
     } catch (err) {
       console.error('Error loading today logs:', err)
