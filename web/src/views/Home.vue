@@ -108,19 +108,15 @@
 
   const loading = ref(false)
   const recentLogs = ref<TimeLog[]>([])
+  const todayLogs = ref<TimeLog[]>([])
 
   // 今日统计数据
   const todayStats = computed(() => {
-    const today = new Date().toDateString()
-    const todayLogs = recentLogs.value.filter(
-      log => new Date(log.start_time).toDateString() === today
-    )
-
-    const activeSessions = todayLogs.filter(log => !log.end_time).length
-    const tagsUsed = new Set(todayLogs.map(log => log.tag_id)).size
+    const activeSessions = todayLogs.value.filter(log => !log.end_time).length
+    const tagsUsed = new Set(todayLogs.value.map(log => log.tag_id)).size
 
     // 计算总时间（小时）
-    const totalMinutes = todayLogs
+    const totalMinutes = todayLogs.value
       .filter(log => log.end_time)
       .reduce((total, log) => {
         const start = new Date(log.start_time)
@@ -134,7 +130,7 @@
         : `${Math.round(totalMinutes)}m`
 
     return {
-      count: todayLogs.length,
+      count: todayLogs.value.length,
       activeSessions,
       totalTime,
       tagsUsed,
@@ -146,10 +142,31 @@
     try {
       const response = await timelogAPI.getRecent(5)
       recentLogs.value = response.data || []
+
+      // 加载今天的所有记录用于统计
+      await loadTodayLogs()
     } catch (err) {
       console.error('Error loading recent logs:', err)
     } finally {
       loading.value = false
+    }
+  }
+
+  const loadTodayLogs = async () => {
+    try {
+      // 获取今天的日期（格式：YYYY-MM-DD）
+      const today = new Date()
+      const todayStr = today.toISOString().split('T')[0]
+
+      // 获取所有时间记录，然后筛选今天的
+      const response = await timelogAPI.getAll()
+      if (response.data) {
+        todayLogs.value = response.data.filter(log =>
+          log.start_time.startsWith(todayStr)
+        )
+      }
+    } catch (err) {
+      console.error('Error loading today logs:', err)
     }
   }
 
