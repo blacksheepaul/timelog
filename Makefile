@@ -31,10 +31,10 @@ endif
 all: build
 
 build:
-	go build -o $(BIN_NAME)
+	go build -trimpath -o $(BIN_NAME)
 
 build-linux:
-	GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -o $(BIN_NAME_ARM)
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -o $(BIN_NAME_LINUX)
 
 buildx: web-build build
 
