@@ -5,6 +5,7 @@ env ?= prod
 migrate_env ?= dev
 BIN_NAME := main
 BIN_NAME_ARM := main.arm
+BIN_NAME_LINUX := main.linux
 
 ifeq ($(env),prod)
 	PORT := 8083
@@ -25,7 +26,7 @@ else
 	MIGRATE_DB_FILE := dev.db
 endif
 
-.PHONY: all build build-linux buildx docker run clean web web-build web-dev mcp-server migrate
+.PHONY: all build build-linux buildx buildx-linux docker run clean web web-build web-dev mcp-server migrate
 
 all: build
 
@@ -36,6 +37,8 @@ build-linux:
 	GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -o $(BIN_NAME_ARM)
 
 buildx: web-build build
+
+buildx-linux: web-build build-linux
 
 docker: build-linux
 	docker build -t $(DOCKER_TAG) .
