@@ -33,8 +33,15 @@ all: build
 build:
 	go build -trimpath -o $(BIN_NAME)
 
+build-lite:
+	go build -trimpath -ldflags="-s -w" -o $(BIN_NAME)
+
 build-linux:
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -o $(BIN_NAME_LINUX)
+
+# recude ≈22% size with -ldflags
+build-linux-lite:
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o $(BIN_NAME_LINUX)
 
 buildx: web-build build
 
