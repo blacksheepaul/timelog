@@ -39,7 +39,7 @@ jobs:
       - name: Package
         run: |
           ARTIFACT_NAME="timelog-${{ github.ref_name }}.tgz"
-          tar -czf "$ARTIFACT_NAME" main.linux web/dist
+          tar -czf "$ARTIFACT_NAME" main.linux
           echo "ARTIFACT_NAME=$ARTIFACT_NAME" >> "$GITHUB_ENV"
 
       - name: Upload Artifact to Server

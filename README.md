@@ -40,6 +40,11 @@ docker run --rm -e ENV=prod -p 8080:8080 timelog-app
 docker run --rm -e ENV=dev -p 18080:8080 timelog-app
 ```
 
+# Deployment
+
+- English: [deploy.md](docs/deploy.md)
+- 中文: [deploy-cn.md](docs/deploy-cn.md)
+
 ### TODO
 
 - frontend: +notification when request timeout

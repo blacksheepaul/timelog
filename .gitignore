@@ -31,7 +31,8 @@ config-test.yml
 # database file
 *.db
 
-docs/
+docs/docs.go
+docs/swagger*
 app.log
 mcp.log
 main
