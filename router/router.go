@@ -13,10 +13,6 @@ import (
 	"github.com/blacksheepaul/timelog/core/logger"
 	"github.com/blacksheepaul/timelog/router/middleware"
 	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
-
-	_ "github.com/blacksheepaul/timelog/docs"
 )
 
 var GinLogger = gin.LoggerWithFormatter(func(p gin.LogFormatterParams) string {
@@ -51,8 +47,8 @@ func Register(r *gin.Engine, cfg *config.Config, l logger.Logger, staticFiles em
 	// 注册 Constraint 路由
 	setupConstraintRoutes(api)
 
-	// 注册 Swagger 文档路由
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	// 注册 Swagger 文档路由（仅非 prod 构建）
+	setupSwagger(r)
 
 	// 静态文件服务 - 嵌入的Vue前端
 	distFS, err := fs.Sub(staticFiles, "web/dist")
