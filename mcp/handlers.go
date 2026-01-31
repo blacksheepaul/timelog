@@ -144,7 +144,8 @@ func GetTimeLogsByDateRange(ctx context.Context, req *mcp.CallToolRequest, args 
 func GetTasksByStatus(ctx context.Context, req *mcp.CallToolRequest, args TaskStatusParams) (*mcp.CallToolResult, interface{}, error) {
 	statusStr := args.Status
 
-	tasks, err := model.GetAllTasks(server.db)
+	// Include all tasks (suspended and completed) to filter by status in application code
+	tasks, err := model.GetAllTasks(server.db, true, true)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get tasks: %w", err)
 	}
