@@ -22,10 +22,28 @@ const api = axios.create({
   },
 })
 
+// Store notification handler to be set by App.vue
+let notificationHandler: ((type: 'success' | 'error', message: string) => void) | null = null
+
+export const setNotificationHandler = (
+  handler: (type: 'success' | 'error', message: string) => void
+) => {
+  notificationHandler = handler
+}
+
 api.interceptors.response.use(
   response => response,
   error => {
     console.error('API Error:', error)
+
+    // Check if the error is a timeout error
+    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+      // Show browser notification for timeout
+      if (notificationHandler) {
+        notificationHandler('error', 'Request timeout - The server took too long to respond')
+      }
+    }
+
     return Promise.reject(error)
   }
 )

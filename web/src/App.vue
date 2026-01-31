@@ -181,6 +181,7 @@
   import { ref, reactive, provide, onMounted, onUnmounted } from 'vue'
   import { CheckCircleIcon, XCircleIcon, Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline'
   import { useSettings } from '@/composables/useSettings'
+  import { setNotificationHandler } from '@/api'
 
   // 移动端菜单状态
   const mobileMenuOpen = ref(false)
@@ -257,6 +258,9 @@
     const { loadSettings } = useSettings()
     loadSettings()
     initSystemNotifications()
+
+    // Register notification handler for API timeout errors
+    setNotificationHandler(showNotification)
   })
 
   onUnmounted(() => {
