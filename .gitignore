@@ -35,6 +35,7 @@ docs/
 app.log
 mcp.log
 main
+main.*
 .DS_STORE
 web/node_modules
 web/dist
