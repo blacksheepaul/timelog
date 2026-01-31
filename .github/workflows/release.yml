@@ -3,7 +3,8 @@ name: release-deploy
 on:
   push:
     tags:
-      - "*"
+      - '*'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -23,14 +24,14 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "pnpm"
+          node-version: '20'
+          cache: 'pnpm'
           cache-dependency-path: web/pnpm-lock.yaml
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: "9"
+          version: '9'
 
       - name: Build
         run: make buildx-linux
