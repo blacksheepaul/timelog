@@ -36,14 +36,13 @@ api.interceptors.response.use(
   error => {
     console.error('API Error:', error)
 
-    // Check if the error is a timeout error
-    // Timeout errors can have various code/message combinations depending on the scenario
+    // Check if the error is a timeout or cancellation error
+    // These can have various code/message combinations depending on the scenario
     const isTimeout =
       error.code === 'ECONNABORTED' || // Request abort (timeout)
+      axios.isCancel?.(error) || // Explicit cancellation via axios cancel token/AbortController
       error.message?.includes('timeout') || // Message contains timeout
-      error.message?.includes('Timeout') || // Case-insensitive
-      error.config?.timeout === 0 || // Explicitly cancelled request
-      (error.response?.status === 408 && error.message?.includes('timeout')) // 408 Request Timeout
+      error.message?.includes('Timeout') // Case-insensitive
 
     if (isTimeout && notificationHandler) {
       // Show browser notification for timeout
