@@ -85,9 +85,7 @@
                 </div>
               </div>
             </div>
-            <span class="text-sm font-semibold text-gray-700">
-              {{ stat.percentage }}%
-            </span>
+            <span class="text-sm font-semibold text-gray-700"> {{ stat.percentage }}% </span>
           </div>
         </div>
       </div>
@@ -146,7 +144,7 @@
   import { ClockIcon, PlayIcon, StopIcon, TagIcon } from '@heroicons/vue/24/outline'
   import { timelogAPI } from '@/api'
   import { formatDateTime, calculateDuration } from '@/utils/date'
-import { parseISO } from 'date-fns'
+  import { parseISO } from 'date-fns'
   import type { TimeLog } from '@/types'
 
   const loading = ref(false)
