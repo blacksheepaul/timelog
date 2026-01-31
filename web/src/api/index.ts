@@ -40,8 +40,7 @@ api.interceptors.response.use(
     // These can have various code/message combinations depending on the scenario
     const isTimeout =
       error.code === 'ECONNABORTED' || // Request abort (timeout)
-      error.message?.includes('timeout') || // Message contains timeout
-      error.message?.includes('Timeout') // Case-insensitive
+      error.message?.toLowerCase().includes('timeout') // Case-insensitive message check
 
     const isCancellation = axios.isCancel(error) // Explicit cancellation via axios cancel token/AbortController
 
