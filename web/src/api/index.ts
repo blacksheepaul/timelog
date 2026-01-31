@@ -37,11 +37,17 @@ api.interceptors.response.use(
     console.error('API Error:', error)
 
     // Check if the error is a timeout error
-    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+    // Timeout errors can have various code/message combinations depending on the scenario
+    const isTimeout =
+      error.code === 'ECONNABORTED' || // Request abort (timeout)
+      error.message?.includes('timeout') || // Message contains timeout
+      error.message?.includes('Timeout') || // Case-insensitive
+      error.config?.timeout === 0 || // Explicitly cancelled request
+      (error.response?.status === 408 && error.message?.includes('timeout')) // 408 Request Timeout
+
+    if (isTimeout && notificationHandler) {
       // Show browser notification for timeout
-      if (notificationHandler) {
-        notificationHandler('error', 'Request timeout - The server took too long to respond')
-      }
+      notificationHandler('error', 'Request timeout - The server took too long to respond')
     }
 
     return Promise.reject(error)
