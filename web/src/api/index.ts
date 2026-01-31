@@ -43,7 +43,7 @@ api.interceptors.response.use(
       error.message?.includes('timeout') || // Message contains timeout
       error.message?.includes('Timeout') // Case-insensitive
 
-    const isCancellation = axios.isCancel?.(error) // Explicit cancellation via axios cancel token/AbortController
+    const isCancellation = axios.isCancel(error) // Explicit cancellation via axios cancel token/AbortController
 
     if (isTimeout && !isCancellation && notificationHandler) {
       // Show browser notification for timeout (but not for explicit cancellations)
