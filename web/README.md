@@ -10,6 +10,7 @@ A Vue 3 + TypeScript + Tailwind CSS frontend for the TimeLog application.
 - ✅ TypeScript for type safety
 - ✅ Form validation and error handling
 - ✅ Notification system
+- ✅ Browser-based reminders every 25 minutes prompting TimeLog entries
 
 ## Development Setup
 

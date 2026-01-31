@@ -39,3 +39,8 @@ docker run --rm -e ENV=prod -p 8080:8080 timelog-app
 # Dev
 docker run --rm -e ENV=dev -p 18080:8080 timelog-app
 ```
+
+### TODO
+
+- frontend: +notification when request timeout
+- frontend: +manual refresh/fetch
