@@ -38,14 +38,15 @@ api.interceptors.response.use(
 
     // Check if the error is a timeout or cancellation error
     // These can have various code/message combinations depending on the scenario
-    const isTimeoutOrCancellation =
+    const isTimeout =
       error.code === 'ECONNABORTED' || // Request abort (timeout)
-      axios.isCancel?.(error) || // Explicit cancellation via axios cancel token/AbortController
       error.message?.includes('timeout') || // Message contains timeout
       error.message?.includes('Timeout') // Case-insensitive
 
-    if (isTimeoutOrCancellation && notificationHandler) {
-      // Show browser notification for timeout
+    const isCancellation = axios.isCancel?.(error) // Explicit cancellation via axios cancel token/AbortController
+
+    if (isTimeout && !isCancellation && notificationHandler) {
+      // Show browser notification for timeout (but not for explicit cancellations)
       notificationHandler('error', 'Request timeout - The server took too long to respond')
     }
 
