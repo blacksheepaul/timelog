@@ -19,7 +19,7 @@ tar -xzf "$ARTIFACT_PATH" -C "$TEMP_DIR"
 
 # 2. 停止服务
 echo "Stopping service..."
-systemctl stop timelog.service
+sudo systemctl stop timelog.service
 
 # 3. 替换文件
 echo "Replacing files..."
@@ -29,7 +29,7 @@ chmod +x "$DEPLOY_DIR/main"
 
 # 4. 重启服务
 echo "Starting service..."
-systemctl start timelog.service
+sudo systemctl start timelog.service
 
 # 5. 清理临时文件
 echo "Cleaning up..."
@@ -38,10 +38,10 @@ rm -f "$ARTIFACT_PATH"
 
 # 验证服务状态
 sleep 2
-if systemctl is-active --quiet timelog.service; then
+if sudo systemctl is-active --quiet timelog.service; then
     echo "Deployment completed successfully!"
 else
     echo "Error: Service failed to start"
-    systemctl status timelog.service
+    sudo systemctl status timelog.service
     exit 1
 fi
