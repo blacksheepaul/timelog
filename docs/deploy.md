@@ -18,7 +18,7 @@ git push origin v1.0.0
 | `DEPLOY_SSH_KEY` | SSH private key                 |
 | `DEPLOY_PATH`    | Upload directory for artifact   |
 | `DEPLOY_SCRIPT`  | Path to deploy script on server |
-| `DEPLOY_PORT`    | SSH port (optional, default 22) |
+| `DEPLOY_PORT`    | SSH port (default 22) |
 
 ## Server Preparation
 
@@ -53,9 +53,3 @@ WantedBy=multi-user.target
 systemctl daemon-reload
 systemctl enable timelog.service
 ```
-
-## Deployment Flow
-
-1. GitHub Actions builds `main.linux`.
-2. Package and upload artifact to server `DEPLOY_PATH`.
-3. Run `deploy.sh`: stop service → replace binary → start service.

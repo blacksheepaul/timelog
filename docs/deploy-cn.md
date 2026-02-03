@@ -18,7 +18,7 @@ git push origin v1.0.0
 | `DEPLOY_SSH_KEY` | SSH 私钥                  |
 | `DEPLOY_PATH`    | artifact 上传目录         |
 | `DEPLOY_SCRIPT`  | 服务器上的部署脚本路径    |
-| `DEPLOY_PORT`    | SSH 端口（可选，默认 22） |
+| `DEPLOY_PORT`    | SSH 端口（默认 22） |
 
 ## 服务器准备
 
@@ -53,9 +53,3 @@ WantedBy=multi-user.target
 systemctl daemon-reload
 systemctl enable timelog.service
 ```
-
-## 部署流程
-
-1. GitHub Actions 构建 `main.linux`
-2. 打包上传到服务器 `DEPLOY_PATH`
-3. 执行 `deploy.sh`：停止服务 → 替换二进制文件 → 启动服务
