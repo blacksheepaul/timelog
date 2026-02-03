@@ -2,13 +2,21 @@
   <div class="space-y-6">
     <div class="flex justify-between items-center">
       <h1 class="text-2xl font-bold text-gray-900">Time Logs</h1>
-      <button
-        @click="toggleForm"
-        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        <PlusIcon class="h-5 w-5 mr-2" />
-        New Log
-      </button>
+      <div class="flex gap-2">
+        <button
+          @click="handleRefresh"
+          class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-600 border border-transparent rounded-md shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+        >
+          Refresh
+        </button>
+        <button
+          @click="toggleForm"
+          class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <PlusIcon class="h-5 w-5 mr-2" />
+          New Log
+        </button>
+      </div>
     </div>
 
     <!-- Time Filter -->
@@ -63,6 +71,7 @@
   import TimeLogList from '@/components/TimeLogList.vue'
   import TimeLogForm from '@/components/TimeLogForm.vue'
   import { timelogAPI, tagAPI, taskAPI, constraintAPI } from '@/api'
+  import { useTimeLogStore } from '@/stores/timelog'
   import type {
     TimeLog,
     Tag,
@@ -78,13 +87,16 @@
     message: string
   ) => void
 
-  const timeLogs = ref<TimeLog[]>([])
+  // 使用Pinia store
+  const timeLogStore = useTimeLogStore()
+  const timeLogs = computed(() => timeLogStore.timeLogs)
+  const loading = computed(() => timeLogStore.loading)
+  const error = computed(() => timeLogStore.error)
+
   const tags = ref<Tag[]>([])
   const tasks = ref<Task[]>([])
   const constraints = ref<Constraint[]>([])
-  const loading = ref(false)
   const submitting = ref(false)
-  const error = ref<string | null>(null)
   const showForm = ref(false)
   const editingLog = ref<TimeLog | undefined>()
 
@@ -122,24 +134,9 @@
     })
   })
 
-  const loadTimeLogs = async () => {
-    loading.value = true
-    error.value = null
-
-    try {
-      const response = await timelogAPI.getAll()
-      const logs = response.data || []
-      // Sort by start_time in descending order (most recent first)
-      timeLogs.value = logs.sort(
-        (a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime()
-      )
-    } catch (err) {
-      error.value = 'Failed to load time logs'
-      console.error('Error loading time logs:', err)
-      showNotification('error', 'Failed to load time logs')
-    } finally {
-      loading.value = false
-    }
+  const handleRefresh = async () => {
+    await timeLogStore.refreshTimeLogs()
+    showNotification('success', 'Time logs refreshed successfully')
   }
 
   const loadTags = async () => {
@@ -192,7 +189,7 @@
         showNotification('success', 'Time log created successfully')
       }
 
-      await loadTimeLogs()
+      await timeLogStore.refreshTimeLogs()
       showForm.value = false
       editingLog.value = undefined
     } catch (err) {
@@ -233,7 +230,7 @@
     try {
       await timelogAPI.delete(id)
       showNotification('success', 'Time log deleted successfully')
-      await loadTimeLogs()
+      await timeLogStore.refreshTimeLogs()
     } catch (err) {
       console.error('Error deleting time log:', err)
       showNotification('error', 'Failed to delete time log')
@@ -241,7 +238,7 @@
   }
 
   onMounted(() => {
-    loadTimeLogs()
+    timeLogStore.loadTimeLogs()
     loadTags()
     loadTasks()
     loadConstraints()
