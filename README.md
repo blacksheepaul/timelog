@@ -75,4 +75,8 @@ docker run --rm -e ENV=dev -p 18080:8080 timelog-app
 
 ### TODO
 
-- frontend: +manual refresh/fetch
+- both: AI-driven summary of day/week (frontend with stream output)
+- dockerize
+- both: upgrade auth from basic-auth
+- both: support passkey
+- Refactoring the original tag into a category
