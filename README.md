@@ -1,10 +1,38 @@
 # timelog
 
-Including a standard MVC structure, cfg, logger.
+Yet another lyubishchev time management implementation.
 
-The database is SQLite.
+Core functions:
 
-# Migrate
+- Time tracking
+- LLM review based on time tracking data (via MCP)
+- Task management (wip)
+
+# How to use
+
+# How to build and run
+
+## Swagger Setup (Development/Testing Only)
+
+For development and testing environments, you need to generate Swagger documentation using the `swag` tool before running `go mod tidy` or building the project:
+
+### Install swag
+
+```bash
+go install github.com/swaggo/swag/cmd/swag@latest
+```
+
+### Generate Swagger documentation
+
+```bash
+swag init
+```
+
+This will generate the necessary files in the `docs` directory that are required by the router package.
+
+**Note:** For production builds, Swagger is automatically excluded via the `prod` build tag, so you don't need to generate Swagger documentation for production deployments.
+
+## Migrate
 
 for example:
 
@@ -40,12 +68,11 @@ docker run --rm -e ENV=prod -p 8080:8080 timelog-app
 docker run --rm -e ENV=dev -p 18080:8080 timelog-app
 ```
 
-# Deployment
+# How to Deployment
 
 - English: [deploy.md](docs/deploy.md)
 - 中文: [deploy-cn.md](docs/deploy-cn.md)
 
 ### TODO
 
-- frontend: +notification when request timeout
 - frontend: +manual refresh/fetch
