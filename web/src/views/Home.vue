@@ -180,13 +180,29 @@
   const tagStats = computed(() => {
     const stats: Record<number, { tag: any; minutes: number }> = {}
 
+    // 获取今天的开始和结束时间（UTC）
+    const today = new Date()
+    const todayLocalStr = today.toISOString().split('T')[0] // YYYY-MM-DD 本地日期
+    const todayStart = parseISO(todayLocalStr + 'T00:00:00Z') // UTC开始时间
+    const todayEnd = parseISO(todayLocalStr + 'T23:59:59.999Z') // UTC结束时间
+
     // 计算每个标签的总时长
     todayLogs.value.forEach(log => {
       if (!log.tag) return
 
       const start = parseISO(log.start_time)
-      const end = log.end_time ? parseISO(log.end_time) : new Date()
-      const minutes = (end.getTime() - start.getTime()) / (1000 * 60)
+      const end = log.end_time ? parseISO(log.end_time) : todayEnd
+
+      // 计算实际的开始时间（如果记录开始时间早于今天开始，使用今天开始）
+      const actualStart = start < todayStart ? todayStart : start
+      // 计算实际的结束时间（如果记录结束时间晚于今天结束，使用今天结束）
+      const actualEnd = end > todayEnd ? todayEnd : end
+
+      // 确保开始时间不晚于结束时间
+      if (actualStart >= actualEnd) return
+
+      // 计算时长（分钟）
+      const minutes = (actualEnd.getTime() - actualStart.getTime()) / (1000 * 60)
 
       if (!stats[log.tag_id]) {
         stats[log.tag_id] = {
