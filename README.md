@@ -57,15 +57,7 @@ make migrate env=dev
 
 ```bash
 # Build binary
-make build env=prod
-# or
-make build-linux env=dev
-# Build image
-docker build -t timelog-app .
-# Prod
-docker run --rm -e ENV=prod -p 8080:8080 timelog-app
-# Dev
-docker run --rm -e ENV=dev -p 18080:8080 timelog-app
+make buildx
 ```
 
 # How to Deployment
@@ -75,8 +67,10 @@ docker run --rm -e ENV=dev -p 18080:8080 timelog-app
 
 ### TODO
 
-- both: AI-driven summary of day/week (frontend with stream output)
-- dockerize
-- both: upgrade auth from basic-auth
-- both: support passkey
-- Refactoring the original tag into a category
+- **AI-driven summary**: Day/week productivity summaries with frontend stream output
+- **Authentication upgrade**: From basic-auth to more secure authentication
+- **Passkey support**: Add support for passkey authentication
+- **Tag refactoring**: Convert tags into categories for better organization
+- **Automated Reporting**: Daily reports generated at 4 AM showing task completion vs. time estimates
+- **Advanced Analytics**: Better visualization of productivity patterns and time allocation
+- **Task Templates**: Reusable task templates for common work patterns

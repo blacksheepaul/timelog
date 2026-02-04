@@ -17,7 +17,7 @@ MCP server that gives LLM access to your TimeLog data for analysis and insights.
 
 ```bash
 # From the project root directory
-make mcp-server
+make mcp
 ```
 
 ### 2. Configure your LLM client
