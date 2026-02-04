@@ -26,7 +26,7 @@ else
 	MIGRATE_DB_FILE := dev.db
 endif
 
-.PHONY: all build build-linux buildx buildx-linux docker run clean web web-build web-dev mcp-server migrate
+.PHONY: all build build-linux buildx buildx-linux docker run clean web mcp migrate
 
 all: build
 
@@ -43,9 +43,9 @@ build-linux:
 build-linux-lite:
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -tags prod -ldflags="-s -w" -o $(BIN_NAME_LINUX)
 
-buildx: web-build build
+buildx: web build
 
-buildx-linux: web-build build-linux
+buildx-linux: web build-linux
 
 docker: build-linux
 	docker build -t $(DOCKER_TAG) .
@@ -58,16 +58,11 @@ clean:
 	rm -rf web/dist web/node_modules
 
 # Web frontend targets
-web-build:
+web:
 	cd web && pnpm install && pnpm run build
 
-web-dev:
-	cd web && pnpm install && pnpm run dev
-
-web: web-build
-
 # MCP Server target
-mcp-server:
+mcp:
 	cd mcp && go build -o timelog-mcp-server .
 
 # Migrate target
