@@ -37,7 +37,7 @@ Add to your Claude Code configuration file:
 
 - **macOS**: `~/Library/Application Support/claude-code/config.json`
 - **Linux**: `~/.config/claude-code/config.json`
-- **Windows**: `%APPDATA%\\claude-code\config.json`
+- **Windows**: `%APPDATA%\\claude-code\\config.json`
 
 ```json
 {
