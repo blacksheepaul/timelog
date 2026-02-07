@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -45,31 +44,42 @@ func main() {
 		Description: "Get current date, time, today, yesterday, and this week's date range",
 	}, GetDateInfo)
 
-	transportMode := strings.ToLower(strings.TrimSpace(os.Getenv("MCP_TRANSPORT")))
-	if transportMode == "" {
-		transportMode = "stdio"
-	}
-	if cfgTransport := strings.ToLower(strings.TrimSpace(server.config.MCP.Transport)); cfgTransport != "" {
-		transportMode = cfgTransport
-	}
-
+	transportMode := server.config.MCP.Transport
 	switch transportMode {
 	case "http":
-		listenAddr := strings.TrimSpace(os.Getenv("MCP_LISTEN_ADDR"))
-		if listenAddr == "" {
-			listenAddr = server.config.MCP.ListenAddr
-		}
-		if listenAddr == "" {
-			listenAddr = ":8080"
-		}
+		listenAddr := server.config.MCP.ListenAddr
+		token := server.config.MCP.Token
 
 		handler := mcp.NewStreamableHTTPHandler(func(_ *http.Request) *mcp.Server {
 			return mcpServer
 		}, nil)
 
+		wrappedHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/health" {
+				w.WriteHeader(http.StatusOK)
+				_, _ = w.Write([]byte("ok"))
+				return
+			}
+
+			if token != "" {
+				authHeader := r.Header.Get("Authorization")
+				if !strings.HasPrefix(authHeader, "Bearer ") {
+					w.WriteHeader(http.StatusUnauthorized)
+					return
+				}
+				provided := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
+				if provided != token {
+					w.WriteHeader(http.StatusUnauthorized)
+					return
+				}
+			}
+
+			handler.ServeHTTP(w, r)
+		})
+
 		httpServer := &http.Server{
 			Addr:    listenAddr,
-			Handler: handler,
+			Handler: wrappedHandler,
 		}
 
 		if err := httpServer.ListenAndServe(); err != nil {
