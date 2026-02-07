@@ -1,17 +1,23 @@
 database:
-    host: ./dev.db
+  host: ./dev.db
 server:
-    addr: "127.0.0.1"
-    port: 8080
-    allow_origins:
-        - "*"
+  addr: '127.0.0.1'
+  port: 8080
+  allow_origins:
+    - '*'
 log:
-    level: debug
-    path: ./app.log
-    rotation:
-        max_size: 10
-        max_backups: 3
-        max_age: 7
-    orm_log_level: 4 # 1=silent, 2=error, 3=warn, 4=info
+  level: debug
+  path: ./app.log
+  rotation:
+    max_size: 10
+    max_backups: 3
+    max_age: 7
+  orm_log_level: 4 # 1=silent, 2=error, 3=warn, 4=info
 test:
-    flush: false
+  flush: false
+mcp:
+  enabled: false
+  level: 'debug'
+  path: './logs/mcp.log'
+  transport: 'stdio' # stdio|http
+  listen_addr: ':8080'
