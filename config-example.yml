@@ -21,3 +21,4 @@ mcp:
   path: './logs/mcp.log'
   transport: 'stdio' # stdio|http
   listen_addr: ':8080'
+  token: '' # Authorization: Bearer <token>
