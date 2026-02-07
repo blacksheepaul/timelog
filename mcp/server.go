@@ -2,6 +2,9 @@ package main
 
 import (
 	"context"
+	"net/http"
+	"os"
+	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -42,10 +45,42 @@ func main() {
 		Description: "Get current date, time, today, yesterday, and this week's date range",
 	}, GetDateInfo)
 
-	// Run MCP server - no logging to avoid stdout contamination
-	ctx := context.Background()
-	transport := &mcp.StdioTransport{}
+	transportMode := strings.ToLower(strings.TrimSpace(os.Getenv("MCP_TRANSPORT")))
+	if transportMode == "" {
+		transportMode = "stdio"
+	}
+	if cfgTransport := strings.ToLower(strings.TrimSpace(server.config.MCP.Transport)); cfgTransport != "" {
+		transportMode = cfgTransport
+	}
 
-	// Run server (any error will exit the process)
-	mcpServer.Run(ctx, transport)
+	switch transportMode {
+	case "http":
+		listenAddr := strings.TrimSpace(os.Getenv("MCP_LISTEN_ADDR"))
+		if listenAddr == "" {
+			listenAddr = server.config.MCP.ListenAddr
+		}
+		if listenAddr == "" {
+			listenAddr = ":8080"
+		}
+
+		handler := mcp.NewStreamableHTTPHandler(func(_ *http.Request) *mcp.Server {
+			return mcpServer
+		}, nil)
+
+		httpServer := &http.Server{
+			Addr:    listenAddr,
+			Handler: handler,
+		}
+
+		if err := httpServer.ListenAndServe(); err != nil {
+			LogMCPError("http_server", err, map[string]interface{}{"addr": listenAddr})
+		}
+	default:
+		// Run MCP server - no logging to avoid stdout contamination
+		ctx := context.Background()
+		transport := &mcp.StdioTransport{}
+		if err := mcpServer.Run(ctx, transport); err != nil {
+			LogMCPError("stdio_server", err, nil)
+		}
+	}
 }
