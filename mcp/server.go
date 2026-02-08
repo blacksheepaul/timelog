@@ -55,7 +55,7 @@ func main() {
 		// Fail fast: require authentication token for HTTP transport
 		if token == "" {
 			fmt.Fprintln(os.Stderr, "FATAL: HTTP transport requires authentication token for security.")
-			fmt.Fprintln(os.Stderr, "Please set MCP.Token in config file or MCP_TOKEN environment variable.")
+			fmt.Fprintln(os.Stderr, "Set token via: MCP.Token in config.yml OR MCP_TOKEN environment variable")
 			os.Exit(1)
 		}
 
