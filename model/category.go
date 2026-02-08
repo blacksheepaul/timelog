@@ -162,6 +162,8 @@ func DeleteCategory(db *gorm.DB, id uint) error {
 }
 
 // getAllDescendantIDs 获取分类及其所有后代的ID（使用ID-based递归查询）
+// 注意：此实现使用递归查询，对于深层或宽层次结构可能产生N+1查询。
+// 由于系统限制最大层级为2（MaxCategoryLevel），性能影响可接受。
 func getAllDescendantIDs(db *gorm.DB, categoryID uint) ([]uint, error) {
 	ids := []uint{categoryID}
 
@@ -182,7 +184,12 @@ func getAllDescendantIDs(db *gorm.DB, categoryID uint) ([]uint, error) {
 }
 
 // isDescendantOf 检查targetID是否是ancestorID的后代（使用ID-based递归查询）
+// 注意：
+//  1. 如果targetID等于ancestorID，返回true（自己也算作自己的"后代"用于循环检测）
+//  2. 此实现对每个祖先级别执行一次查询。由于系统限制最大层级为2（MaxCategoryLevel），
+//     最多执行3次查询，性能影响可接受。
 func isDescendantOf(db *gorm.DB, targetID, ancestorID uint) (bool, error) {
+	// 如果相等，说明尝试移动到自己（虽然MoveCategory已经检查过，但这里作为防御性编程）
 	if targetID == ancestorID {
 		return true, nil
 	}
