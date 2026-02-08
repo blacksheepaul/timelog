@@ -58,7 +58,11 @@ DROP INDEX IF EXISTS idx_timelogs_category_id;
 DROP TABLE IF EXISTS categories;
 
 -- Verify foreign key integrity
+-- Note: This is informational. If violations exist, they will cause errors when FK constraints
+-- are re-enabled or on subsequent operations. The migration framework doesn't support
+-- conditional logic to fail on PRAGMA foreign_key_check results.
 PRAGMA foreign_key_check;
 
 -- Re-enable foreign key constraints
+-- If there were any FK violations, subsequent operations will fail
 PRAGMA foreign_keys = ON;
