@@ -44,7 +44,7 @@
             <TagIcon class="h-8 w-8 text-purple-600" />
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-500">Tags Used</p>
+            <p class="text-sm font-medium text-gray-500">Categories Used</p>
             <p class="text-2xl font-semibold text-gray-900">{{ todayStats.tagsUsed }}</p>
           </div>
         </div>
@@ -54,7 +54,7 @@
     <!-- 标签时长统计 -->
     <div class="bg-white shadow rounded-lg">
       <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-medium text-gray-900">Tag Duration Stats</h3>
+        <h3 class="text-lg font-medium text-gray-900">Category Duration Stats</h3>
       </div>
       <div v-if="loading" class="p-6 text-center">
         <div
@@ -63,7 +63,7 @@
         <p class="mt-2 text-gray-600">Loading...</p>
       </div>
       <div v-else-if="tagStats.length === 0" class="p-6 text-center text-gray-500">
-        No tag statistics available.
+        No category statistics available.
       </div>
       <div v-else class="divide-y divide-gray-200">
         <div v-for="stat in tagStats" :key="stat.category.id" class="p-6 hover:bg-gray-50">
