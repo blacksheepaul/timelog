@@ -92,11 +92,6 @@ func UpdateCategory(category *model.Category) error {
 	return model.UpdateCategory(db, category)
 }
 
-// DeleteCategory 删除分类
-func DeleteCategory(id uint) error {
-	db := model.GetDao().Db()
-	return model.DeleteCategory(db, id)
-}
 
 // MoveCategory 移动分类
 func MoveCategory(categoryID uint, newParentID *uint) error {

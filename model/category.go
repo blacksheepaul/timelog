@@ -131,35 +131,6 @@ func UpdateCategory(db *gorm.DB, category *Category) error {
 	return db.Save(category).Error
 }
 
-// DeleteCategory 删除分类（软删除，会自动删除子分类）
-func DeleteCategory(db *gorm.DB, id uint) error {
-	return db.Transaction(func(tx *gorm.DB) error {
-		// 获取该分类及其所有子分类
-		var ids []uint
-		if err := tx.Model(&Category{}).Where("id = ? OR path LIKE ?", id, fmt.Sprintf("%%%d%%", id)).Pluck("id", &ids).Error; err != nil {
-			return err
-		}
-
-		// 检查是否有timelogs或tasks引用这些分类
-		var count int64
-		if err := tx.Model(&TimeLog{}).Where("category_id IN ?", ids).Count(&count).Error; err != nil {
-			return err
-		}
-		if count > 0 {
-			return fmt.Errorf("cannot delete category: %d timelogs are using it", count)
-		}
-
-		if err := tx.Model(&Task{}).Where("category_id IN ?", ids).Count(&count).Error; err != nil {
-			return err
-		}
-		if count > 0 {
-			return fmt.Errorf("cannot delete category: %d tasks are using it", count)
-		}
-
-		// 软删除分类及其子分类
-		return tx.Delete(&Category{}, "id IN ?", ids).Error
-	})
-}
 
 // MoveCategory 移动分类到新的父分类下
 func MoveCategory(db *gorm.DB, categoryID uint, newParentID *uint) error {
