@@ -51,7 +51,7 @@
       </div>
     </div>
 
-    <!-- 标签时长统计 -->
+    <!-- 分类时长统计 -->
     <div class="bg-white shadow rounded-lg">
       <div class="px-6 py-4 border-b border-gray-200">
         <h3 class="text-lg font-medium text-gray-900">Category Duration Stats</h3>
