@@ -1,4 +1,8 @@
 -- Revert categories back to tags
+-- Disable foreign key constraints temporarily
+PRAGMA foreign_keys = OFF;
+
+-- Create tags table
 CREATE TABLE IF NOT EXISTS tags (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name VARCHAR(50) NOT NULL UNIQUE,
@@ -15,8 +19,46 @@ SELECT id, name, color, description, created_at, updated_at
 FROM categories
 WHERE level = 0;
 
--- Rename timelogs.category_id back to tag_id
-ALTER TABLE timelogs RENAME COLUMN category_id TO tag_id;
+-- Rebuild timelogs table with tag_id FK pointing to tags
+CREATE TABLE timelogs_new (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER DEFAULT 1,
+    start_time DATETIME NOT NULL,
+    end_time DATETIME NULL,
+    tag_id INTEGER NOT NULL,
+    task_id INTEGER,
+    remark TEXT,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at DATETIME,
+    FOREIGN KEY (tag_id) REFERENCES tags(id),
+    FOREIGN KEY (task_id) REFERENCES tasks(id)
+);
+
+-- Copy data from old timelogs table
+INSERT INTO timelogs_new (id, user_id, start_time, end_time, tag_id, task_id, remark, created_at, updated_at, deleted_at)
+SELECT id, user_id, start_time, end_time, category_id, task_id, remark, created_at, updated_at, deleted_at
+FROM timelogs;
+
+-- Drop old timelogs table
+DROP TABLE timelogs;
+
+-- Rename new table to timelogs
+ALTER TABLE timelogs_new RENAME TO timelogs;
+
+-- Recreate indexes on timelogs
+CREATE INDEX idx_timelogs_tag_id ON timelogs(tag_id);
+CREATE INDEX idx_timelogs_task_id ON timelogs(task_id);
+CREATE INDEX idx_timelogs_deleted_at ON timelogs(deleted_at);
+
+-- Drop old category_id index if exists
+DROP INDEX IF EXISTS idx_timelogs_category_id;
 
 -- Drop categories table
 DROP TABLE IF EXISTS categories;
+
+-- Verify foreign key integrity
+PRAGMA foreign_key_check;
+
+-- Re-enable foreign key constraints
+PRAGMA foreign_keys = ON;
