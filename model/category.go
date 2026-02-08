@@ -105,9 +105,11 @@ func ListCategoriesByLevel(db *gorm.DB, level int) ([]Category, error) {
 // GetCategoriesByParentID 获取指定父分类下的子分类
 func GetCategoriesByParentID(db *gorm.DB, parentID *uint) ([]Category, error) {
 	var categories []Category
-	query := db.Where("parent_id = ?", parentID)
+	query := db
 	if parentID == nil {
-		query = db.Where("parent_id IS NULL")
+		query = query.Where("parent_id IS NULL")
+	} else {
+		query = query.Where("parent_id = ?", *parentID)
 	}
 	err := query.Order("sort_order DESC, name ASC").Find(&categories).Error
 	return categories, err
