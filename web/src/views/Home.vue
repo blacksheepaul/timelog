@@ -66,14 +66,14 @@
         No tag statistics available.
       </div>
       <div v-else class="divide-y divide-gray-200">
-        <div v-for="stat in tagStats" :key="stat.tag.id" class="p-6 hover:bg-gray-50">
+        <div v-for="stat in tagStats" :key="stat.category.id" class="p-6 hover:bg-gray-50">
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
               <span
                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
-                :style="{ backgroundColor: stat.tag.color }"
+                :style="{ backgroundColor: stat.category.color }"
               >
-                {{ stat.tag.name }}
+                {{ stat.category.name }}
               </span>
               <div>
                 <p class="text-sm font-medium text-gray-900">{{ stat.duration }}</p>
@@ -110,11 +110,11 @@
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
               <span
-                v-if="log.tag"
+                v-if="log.category"
                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
-                :style="{ backgroundColor: log.tag.color }"
+                :style="{ backgroundColor: log.category.color }"
               >
-                {{ log.tag.name }}
+                {{ log.category.name }}
               </span>
               <div>
                 <p class="text-sm font-medium text-gray-900">{{ log.remarks || 'No remarks' }}</p>
@@ -154,7 +154,7 @@
   // 今日统计数据
   const todayStats = computed(() => {
     const activeSessions = todayLogs.value.filter(log => !log.end_time).length
-    const tagsUsed = new Set(todayLogs.value.map(log => log.tag_id)).size
+    const tagsUsed = new Set(todayLogs.value.map(log => log.category_id)).size
 
     // 计算总时间（包括ongoing记录）
     const totalMinutes = todayLogs.value.reduce((total, log) => {
@@ -176,9 +176,9 @@
     }
   })
 
-  // 标签时长统计
+  // 分类时长统计
   const tagStats = computed(() => {
-    const stats: Record<number, { tag: any; minutes: number }> = {}
+    const stats: Record<number, { category: any; minutes: number }> = {}
 
     // 获取今天的开始和结束时间（UTC）
     const today = new Date()
@@ -188,7 +188,7 @@
 
     // 计算每个标签的总时长
     todayLogs.value.forEach(log => {
-      if (!log.tag) return
+      if (!log.category) return
 
       const start = parseISO(log.start_time)
       const end = log.end_time ? parseISO(log.end_time) : todayEnd
@@ -204,13 +204,13 @@
       // 计算时长（分钟）
       const minutes = (actualEnd.getTime() - actualStart.getTime()) / (1000 * 60)
 
-      if (!stats[log.tag_id]) {
-        stats[log.tag_id] = {
-          tag: log.tag,
+      if (!stats[log.category_id]) {
+        stats[log.category_id] = {
+          category: log.category,
           minutes: 0,
         }
       }
-      stats[log.tag_id].minutes += minutes
+      stats[log.category_id].minutes += minutes
     })
 
     // 计算总时长
@@ -226,7 +226,7 @@
             : `${Math.round(stat.minutes)}m`
 
         return {
-          tag: stat.tag,
+          category: stat.category,
           minutes: stat.minutes,
           duration,
           percentage,

@@ -39,7 +39,7 @@
             <th
               class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
-              Tags
+              Category
             </th>
             <th
               class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -66,12 +66,12 @@
             </td>
             <td class="px-6 py-4 text-sm text-gray-900">
               <span
-                v-if="log.tag"
+                v-if="log.category"
                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
-                :style="{ backgroundColor: log.tag.color }"
-                :title="log.tag.description"
+                :style="{ backgroundColor: log.category.color }"
+                :title="log.category.description"
               >
-                {{ log.tag.name }}
+                {{ log.category.name }}
               </span>
             </td>
             <td class="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">

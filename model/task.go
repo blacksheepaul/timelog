@@ -24,8 +24,8 @@ type Task struct {
 	ID               uint           `gorm:"primaryKey" json:"id"`
 	Title            string         `gorm:"column:title;not null;size:200" json:"title"`
 	Description      string         `gorm:"column:description;type:text" json:"description"`
-	TagID            uint           `gorm:"column:tag_id;not null" json:"tag_id"`
-	Tag              Tag            `gorm:"foreignKey:TagID" json:"tag"`
+	CategoryID       uint           `gorm:"column:category_id;not null" json:"category_id"`
+	Category         Category       `gorm:"foreignKey:CategoryID" json:"category"`
 	DueDate          time.Time      `gorm:"column:due_date;not null" json:"due_date"`
 	EstimatedMinutes int            `gorm:"column:estimated_minutes;not null" json:"estimated_minutes"`
 	IsCompleted      bool           `gorm:"column:is_completed;default:false" json:"is_completed"`
@@ -50,7 +50,7 @@ func CreateTask(db *gorm.DB, task *Task) error {
 // GetTaskByID 根据ID获取任务
 func GetTaskByID(db *gorm.DB, id uint) (*Task, error) {
 	var task Task
-	err := db.Preload("Tag").First(&task, id).Error
+	err := db.Preload("Category").First(&task, id).Error
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func GetTaskByID(db *gorm.DB, id uint) (*Task, error) {
 // includeCompleted: 是否包含已完成的任务
 func GetAllTasks(db *gorm.DB, includeSuspended bool, includeCompleted bool) ([]Task, error) {
 	var tasks []Task
-	query := db.Preload("Tag")
+	query := db.Preload("Category")
 
 	if !includeSuspended {
 		query = query.Where("is_suspended = ?", false)
@@ -84,7 +84,7 @@ func GetTasksByDate(db *gorm.DB, date time.Time, includeSuspended bool, includeC
 	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
 	endOfDay := startOfDay.Add(24 * time.Hour)
 
-	query := db.Preload("Tag").Where("due_date >= ? AND due_date < ?", startOfDay, endOfDay)
+	query := db.Preload("Category").Where("due_date >= ? AND due_date < ?", startOfDay, endOfDay)
 
 	if !includeSuspended {
 		query = query.Where("is_suspended = ?", false)
@@ -101,7 +101,7 @@ func GetTasksByDate(db *gorm.DB, date time.Time, includeSuspended bool, includeC
 // GetTasksByDateRange 根据日期范围获取任务
 func GetTasksByDateRange(db *gorm.DB, startDate, endDate time.Time) ([]Task, error) {
 	var tasks []Task
-	err := db.Preload("Tag").Where("due_date >= ? AND due_date <= ?", startDate, endDate).Find(&tasks).Error
+	err := db.Preload("Category").Where("due_date >= ? AND due_date <= ?", startDate, endDate).Find(&tasks).Error
 	return tasks, err
 }
 
@@ -145,7 +145,7 @@ func UnsuspendTask(db *gorm.DB, taskID uint) error {
 // GetCompletedTasksInDateRange 获取指定日期范围内的已完成任务
 func GetCompletedTasksInDateRange(db *gorm.DB, startDate, endDate time.Time) ([]Task, error) {
 	var tasks []Task
-	err := db.Preload("Tag").Where("is_completed = ? AND completed_at >= ? AND completed_at <= ?",
+	err := db.Preload("Category").Where("is_completed = ? AND completed_at >= ? AND completed_at <= ?",
 		true, startDate, endDate).Find(&tasks).Error
 	return tasks, err
 }

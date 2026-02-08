@@ -104,13 +104,13 @@ func GetTimeLogsByDateRange(ctx context.Context, req *mcp.CallToolRequest, args 
 		}
 
 		entry := map[string]interface{}{
-			"id":         tl.ID,
-			"start_time": tl.StartTime.In(sgLocation).Format("2006-01-02 15:04:05"),
-			"end_time":   nil,
-			"duration":   durationStr,
-			"tag":        tl.Tag.Name,
-			"tag_color":  tl.Tag.Color,
-			"remarks":    tl.Remark,
+			"id":             tl.ID,
+			"start_time":     tl.StartTime.In(sgLocation).Format("2006-01-02 15:04:05"),
+			"end_time":       nil,
+			"duration":       durationStr,
+			"category":       tl.Category.Name,
+			"category_color": tl.Category.Color,
+			"remarks":        tl.Remark,
 		}
 
 		if tl.EndTime != nil {
@@ -164,8 +164,8 @@ func GetTasksByStatus(ctx context.Context, req *mcp.CallToolRequest, args TaskSt
 			"id":                task.ID,
 			"title":             task.Title,
 			"description":       task.Description,
-			"tag":               task.Tag.Name,
-			"tag_color":         task.Tag.Color,
+			"category":          task.Category.Name,
+			"category_color":    task.Category.Color,
 			"due_date":          task.DueDate.In(singaporeLocation).Format("2006-01-02"),
 			"estimated_minutes": task.EstimatedMinutes,
 			"is_completed":      task.IsCompleted,
@@ -202,12 +202,12 @@ func GetCurrentActivity(ctx context.Context, req *mcp.CallToolRequest, args Curr
 		minutes := int(duration.Minutes()) % 60
 
 		entry := map[string]interface{}{
-			"id":         tl.ID,
-			"start_time": tl.StartTime.In(singaporeLocation).Format("2006-01-02 15:04:05"),
-			"duration":   fmt.Sprintf("%dh %dm", hours, minutes),
-			"tag":        tl.Tag.Name,
-			"tag_color":  tl.Tag.Color,
-			"remarks":    tl.Remark,
+			"id":             tl.ID,
+			"start_time":     tl.StartTime.In(singaporeLocation).Format("2006-01-02 15:04:05"),
+			"duration":       fmt.Sprintf("%dh %dm", hours, minutes),
+			"category":       tl.Category.Name,
+			"category_color": tl.Category.Color,
+			"remarks":        tl.Remark,
 		}
 
 		if tl.Task != nil {

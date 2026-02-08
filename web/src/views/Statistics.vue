@@ -128,14 +128,14 @@
         No data available for the selected time range.
       </div>
       <div v-else class="divide-y divide-gray-200">
-        <div v-for="stat in tagStats" :key="stat.tag.id" class="p-6">
+        <div v-for="stat in tagStats" :key="stat.category.id" class="p-6">
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center space-x-3">
               <span
                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
-                :style="{ backgroundColor: stat.tag.color }"
+                :style="{ backgroundColor: stat.category.color }"
               >
-                {{ stat.tag.name }}
+                {{ stat.category.name }}
               </span>
               <span class="text-sm text-gray-500">{{ stat.count }} sessions</span>
             </div>
@@ -145,7 +145,7 @@
             <div
               class="h-2 rounded-full"
               :style="{
-                backgroundColor: stat.tag.color,
+                backgroundColor: stat.category.color,
                 width: `${stat.percentage}%`,
               }"
             ></div>
@@ -260,12 +260,12 @@
   // 按标签统计
   const tagStats = computed(() => {
     const logs = filteredLogs.value.filter(log => log.end_time)
-    const tagMap = new Map<number, { tag: any; minutes: number; count: number }>()
+    const tagMap = new Map<number, { category: any; minutes: number; count: number }>()
 
     let totalMinutes = 0
 
     logs.forEach(log => {
-      if (!log.tag) return
+      if (!log.category) return
 
       const start = new Date(log.start_time)
       const end = new Date(log.end_time!)
@@ -273,13 +273,13 @@
 
       totalMinutes += minutes
 
-      if (tagMap.has(log.tag_id)) {
-        const existing = tagMap.get(log.tag_id)!
+      if (tagMap.has(log.category_id)) {
+        const existing = tagMap.get(log.category_id)!
         existing.minutes += minutes
         existing.count += 1
       } else {
-        tagMap.set(log.tag_id, {
-          tag: log.tag,
+        tagMap.set(log.category_id, {
+          category: log.category,
           minutes,
           count: 1,
         })
