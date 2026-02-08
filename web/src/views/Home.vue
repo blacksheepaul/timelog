@@ -45,7 +45,7 @@
           </div>
           <div class="ml-4">
             <p class="text-sm font-medium text-gray-500">Categories Used</p>
-            <p class="text-2xl font-semibold text-gray-900">{{ todayStats.tagsUsed }}</p>
+            <p class="text-2xl font-semibold text-gray-900">{{ todayStats.categoriesUsed }}</p>
           </div>
         </div>
       </div>
@@ -62,11 +62,11 @@
         ></div>
         <p class="mt-2 text-gray-600">Loading...</p>
       </div>
-      <div v-else-if="tagStats.length === 0" class="p-6 text-center text-gray-500">
+      <div v-else-if="categoryStats.length === 0" class="p-6 text-center text-gray-500">
         No category statistics available.
       </div>
       <div v-else class="divide-y divide-gray-200">
-        <div v-for="stat in tagStats" :key="stat.category.id" class="p-6 hover:bg-gray-50">
+        <div v-for="stat in categoryStats" :key="stat.category.id" class="p-6 hover:bg-gray-50">
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
               <span
@@ -154,7 +154,7 @@
   // 今日统计数据
   const todayStats = computed(() => {
     const activeSessions = todayLogs.value.filter(log => !log.end_time).length
-    const tagsUsed = new Set(todayLogs.value.map(log => log.category_id)).size
+    const categoriesUsed = new Set(todayLogs.value.map(log => log.category_id)).size
 
     // 计算总时间（包括ongoing记录）
     const totalMinutes = todayLogs.value.reduce((total, log) => {
@@ -172,12 +172,12 @@
       count: todayLogs.value.length,
       activeSessions,
       totalTime,
-      tagsUsed,
+      categoriesUsed,
     }
   })
 
   // 分类时长统计
-  const tagStats = computed(() => {
+  const categoryStats = computed(() => {
     const stats: Record<number, { category: any; minutes: number }> = {}
 
     // 获取今天的开始和结束时间（UTC）
@@ -186,7 +186,7 @@
     const todayStart = parseISO(todayLocalStr + 'T00:00:00Z') // UTC开始时间
     const todayEnd = parseISO(todayLocalStr + 'T23:59:59.999Z') // UTC结束时间
 
-    // 计算每个标签的总时长
+    // 计算每个分类的总时长
     todayLogs.value.forEach(log => {
       if (!log.category) return
 
@@ -232,7 +232,7 @@
           percentage,
         }
       })
-      .filter(stat => stat.minutes > 0) // 只显示时长大于0的标签
+      .filter(stat => stat.minutes > 0) // 只显示时长大于0的分类
       .sort((a, b) => b.minutes - a.minutes) // 按时长降序排列
   })
 
