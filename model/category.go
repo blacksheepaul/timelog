@@ -218,7 +218,7 @@ func MoveCategory(db *gorm.DB, categoryID uint, newParentID *uint) error {
 }
 
 // GetCategoryTree 获取分类树
-func GetCategoryTree(db *gorm.DB) ([]CategoryNode, error) {
+func GetCategoryTree(db *gorm.DB) ([]*CategoryNode, error) {
 	categories, err := ListCategories(db)
 	if err != nil {
 		return nil, err
@@ -229,20 +229,20 @@ func GetCategoryTree(db *gorm.DB) ([]CategoryNode, error) {
 
 // CategoryNode 分类树节点
 type CategoryNode struct {
-	Category Category       `json:"category"`
-	Children []CategoryNode `json:"children,omitempty"`
+	Category Category        `json:"category"`
+	Children []*CategoryNode `json:"children,omitempty"`
 }
 
 // buildCategoryTree 构建分类树
-func buildCategoryTree(categories []Category) []CategoryNode {
+func buildCategoryTree(categories []Category) []*CategoryNode {
 	nodeMap := make(map[uint]*CategoryNode)
-	var roots []CategoryNode
+	var roots []*CategoryNode
 
 	// 第一遍：创建所有节点
 	for i := range categories {
 		node := &CategoryNode{
 			Category: categories[i],
-			Children: []CategoryNode{},
+			Children: []*CategoryNode{},
 		}
 		nodeMap[categories[i].ID] = node
 	}
@@ -251,10 +251,10 @@ func buildCategoryTree(categories []Category) []CategoryNode {
 	for i := range categories {
 		node := nodeMap[categories[i].ID]
 		if categories[i].ParentID == nil || *categories[i].ParentID == 0 {
-			roots = append(roots, *node)
+			roots = append(roots, node)
 		} else {
 			if parent, ok := nodeMap[*categories[i].ParentID]; ok {
-				parent.Children = append(parent.Children, *node)
+				parent.Children = append(parent.Children, node)
 			}
 		}
 	}
