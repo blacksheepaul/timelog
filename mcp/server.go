@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/subtle"
 	"net/http"
 	"strings"
 
@@ -68,7 +69,8 @@ func main() {
 					return
 				}
 				provided := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
-				if provided != token {
+				// Use constant-time comparison to prevent timing attacks
+				if subtle.ConstantTimeCompare([]byte(provided), []byte(token)) != 1 {
 					w.WriteHeader(http.StatusUnauthorized)
 					return
 				}
