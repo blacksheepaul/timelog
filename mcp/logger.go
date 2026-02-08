@@ -17,7 +17,7 @@ var mcpLogger *zap.SugaredLogger
 // This logger will never write to stdout to avoid breaking MCP protocol
 func InitMCPLogger(cfg *config.Config) *zap.SugaredLogger {
 	// Return no-op logger if MCP logging is disabled
-	if cfg == nil || !cfg.Log.MCP.Enabled {
+	if cfg == nil || !cfg.MCP.Enabled {
 		mcpLogger = zap.NewNop().Sugar()
 		return mcpLogger
 	}
@@ -29,13 +29,13 @@ func InitMCPLogger(cfg *config.Config) *zap.SugaredLogger {
 	}
 
 	// Parse log level (default to debug for troubleshooting)
-	level, err := zap.ParseAtomicLevel(cfg.Log.MCP.Level)
+	level, err := zap.ParseAtomicLevel(cfg.MCP.Level)
 	if err != nil {
 		level = zap.NewAtomicLevelAt(zap.DebugLevel)
 	}
 
 	// Ensure log directory exists
-	logPath := cfg.Log.MCP.Path
+	logPath := cfg.MCP.Path
 	if logPath == "" {
 		logPath = "logs/mcp.log"
 	}

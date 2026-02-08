@@ -18,12 +18,15 @@ type Config struct {
 			MaxAge     int `yaml:"max_age"`
 		} `yaml:"rotation"`
 		ORMLogLevel int `yaml:"orm_log_level"`
-		MCP         struct {
-			Enabled bool   `yaml:"enabled" env-default:"false"`
-			Level   string `yaml:"level" env-default:"debug"`
-			Path    string `yaml:"path" env-default:"logs/mcp.log"`
-		} `yaml:"mcp"`
 	} `yaml:"log"`
+	MCP struct {
+		Enabled    bool   `yaml:"enabled" env:"MCP_ENABLED" env-default:"false"`
+		Level      string `yaml:"level" env:"MCP_LEVEL" env-default:"debug"`
+		Path       string `yaml:"path" env:"MCP_PATH" env-default:"logs/mcp.log"`
+		Transport  string `yaml:"transport" env:"MCP_TRANSPORT" env-default:"stdio"`
+		ListenAddr string `yaml:"listen_addr" env:"MCP_LISTEN_ADDR" env-default:":8080"`
+		Token      string `yaml:"token" env:"MCP_TOKEN" env-default:""`
+	} `yaml:"mcp"`
 	Test struct {
 		Flush bool `yaml:"flush" env-default:"false"`
 	} `yaml:"test"`
