@@ -82,7 +82,7 @@ func main() {
 			Handler: wrappedHandler,
 		}
 
-		if err := httpServer.ListenAndServe(); err != nil {
+		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			LogMCPError("http_server", err, map[string]interface{}{"addr": listenAddr})
 		}
 	default:
