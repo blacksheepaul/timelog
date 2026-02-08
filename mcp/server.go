@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"crypto/subtle"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -50,6 +52,13 @@ func main() {
 	case "http":
 		listenAddr := server.config.MCP.ListenAddr
 		token := server.config.MCP.Token
+
+		// Fail fast: require authentication token for HTTP transport
+		if token == "" {
+			fmt.Fprintln(os.Stderr, "FATAL: HTTP transport requires authentication token for security.")
+			fmt.Fprintln(os.Stderr, "Set token via: MCP.Token in config.yml OR MCP_TOKEN environment variable")
+			os.Exit(1)
+		}
 
 		handler := mcp.NewStreamableHTTPHandler(func(_ *http.Request) *mcp.Server {
 			return mcpServer
