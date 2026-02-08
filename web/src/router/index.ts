@@ -5,7 +5,7 @@ import type { RouteRecordRaw } from 'vue-router'
 const Home = () => import('@/views/Home.vue')
 const TimeLog = () => import('@/views/TimeLog.vue')
 const Tasks = () => import('@/views/Tasks.vue')
-const Tags = () => import('@/views/Tags.vue')
+const Categories = () => import('@/views/Categories.vue')
 const Statistics = () => import('@/views/Statistics.vue')
 // @ts-ignore
 const Constraints = () => import('@/views/Constraints.vue') as Promise<{ default: any }>
@@ -36,11 +36,11 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/tags',
-    name: 'Tags',
-    component: Tags,
+    path: '/categories',
+    name: 'Categories',
+    component: Categories,
     meta: {
-      title: 'Tag Management',
+      title: 'Category Management',
     },
   },
   {

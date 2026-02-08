@@ -46,16 +46,18 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
-            <label for="tag_id" class="block text-sm font-medium text-gray-700 mb-2"> Tag * </label>
+            <label for="category_id" class="block text-sm font-medium text-gray-700 mb-2">
+              Tag *
+            </label>
             <select
-              id="tag_id"
-              v-model="form.tag_id"
+              id="category_id"
+              v-model="form.category_id"
               required
               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="" disabled>Select a tag</option>
               <option
-                v-for="tag in availableTags"
+                v-for="tag in availableCategories"
                 :key="tag.id"
                 :value="tag.id"
                 :style="{ color: tag.color }"
@@ -197,11 +199,11 @@
                   {{ task.title }}
                 </h3>
                 <span
-                  v-if="task.tag"
+                  v-if="task.category"
                   class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
-                  :style="{ backgroundColor: task.tag.color }"
+                  :style="{ backgroundColor: task.category.color }"
                 >
-                  {{ task.tag.name }}
+                  {{ task.category.name }}
                 </span>
                 <span
                   v-if="task.is_completed"
@@ -283,7 +285,7 @@
   import { ref, reactive, onMounted, computed, inject, nextTick, watch } from 'vue'
   import { PlusIcon } from '@heroicons/vue/24/outline'
   import { formatDate, formatDateTime } from '@/utils/date'
-  import { taskAPI, tagAPI } from '@/api'
+  import { taskAPI, categoryAPI } from '@/api'
   import type { Task, Tag, CreateTaskRequest, UpdateTaskRequest } from '@/types'
   import { useSettings } from '@/composables/useSettings'
 
@@ -294,7 +296,7 @@
   ) => void
 
   const tasks = ref<Task[]>([])
-  const availableTags = ref<Tag[]>([])
+  const availableCategories = ref<Tag[]>([])
   const loading = ref(false)
   const submitting = ref(false)
   const error = ref<string | null>(null)
@@ -319,7 +321,7 @@
   const form = reactive({
     title: '',
     description: '',
-    tag_id: '',
+    category_id: '',
     due_date: '',
     estimated_minutes: 60,
   })
@@ -327,7 +329,7 @@
   const resetForm = () => {
     form.title = ''
     form.description = ''
-    form.tag_id = ''
+    form.category_id = ''
     form.due_date = new Date().toISOString().split('T')[0] // Today's date
     form.estimated_minutes = 60
   }
@@ -336,7 +338,7 @@
     if (editingTask.value) {
       form.title = editingTask.value.title
       form.description = editingTask.value.description
-      form.tag_id = editingTask.value.tag_id.toString()
+      form.category_id = editingTask.value.category_id.toString()
       form.due_date = editingTask.value.due_date.split('T')[0]
       form.estimated_minutes = editingTask.value.estimated_minutes
     } else {
@@ -375,8 +377,8 @@
 
   const loadTags = async () => {
     try {
-      const response = await tagAPI.getAll()
-      availableTags.value = response.data || []
+      const response = await categoryAPI.getAll()
+      availableCategories.value = response.data || []
     } catch (err) {
       console.error('Error loading tags:', err)
       showNotification('error', 'Failed to load tags')
@@ -398,7 +400,7 @@
       const data: CreateTaskRequest | UpdateTaskRequest = {
         title: form.title.trim(),
         description: form.description.trim(),
-        tag_id: Number(form.tag_id),
+        category_id: Number(form.category_id),
         due_date: new Date(form.due_date + 'T12:00:00Z').toISOString(),
         estimated_minutes: form.estimated_minutes,
       }
