@@ -32,6 +32,37 @@ This will generate the necessary files in the `docs` directory that are required
 
 **Note:** For production builds, Swagger is automatically excluded via the `prod` build tag, so you don't need to generate Swagger documentation for production deployments.
 
+## Passkey Setup
+
+Passkey authentication replaces the previous Basic Auth flow. Use the helper script to generate a one-time temp password, then bind a device in the UI.
+
+### Generate temp password
+
+```bash
+make passkey-temp create
+```
+
+Optional: specify TTL seconds (defaults to config `passkey.temp_password.ttl`).
+
+```bash
+make passkey-temp create 900
+```
+
+### List or revoke temp passwords
+
+```bash
+make passkey-temp list
+make passkey-temp revoke <id>
+```
+
+### Bind device
+
+Open `http://localhost:3000/passkey/register` and use the temp password to create a passkey.
+
+### Login
+
+Open `http://localhost:3000/login` and complete the passkey prompt.
+
 ## Migrate
 
 for example:

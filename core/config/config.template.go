@@ -24,6 +24,15 @@ type Config struct {
 			Path    string `yaml:"path" env-default:"logs/mcp.log"`
 		} `yaml:"mcp"`
 	} `yaml:"log"`
+	Passkey struct {
+		RPID         string   `yaml:"rp_id"`
+		RPName       string   `yaml:"rp_name"`
+		RPOrigins    []string `yaml:"rp_origins"`
+		TokenTTL     int      `yaml:"token_ttl" env-default:"86400"`
+		TempPassword struct {
+			TTL int `yaml:"ttl" env-default:"900"`
+		} `yaml:"temp_password"`
+	} `yaml:"passkey"`
 	Test struct {
 		Flush bool `yaml:"flush" env-default:"false"`
 	} `yaml:"test"`
