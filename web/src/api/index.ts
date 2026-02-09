@@ -1,7 +1,8 @@
 import axios from 'axios'
 import type {
   TimeLog,
-  Tag,
+  Category,
+  CategoryNode,
   Task,
   CreateTimeLogRequest,
   UpdateTimeLogRequest,
@@ -74,20 +75,37 @@ export const timelogAPI = {
     api.delete(`/timelogs/${id}`).then(res => res.data),
 }
 
-export const tagAPI = {
-  getAll: (): Promise<ApiResponse<Tag[]>> => api.get('/tags').then(res => res.data),
+export const categoryAPI = {
+  getAll: (): Promise<ApiResponse<Category[]>> => api.get('/categories').then(res => res.data),
 
-  getById: (id: number): Promise<ApiResponse<Tag>> => api.get(`/tags/${id}`).then(res => res.data),
+  getTree: (): Promise<ApiResponse<CategoryNode[]>> =>
+    api.get('/categories/tree').then(res => res.data),
 
-  create: (data: Partial<Tag>): Promise<ApiResponse<Tag>> =>
-    api.post('/tags', data).then(res => res.data),
+  getByLevel: (level: number): Promise<ApiResponse<Category[]>> =>
+    api.get(`/categories?level=${level}`).then(res => res.data),
 
-  update: (id: number, data: Partial<Tag>): Promise<ApiResponse<Tag>> =>
-    api.put(`/tags/${id}`, data).then(res => res.data),
+  getByParentId: (parentId: number): Promise<ApiResponse<Category[]>> =>
+    api.get(`/categories?parent_id=${parentId}`).then(res => res.data),
+
+  getById: (id: number): Promise<ApiResponse<Category>> =>
+    api.get(`/categories/${id}`).then(res => res.data),
+
+  create: (data: Partial<Category>): Promise<ApiResponse<Category>> =>
+    api.post('/categories', data).then(res => res.data),
+
+  update: (id: number, data: Partial<Category>): Promise<ApiResponse<Category>> =>
+    api.put(`/categories/${id}`, data).then(res => res.data),
 
   delete: (id: number): Promise<ApiResponse<null>> =>
-    api.delete(`/tags/${id}`).then(res => res.data),
+    api.delete(`/categories/${id}`).then(res => res.data),
+
+  move: (id: number, parentId: number | null): Promise<ApiResponse<null>> =>
+    api.post(`/categories/${id}/move`, { parent_id: parentId }).then(res => res.data),
 }
+
+// Backward compatibility - tagAPI is deprecated, use categoryAPI instead
+/** @deprecated Use categoryAPI instead */
+export const tagAPI = categoryAPI
 
 export const taskAPI = {
   getAll: (

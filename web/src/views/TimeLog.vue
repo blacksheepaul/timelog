@@ -46,7 +46,7 @@
       v-if="showForm"
       :editing-log="editingLog"
       :submitting="submitting"
-      :available-tags="tags"
+      :available-categories="categories"
       :available-tasks="tasks"
       :available-constraints="constraints"
       :last-end-time="getLastEndTime()"
@@ -70,11 +70,11 @@
   import { startOfDay, startOfWeek, isAfter, parseISO } from 'date-fns'
   import TimeLogList from '@/components/TimeLogList.vue'
   import TimeLogForm from '@/components/TimeLogForm.vue'
-  import { timelogAPI, tagAPI, taskAPI, constraintAPI } from '@/api'
+  import { timelogAPI, categoryAPI, taskAPI, constraintAPI } from '@/api'
   import { useTimeLogStore } from '@/stores/timelog'
   import type {
     TimeLog,
-    Tag,
+    Category,
     Task,
     Constraint,
     CreateTimeLogRequest,
@@ -93,7 +93,7 @@
   const loading = computed(() => timeLogStore.loading)
   const error = computed(() => timeLogStore.error)
 
-  const tags = ref<Tag[]>([])
+  const categories = ref<Category[]>([])
   const tasks = ref<Task[]>([])
   const constraints = ref<Constraint[]>([])
   const submitting = ref(false)
@@ -139,13 +139,13 @@
     showNotification('success', 'Time logs refreshed successfully')
   }
 
-  const loadTags = async () => {
+  const loadCategories = async () => {
     try {
-      const response = await tagAPI.getAll()
-      tags.value = response.data || []
+      const response = await categoryAPI.getAll()
+      categories.value = response.data || []
     } catch (err) {
-      console.error('Error loading tags:', err)
-      showNotification('error', 'Failed to load tags')
+      console.error('Error loading categories:', err)
+      showNotification('error', 'Failed to load categories')
     }
   }
 
@@ -239,7 +239,7 @@
 
   onMounted(() => {
     timeLogStore.loadTimeLogs()
-    loadTags()
+    loadCategories()
     loadTasks()
     loadConstraints()
   })

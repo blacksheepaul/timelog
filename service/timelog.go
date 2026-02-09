@@ -42,40 +42,59 @@ func DeleteTimeLog(id uint) error {
 	return model.DeleteTimeLog(db, id)
 }
 
-// --- Tag Service ---
+// --- Category Service ---
 
-// CreateTag 新增一个标签
-func CreateTag(tag *model.Tag) error {
+// CreateCategory 创建分类
+func CreateCategory(category *model.Category) error {
 	db := model.GetDao().Db()
-	return model.CreateTag(db, tag)
+	return model.CreateCategory(db, category)
 }
 
-// GetTagByID 根据ID获取标签
-func GetTagByID(id uint) (*model.Tag, error) {
+// GetCategoryByID 根据ID获取分类
+func GetCategoryByID(id uint) (*model.Category, error) {
 	db := model.GetDao().Db()
-	return model.GetTagByID(db, id)
+	return model.GetCategoryByID(db, id)
 }
 
-// GetTagByName 根据名称获取标签
-func GetTagByName(name string) (*model.Tag, error) {
+// GetCategoryByName 根据名称获取分类
+func GetCategoryByName(name string, parentID *uint) (*model.Category, error) {
 	db := model.GetDao().Db()
-	return model.GetTagByName(db, name)
+	return model.GetCategoryByName(db, name, parentID)
 }
 
-// ListTags 查询标签列表
-func ListTags(conds ...interface{}) ([]model.Tag, error) {
+// ListCategories 查询所有分类
+func ListCategories(conds ...interface{}) ([]model.Category, error) {
 	db := model.GetDao().Db()
-	return model.ListTags(db, conds...)
+	return model.ListCategories(db, conds...)
 }
 
-// UpdateTag 更新一个标签
-func UpdateTag(tag *model.Tag) error {
+// ListCategoriesByLevel 按层级查询分类
+func ListCategoriesByLevel(level int) ([]model.Category, error) {
 	db := model.GetDao().Db()
-	return model.UpdateTag(db, tag)
+	return model.ListCategoriesByLevel(db, level)
 }
 
-// DeleteTag 删除一个标签
-func DeleteTag(id uint) error {
+// GetCategoriesByParentID 获取指定父分类下的子分类
+func GetCategoriesByParentID(parentID *uint) ([]model.Category, error) {
 	db := model.GetDao().Db()
-	return model.DeleteTag(db, id)
+	return model.GetCategoriesByParentID(db, parentID)
+}
+
+// GetCategoryTree 获取分类树
+func GetCategoryTree() ([]*model.CategoryNode, error) {
+	db := model.GetDao().Db()
+	return model.GetCategoryTree(db)
+}
+
+// UpdateCategory 更新分类
+func UpdateCategory(category *model.Category) error {
+	db := model.GetDao().Db()
+	return model.UpdateCategory(db, category)
+}
+
+
+// MoveCategory 移动分类
+func MoveCategory(categoryID uint, newParentID *uint) error {
+	db := model.GetDao().Db()
+	return model.MoveCategory(db, categoryID, newParentID)
 }

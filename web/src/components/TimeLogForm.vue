@@ -69,21 +69,24 @@
       </div>
 
       <div>
-        <label for="tag_id" class="block text-sm font-medium text-gray-700 mb-2"> Tag * </label>
+        <label for="category_id" class="block text-sm font-medium text-gray-700 mb-2">
+          Category *
+        </label>
         <select
-          id="tag_id"
-          v-model="form.tag_id"
+          id="category_id"
+          v-model="form.category_id"
           required
           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
-          <option value="" disabled>Select a tag</option>
+          <option value="" disabled>Select a category</option>
           <option
-            v-for="tag in availableTags"
-            :key="tag.id"
-            :value="tag.id"
-            :style="{ color: tag.color }"
+            v-for="category in availableCategories"
+            :key="category.id"
+            :value="category.id"
+            :style="{ color: category.color }"
           >
-            {{ tag.name }} - {{ tag.description }}
+            {{ category.path === '/' ? '' : category.path.replace(/\//g, ' / ') + ' / '
+            }}{{ category.name }}
           </option>
         </select>
       </div>
@@ -100,7 +103,7 @@
           <option value="" disabled>Select a task (optional)</option>
           <option value="">No task</option>
           <option v-for="task in availableTasks" :key="task.id" :value="task.id">
-            {{ task.title }} ({{ task.tag?.name }})
+            {{ task.title }} ({{ task.category?.name }})
           </option>
         </select>
       </div>
@@ -140,13 +143,13 @@
 <script setup lang="ts">
   import { reactive, watch, computed, ref, nextTick } from 'vue'
   import { ClockIcon, XMarkIcon } from '@heroicons/vue/24/outline'
-  import type { TimeLog, Tag, Task, CreateTimeLogRequest, UpdateTimeLogRequest } from '@/types'
+  import type { TimeLog, Category, Task, CreateTimeLogRequest, UpdateTimeLogRequest } from '@/types'
   import { formatDateTimeLocal, formatUTCToLocal, formatLocalToUTC } from '@/utils/date'
 
   const props = defineProps<{
     editingLog?: TimeLog
     submitting: boolean
-    availableTags: Tag[]
+    availableCategories: Category[]
     availableTasks: Task[]
     lastEndTime?: string | null
   }>()
@@ -164,13 +167,13 @@
   const form = reactive<{
     start_time: string
     end_time: string
-    tag_id: number | ''
+    category_id: number | ''
     task_id: number | ''
     remarks: string
   }>({
     start_time: '',
     end_time: '',
-    tag_id: '',
+    category_id: '',
     task_id: '',
     remarks: '',
   })
@@ -183,7 +186,7 @@
       form.start_time = formatDateTimeLocal()
     }
     form.end_time = ''
-    form.tag_id = ''
+    form.category_id = ''
     form.task_id = ''
     form.remarks = ''
   }
@@ -205,7 +208,7 @@
     if (props.editingLog) {
       form.start_time = formatUTCToLocal(props.editingLog.start_time)
       form.end_time = props.editingLog.end_time ? formatUTCToLocal(props.editingLog.end_time) : ''
-      form.tag_id = props.editingLog.tag_id
+      form.category_id = props.editingLog.category_id
       form.task_id = props.editingLog.task_id || ''
       form.remarks = props.editingLog.remarks
     } else {
@@ -218,14 +221,14 @@
   }
 
   const handleSubmit = () => {
-    if (form.tag_id === '') {
-      return // Tag is required
+    if (form.category_id === '') {
+      return // Category is required
     }
 
     const data = {
       start_time: formatLocalToUTC(form.start_time),
       end_time: form.end_time ? formatLocalToUTC(form.end_time) : undefined,
-      tag_id: Number(form.tag_id),
+      category_id: Number(form.category_id),
       task_id: form.task_id ? Number(form.task_id) : null,
       remarks: form.remarks,
     }
