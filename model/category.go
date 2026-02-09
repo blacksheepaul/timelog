@@ -131,36 +131,6 @@ func UpdateCategory(db *gorm.DB, category *Category) error {
 	return db.Save(category).Error
 }
 
-// DeleteCategory 删除分类（软删除，会自动删除子分类）
-func DeleteCategory(db *gorm.DB, id uint) error {
-	return db.Transaction(func(tx *gorm.DB) error {
-		// 获取该分类及其所有子分类
-		ids, err := getAllDescendantIDs(tx, id)
-		if err != nil {
-			return err
-		}
-
-		// 检查是否有timelogs或tasks引用这些分类
-		var count int64
-		if err := tx.Model(&TimeLog{}).Where("category_id IN ?", ids).Count(&count).Error; err != nil {
-			return err
-		}
-		if count > 0 {
-			return fmt.Errorf("cannot delete category: %d timelogs are using it", count)
-		}
-
-		if err := tx.Model(&Task{}).Where("category_id IN ?", ids).Count(&count).Error; err != nil {
-			return err
-		}
-		if count > 0 {
-			return fmt.Errorf("cannot delete category: %d tasks are using it", count)
-		}
-
-		// 软删除分类及其子分类
-		return tx.Delete(&Category{}, "id IN ?", ids).Error
-	})
-}
-
 // getAllDescendantIDs 获取分类及其所有后代的ID（使用ID-based递归查询）
 // 注意：此实现使用递归查询，对于深层或宽层次结构可能产生N+1查询。
 // 由于系统限制最大层级为2（MaxCategoryLevel），性能影响可接受。

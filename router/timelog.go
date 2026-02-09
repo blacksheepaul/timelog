@@ -52,7 +52,7 @@ func RegisterTimeLogRoutes(group *gin.RouterGroup) {
 	group.POST("/categories", createCategoryHandler)
 	group.GET("/categories/:id", getCategoryHandler)
 	group.PUT("/categories/:id", updateCategoryHandler)
-	group.DELETE("/categories/:id", deleteCategoryHandler)
+
 	group.POST("/categories/:id/move", moveCategoryHandler)
 }
 
@@ -372,28 +372,6 @@ func updateCategoryHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, SuccessResponse(category, "Category updated successfully"))
 }
 
-// deleteCategoryHandler godoc
-// @Summary 删除分类
-// @Description 根据ID删除分类（会级联删除子分类）
-// @Tags category
-// @Produce json
-// @Param id path int true "分类ID"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /api/categories/{id} [delete]
-func deleteCategoryHandler(c *gin.Context) {
-	var id uint
-	if err := parseUintParam(c, "id", &id); err != nil {
-		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
-		return
-	}
-	if err := service.DeleteCategory(id); err != nil {
-		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
-		return
-	}
-	c.JSON(http.StatusOK, SuccessResponse(nil, "Category deleted successfully"))
-}
 
 // moveCategoryHandler godoc
 // @Summary 移动分类
