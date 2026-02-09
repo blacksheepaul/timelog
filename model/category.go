@@ -135,8 +135,8 @@ func UpdateCategory(db *gorm.DB, category *Category) error {
 func DeleteCategory(db *gorm.DB, id uint) error {
 	return db.Transaction(func(tx *gorm.DB) error {
 		// 获取该分类及其所有子分类
-		var ids []uint
-		if err := tx.Model(&Category{}).Where("id = ? OR path LIKE ?", id, fmt.Sprintf("%%%d%%", id)).Pluck("id", &ids).Error; err != nil {
+		ids, err := getAllDescendantIDs(tx, id)
+		if err != nil {
 			return err
 		}
 
@@ -161,6 +161,53 @@ func DeleteCategory(db *gorm.DB, id uint) error {
 	})
 }
 
+// getAllDescendantIDs 获取分类及其所有后代的ID（使用ID-based递归查询）
+// 注意：此实现使用递归查询，对于深层或宽层次结构可能产生N+1查询。
+// 由于系统限制最大层级为2（MaxCategoryLevel），性能影响可接受。
+func getAllDescendantIDs(db *gorm.DB, categoryID uint) ([]uint, error) {
+	ids := []uint{categoryID}
+
+	var children []Category
+	if err := db.Where("parent_id = ?", categoryID).Find(&children).Error; err != nil {
+		return nil, err
+	}
+
+	for _, child := range children {
+		childIDs, err := getAllDescendantIDs(db, child.ID)
+		if err != nil {
+			return nil, err
+		}
+		ids = append(ids, childIDs...)
+	}
+
+	return ids, nil
+}
+
+// isDescendantOf 检查targetID是否是ancestorID的后代（使用ID-based递归查询）
+// 注意：
+//  1. 如果targetID等于ancestorID，返回true（自己也算作自己的"后代"用于循环检测）
+//  2. 此实现对每个祖先级别执行一次查询。由于系统限制最大层级为2（MaxCategoryLevel），
+//     最多执行3次查询，性能影响可接受。
+func isDescendantOf(db *gorm.DB, targetID, ancestorID uint) (bool, error) {
+	// 如果相等，说明尝试移动到自己（虽然MoveCategory已经检查过，但这里作为防御性编程）
+	if targetID == ancestorID {
+		return true, nil
+	}
+
+	var category Category
+	if err := db.First(&category, targetID).Error; err != nil {
+		return false, err
+	}
+
+	// 如果没有父分类，说明已经到根节点
+	if category.ParentID == nil || *category.ParentID == 0 {
+		return false, nil
+	}
+
+	// 递归检查父分类
+	return isDescendantOf(db, *category.ParentID, ancestorID)
+}
+
 // MoveCategory 移动分类到新的父分类下
 func MoveCategory(db *gorm.DB, categoryID uint, newParentID *uint) error {
 	return db.Transaction(func(tx *gorm.DB) error {
@@ -180,11 +227,11 @@ func MoveCategory(db *gorm.DB, categoryID uint, newParentID *uint) error {
 			}
 
 			// 检查新父分类是否是当前分类的子分类（防止循环）
-			var childCount int64
-			if err := tx.Model(&Category{}).Where("id = ? AND (parent_id = ? OR path LIKE ?)", *newParentID, categoryID, fmt.Sprintf("%%%d%%", categoryID)).Count(&childCount).Error; err != nil {
+			isDescendant, err := isDescendantOf(tx, *newParentID, categoryID)
+			if err != nil {
 				return err
 			}
-			if childCount > 0 {
+			if isDescendant {
 				return fmt.Errorf("cannot move category to its own child")
 			}
 
