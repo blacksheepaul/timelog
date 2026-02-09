@@ -1,18 +1,27 @@
-export interface Tag {
+export interface Category {
   id: number
   name: string
   color: string
   description: string
+  parent_id?: number | null
+  level: number
+  sort_order: number
+  path: string
   created_at: string
   updated_at: string
+}
+
+export interface CategoryNode {
+  category: Category
+  children?: CategoryNode[]
 }
 
 export interface TimeLog {
   ID: number
   start_time: string
   end_time?: string | null
-  tag_id: number
-  tag: Tag
+  category_id: number
+  category: Category
   task_id?: number | null
   task?: Task | null
   remarks: string
@@ -24,7 +33,7 @@ export interface TimeLog {
 export interface CreateTimeLogRequest {
   start_time: string
   end_time?: string
-  tag_id: number
+  category_id: number
   task_id?: number | null
   remarks: string
 }
@@ -32,7 +41,7 @@ export interface CreateTimeLogRequest {
 export interface UpdateTimeLogRequest {
   start_time?: string
   end_time?: string
-  tag_id?: number
+  category_id?: number
   task_id?: number | null
   remarks?: string
 }
@@ -41,8 +50,8 @@ export interface Task {
   id: number
   title: string
   description: string
-  tag_id: number
-  tag?: Tag
+  category_id: number
+  category?: Category
   due_date: string
   estimated_minutes: number
   is_completed: boolean
@@ -55,7 +64,7 @@ export interface Task {
 export interface CreateTaskRequest {
   title: string
   description?: string
-  tag_id: number
+  category_id: number
   due_date: string
   estimated_minutes: number
 }
@@ -63,7 +72,7 @@ export interface CreateTaskRequest {
 export interface UpdateTaskRequest {
   title?: string
   description?: string
-  tag_id?: number
+  category_id?: number
   due_date?: string
   estimated_minutes?: number
   is_completed?: boolean
@@ -124,3 +133,7 @@ export interface UpdateConstraintRequest {
   start_date?: string
   end_date?: string
 }
+
+// Backward compatibility - Tag is deprecated, use Category instead
+/** @deprecated Use Category instead */
+export type Tag = Category

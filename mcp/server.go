@@ -2,6 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"crypto/subtle"
+	"net/http"
+	"os"
+	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -42,10 +47,61 @@ func main() {
 		Description: "Get current date, time, today, yesterday, and this week's date range",
 	}, GetDateInfo)
 
-	// Run MCP server - no logging to avoid stdout contamination
-	ctx := context.Background()
-	transport := &mcp.StdioTransport{}
+	transportMode := server.config.MCP.Transport
+	switch transportMode {
+	case "http":
+		listenAddr := server.config.MCP.ListenAddr
+		token := server.config.MCP.Token
 
-	// Run server (any error will exit the process)
-	mcpServer.Run(ctx, transport)
+		// Fail fast: require authentication token for HTTP transport
+		if token == "" {
+			fmt.Fprintln(os.Stderr, "FATAL: HTTP transport requires authentication token for security.")
+			fmt.Fprintln(os.Stderr, "Set token via: MCP.Token in config.yml OR MCP_TOKEN environment variable")
+			os.Exit(1)
+		}
+
+		handler := mcp.NewStreamableHTTPHandler(func(_ *http.Request) *mcp.Server {
+			return mcpServer
+		}, nil)
+
+		wrappedHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/health" {
+				w.WriteHeader(http.StatusOK)
+				_, _ = w.Write([]byte("ok"))
+				return
+			}
+
+			if token != "" {
+				authHeader := r.Header.Get("Authorization")
+				if !strings.HasPrefix(authHeader, "Bearer ") {
+					w.WriteHeader(http.StatusUnauthorized)
+					return
+				}
+				provided := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
+				// Use constant-time comparison to prevent timing attacks
+				if subtle.ConstantTimeCompare([]byte(provided), []byte(token)) != 1 {
+					w.WriteHeader(http.StatusUnauthorized)
+					return
+				}
+			}
+
+			handler.ServeHTTP(w, r)
+		})
+
+		httpServer := &http.Server{
+			Addr:    listenAddr,
+			Handler: wrappedHandler,
+		}
+
+		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			LogMCPError("http_server", err, map[string]interface{}{"addr": listenAddr})
+		}
+	default:
+		// Run MCP server - no logging to avoid stdout contamination
+		ctx := context.Background()
+		transport := &mcp.StdioTransport{}
+		if err := mcpServer.Run(ctx, transport); err != nil {
+			LogMCPError("stdio_server", err, nil)
+		}
+	}
 }

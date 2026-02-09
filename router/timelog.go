@@ -46,12 +46,14 @@ func RegisterTimeLogRoutes(group *gin.RouterGroup) {
 	group.PUT("/timelogs/:id", updateTimeLogHandler)
 	group.DELETE("/timelogs/:id", deleteTimeLogHandler)
 
-	// Tag 相关路由
-	group.GET("/tags", listTagsHandler)
-	group.POST("/tags", createTagHandler)
-	group.GET("/tags/:id", getTagHandler)
-	group.PUT("/tags/:id", updateTagHandler)
-	group.DELETE("/tags/:id", deleteTagHandler)
+	// Category 相关路由
+	group.GET("/categories", listCategoriesHandler)
+	group.GET("/categories/tree", getCategoryTreeHandler)
+	group.POST("/categories", createCategoryHandler)
+	group.GET("/categories/:id", getCategoryHandler)
+	group.PUT("/categories/:id", updateCategoryHandler)
+
+	group.POST("/categories/:id/move", moveCategoryHandler)
 }
 
 // CreateTimeLogHandler godoc
@@ -76,7 +78,7 @@ func createTimeLogHandler(c *gin.Context) {
 		return
 	}
 
-	// 重新查询以获取完整的Tag信息
+	// 重新查询以获取完整的Category信息
 	createdLog, err := service.GetTimeLogByID(tl.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
@@ -180,7 +182,7 @@ func updateTimeLogHandler(c *gin.Context) {
 		return
 	}
 
-	// 重新查询以获取完整的Tag信息
+	// 重新查询以获取完整的Category信息
 	updatedLog, err := service.GetTimeLogByID(tl.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
@@ -229,123 +231,178 @@ func parseUint(s string) (uint64, error) {
 	return strconv.ParseUint(s, 10, 64)
 }
 
-// --- Tag Handlers ---
+// --- Category Handlers ---
 
-// listTagsHandler godoc
-// @Summary 查询标签列表
-// @Description 获取所有标签
-// @Tags tag
+// listCategoriesHandler godoc
+// @Summary 查询分类列表
+// @Description 获取所有分类（扁平列表）
+// @Tags category
 // @Produce json
-// @Success 200 {array} model.Tag
+// @Param level query int false "Filter by level (0, 1, 2)"
+// @Param parent_id query int false "Filter by parent_id"
+// @Success 200 {array} model.Category
 // @Failure 500 {object} map[string]string
-// @Router /api/tags [get]
-func listTagsHandler(c *gin.Context) {
-	tags, err := service.ListTags()
+// @Router /api/categories [get]
+func listCategoriesHandler(c *gin.Context) {
+	levelStr := c.Query("level")
+	parentIDStr := c.Query("parent_id")
+
+	var categories []model.Category
+	var err error
+
+	if levelStr != "" {
+		level, parseErr := strconv.Atoi(levelStr)
+		if parseErr != nil {
+			c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "invalid level parameter"))
+			return
+		}
+		categories, err = service.ListCategoriesByLevel(level)
+	} else if parentIDStr != "" {
+		parentID, parseErr := strconv.ParseUint(parentIDStr, 10, 64)
+		if parseErr != nil {
+			c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "invalid parent_id parameter"))
+			return
+		}
+		pid := uint(parentID)
+		categories, err = service.GetCategoriesByParentID(&pid)
+	} else {
+		categories, err = service.ListCategories()
+	}
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, SuccessResponse(tags, "Tags retrieved successfully"))
+	c.JSON(http.StatusOK, SuccessResponse(categories, "Categories retrieved successfully"))
 }
 
-// createTagHandler godoc
-// @Summary 创建标签
-// @Description 新增一个标签
-// @Tags tag
-// @Accept json
+// getCategoryTreeHandler godoc
+// @Summary 获取分类树
+// @Description 获取树形结构的分类列表
+// @Tags category
 // @Produce json
-// @Param data body model.Tag true "标签数据"
-// @Success 200 {object} model.Tag
-// @Failure 400 {object} map[string]string
+// @Success 200 {array} model.CategoryNode
 // @Failure 500 {object} map[string]string
-// @Router /api/tags [post]
-func createTagHandler(c *gin.Context) {
-	var tag model.Tag
-	if err := c.ShouldBindJSON(&tag); err != nil {
-		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
-		return
-	}
-	if err := service.CreateTag(&tag); err != nil {
+// @Router /api/categories/tree [get]
+func getCategoryTreeHandler(c *gin.Context) {
+	tree, err := service.GetCategoryTree()
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, SuccessResponse(tag, "Tag created successfully"))
+	c.JSON(http.StatusOK, SuccessResponse(tree, "Category tree retrieved successfully"))
 }
 
-// getTagHandler godoc
-// @Summary 查询单个标签
-// @Description 根据ID获取标签
-// @Tags tag
+// createCategoryHandler godoc
+// @Summary 创建分类
+// @Description 新增一个分类（支持层级，最大深度3层）
+// @Tags category
+// @Accept json
 // @Produce json
-// @Param id path int true "标签ID"
-// @Success 200 {object} model.Tag
+// @Param data body model.Category true "分类数据"
+// @Success 200 {object} model.Category
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/categories [post]
+func createCategoryHandler(c *gin.Context) {
+	var category model.Category
+	if err := c.ShouldBindJSON(&category); err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
+		return
+	}
+	if err := service.CreateCategory(&category); err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, SuccessResponse(category, "Category created successfully"))
+}
+
+// getCategoryHandler godoc
+// @Summary 查询单个分类
+// @Description 根据ID获取分类
+// @Tags category
+// @Produce json
+// @Param id path int true "分类ID"
+// @Success 200 {object} model.Category
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
-// @Router /api/tags/{id} [get]
-func getTagHandler(c *gin.Context) {
+// @Router /api/categories/{id} [get]
+func getCategoryHandler(c *gin.Context) {
 	var id uint
 	if err := parseUintParam(c, "id", &id); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
-	tag, err := service.GetTagByID(id)
+	category, err := service.GetCategoryByID(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, ErrorResponse(http.StatusNotFound, err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, SuccessResponse(tag, "Tag retrieved successfully"))
+	c.JSON(http.StatusOK, SuccessResponse(category, "Category retrieved successfully"))
 }
 
-// updateTagHandler godoc
-// @Summary 更新标签
-// @Description 根据ID更新标签
-// @Tags tag
+// updateCategoryHandler godoc
+// @Summary 更新分类
+// @Description 根据ID更新分类（不允许修改层级结构）
+// @Tags category
 // @Accept json
 // @Produce json
-// @Param id path int true "标签ID"
-// @Param data body model.Tag true "标签数据"
-// @Success 200 {object} model.Tag
+// @Param id path int true "分类ID"
+// @Param data body model.Category true "分类数据"
+// @Success 200 {object} model.Category
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /api/tags/{id} [put]
-func updateTagHandler(c *gin.Context) {
+// @Router /api/categories/{id} [put]
+func updateCategoryHandler(c *gin.Context) {
 	var id uint
 	if err := parseUintParam(c, "id", &id); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
-	var tag model.Tag
-	if err := c.ShouldBindJSON(&tag); err != nil {
+	var category model.Category
+	if err := c.ShouldBindJSON(&category); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
-	tag.ID = id
-	if err := service.UpdateTag(&tag); err != nil {
+	category.ID = id
+	if err := service.UpdateCategory(&category); err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, SuccessResponse(tag, "Tag updated successfully"))
+	c.JSON(http.StatusOK, SuccessResponse(category, "Category updated successfully"))
 }
 
-// deleteTagHandler godoc
-// @Summary 删除标签
-// @Description 根据ID删除标签
-// @Tags tag
+
+// moveCategoryHandler godoc
+// @Summary 移动分类
+// @Description 将分类移动到新的父分类下
+// @Tags category
+// @Accept json
 // @Produce json
-// @Param id path int true "标签ID"
+// @Param id path int true "分类ID"
+// @Param data body object true "移动参数" {"parent_id": 0}
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /api/tags/{id} [delete]
-func deleteTagHandler(c *gin.Context) {
+// @Router /api/categories/{id}/move [post]
+func moveCategoryHandler(c *gin.Context) {
 	var id uint
 	if err := parseUintParam(c, "id", &id); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
-	if err := service.DeleteTag(id); err != nil {
+
+	var req struct {
+		ParentID *uint `json:"parent_id"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
+		return
+	}
+
+	if err := service.MoveCategory(id, req.ParentID); err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, SuccessResponse(nil, "Tag deleted successfully"))
+	c.JSON(http.StatusOK, SuccessResponse(nil, "Category moved successfully"))
 }

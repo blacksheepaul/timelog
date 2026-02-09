@@ -22,7 +22,7 @@ func NewTimelogMCPServer() *TimelogMCPServer {
 	InitMCPLogger(cfg)
 	LogMCPDebug("MCP server initializing", map[string]interface{}{
 		"config_path":         configPath,
-		"mcp_logging_enabled": cfg.Log.MCP.Enabled,
+		"mcp_logging_enabled": cfg.MCP.Enabled,
 	})
 
 	// Disable ORM logging to prevent ANSI escape codes in MCP output
@@ -38,6 +38,7 @@ func NewTimelogMCPServer() *TimelogMCPServer {
 	})
 
 	return &TimelogMCPServer{
-		db: dao.Db(),
+		db:     dao.Db(),
+		config: cfg,
 	}
 }

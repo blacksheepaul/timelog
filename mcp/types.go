@@ -1,12 +1,14 @@
 package main
 
 import (
+	"github.com/blacksheepaul/timelog/core/config"
 	"gorm.io/gorm"
 )
 
 // TimelogMCPServer is the main server struct
 type TimelogMCPServer struct {
-	db *gorm.DB
+	db     *gorm.DB
+	config *config.Config
 }
 
 // Tool parameter structs
