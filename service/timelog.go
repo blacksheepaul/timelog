@@ -81,7 +81,7 @@ func GetCategoriesByParentID(parentID *uint) ([]model.Category, error) {
 }
 
 // GetCategoryTree 获取分类树
-func GetCategoryTree() ([]model.CategoryNode, error) {
+func GetCategoryTree() ([]*model.CategoryNode, error) {
 	db := model.GetDao().Db()
 	return model.GetCategoryTree(db)
 }
