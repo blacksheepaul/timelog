@@ -74,3 +74,12 @@ fmt:
 	go fmt ./...
 	cd mcp && go fmt ./...
 	cd web && npx prettier --write src/ || true
+
+install-deps:
+	go install gorm.io/gen/tools/gentool@latest
+
+gen-model:
+	@cd model && \
+		gentool -c gen.yml
+	@rm -f model/generated/schema_migrations.gen.go model/generated/sqlite_sequence.gen.go 2>/dev/null || true
+	@echo "Models generated. Check compilation with: go build ./model/..."
