@@ -24,13 +24,17 @@ func (l FakeLogger) Errorw(msg string, keysAndValues ...interface{})  {}
 func (l FakeLogger) Fatal(fields ...interface{})                      {}
 func (l FakeLogger) Fatalw(msg string, keysAndValues ...interface{})  {}
 
-func TestAuthMiddlewareRejectsPasskeySession(t *testing.T) {
-	// Initialize model and service
+// setupTestEnvironment initializes model and service for testing
+func setupTestEnvironment() {
 	cfg := &config.Config{}
 	cfg.Database.Host = ":memory:"
 	cfg.Log.ORMLogLevel = 1
 	model.InitDao(cfg, FakeLogger{})
 	service.InitService(FakeLogger{}, cfg)
+}
+
+func TestAuthMiddlewareRejectsPasskeySession(t *testing.T) {
+	setupTestEnvironment()
 
 	// Create a passkey session (stored with passkey_session: prefix)
 	sessionID := "test-session-abc123"
@@ -58,12 +62,7 @@ func TestAuthMiddlewareRejectsPasskeySession(t *testing.T) {
 }
 
 func TestAuthMiddlewareAcceptsValidToken(t *testing.T) {
-	// Initialize model and service
-	cfg := &config.Config{}
-	cfg.Database.Host = ":memory:"
-	cfg.Log.ORMLogLevel = 1
-	model.InitDao(cfg, FakeLogger{})
-	service.InitService(FakeLogger{}, cfg)
+	setupTestEnvironment()
 
 	// Create a valid auth token (stored with auth_token: prefix)
 	token := "valid-auth-token-xyz789"
@@ -90,12 +89,7 @@ func TestAuthMiddlewareAcceptsValidToken(t *testing.T) {
 }
 
 func TestAuthMiddlewareRejectsUnprefixedCacheKey(t *testing.T) {
-	// Initialize model and service
-	cfg := &config.Config{}
-	cfg.Database.Host = ":memory:"
-	cfg.Log.ORMLogLevel = 1
-	model.InitDao(cfg, FakeLogger{})
-	service.InitService(FakeLogger{}, cfg)
+	setupTestEnvironment()
 
 	// Simulate an old-style cache entry without prefix (should not work)
 	token := "unprefixed-token-123"

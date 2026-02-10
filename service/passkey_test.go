@@ -22,13 +22,17 @@ func (l FakeLogger) Errorw(msg string, keysAndValues ...interface{})  {}
 func (l FakeLogger) Fatal(fields ...interface{})                      {}
 func (l FakeLogger) Fatalw(msg string, keysAndValues ...interface{})  {}
 
-func TestPasskeySessionKeyNamespacing(t *testing.T) {
-	// Initialize model for cache access
+// setupTestModel initializes the model with an in-memory database for testing
+func setupTestModel() *model.Dao {
 	cfg := &config.Config{}
 	cfg.Database.Host = ":memory:"
 	cfg.Log.ORMLogLevel = 1
 	model.InitDao(cfg, FakeLogger{})
-	dao := model.GetDao()
+	return model.GetDao()
+}
+
+func TestPasskeySessionKeyNamespacing(t *testing.T) {
+	dao := setupTestModel()
 
 	// Test 1: Verify passkey session uses namespaced key
 	sessionID := "test-session-123"
@@ -66,12 +70,7 @@ func TestPasskeySessionKeyNamespacing(t *testing.T) {
 }
 
 func TestAuthTokenKeyNamespacing(t *testing.T) {
-	// Initialize model for cache access
-	cfg := &config.Config{}
-	cfg.Database.Host = ":memory:"
-	cfg.Log.ORMLogLevel = 1
-	model.InitDao(cfg, FakeLogger{})
-	dao := model.GetDao()
+	dao := setupTestModel()
 
 	// Test 2: Verify auth token uses namespaced key
 	token := "test-auth-token-456"
@@ -97,12 +96,7 @@ func TestAuthTokenKeyNamespacing(t *testing.T) {
 }
 
 func TestSessionAndTokenIsolation(t *testing.T) {
-	// Initialize model for cache access
-	cfg := &config.Config{}
-	cfg.Database.Host = ":memory:"
-	cfg.Log.ORMLogLevel = 1
-	model.InitDao(cfg, FakeLogger{})
-	dao := model.GetDao()
+	dao := setupTestModel()
 
 	// Test 3: Verify that using the same ID for both doesn't cause collision
 	sharedID := "shared-id-789"
