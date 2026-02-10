@@ -213,11 +213,6 @@ func passkeyLoginFinishHandler(c *gin.Context) {
 		return
 	}
 
-	passkeyUser, ok := user.(*service.PasskeyUser)
-	if ok {
-		_ = passkeyUser
-	}
-
 	_ = service.UpdatePasskeyCredentialAuth(credential)
 
 	token, err := service.GenerateSessionToken()
