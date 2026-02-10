@@ -28,7 +28,10 @@
               <input
                 id="temp-password"
                 v-model="tempPassword"
-                type="text"
+                type="password"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
                 class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
                 placeholder="从命令行获取的临时密码"
               />
