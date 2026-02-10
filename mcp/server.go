@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"crypto/subtle"
+	"fmt"
 	"net/http"
 	"os"
 	"strings"

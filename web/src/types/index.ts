@@ -97,7 +97,6 @@ export interface PasskeyBeginResponse<T> {
 
 export interface PasskeyCredential {
   id: number
-  credential_id: string
   device_name?: string
   created_at: string
 }
