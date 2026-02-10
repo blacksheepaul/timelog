@@ -49,13 +49,15 @@ func StorePasskeySession(sessionID string, session *webauthn.SessionData, ttlSec
 		return errors.New("session is nil")
 	}
 	dao := model.GetDao()
-	dao.WriteCache(sessionID, session, ttlSeconds)
+	// Namespace the key to prevent confusion with auth tokens
+	dao.WriteCache("passkey_session:"+sessionID, session, ttlSeconds)
 	return nil
 }
 
 func LoadPasskeySession(sessionID string) (*webauthn.SessionData, error) {
 	dao := model.GetDao()
-	raw, ok := dao.GetCache(sessionID)
+	// Use namespaced key to retrieve passkey session
+	raw, ok := dao.GetCache("passkey_session:" + sessionID)
 	if !ok {
 		return nil, errors.New("session not found")
 	}
@@ -106,7 +108,8 @@ func GenerateSessionToken() (string, error) {
 
 func StoreSessionToken(token string, ttlSeconds int64) error {
 	dao := model.GetDao()
-	dao.WriteCache(token, true, ttlSeconds)
+	// Namespace the key to distinguish from passkey sessions
+	dao.WriteCache("auth_token:"+token, true, ttlSeconds)
 	return nil
 }
 
