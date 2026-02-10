@@ -23,6 +23,13 @@ type passkeyRegisterBeginRequest struct {
 	DeviceName   string `json:"device_name"`
 }
 
+// passkeyCredentialDTO is a sanitized credential response that excludes cryptographic material
+type passkeyCredentialDTO struct {
+	ID         uint   `json:"id"`
+	DeviceName string `json:"device_name"`
+	CreatedAt  string `json:"created_at"`
+}
+
 func setupPasskeyRoutes(public *gin.RouterGroup, protected *gin.RouterGroup) {
 	public.POST("/passkey/register/begin", passkeyRegisterBeginHandler)
 	public.POST("/passkey/register/finish", passkeyRegisterFinishHandler)
@@ -239,7 +246,17 @@ func passkeyListCredentialsHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, SuccessResponse(credentials, "passkey credentials"))
+	// Convert to sanitized DTO to avoid exposing cryptographic material
+	dtos := make([]passkeyCredentialDTO, len(credentials))
+	for i, cred := range credentials {
+		dtos[i] = passkeyCredentialDTO{
+			ID:         cred.ID,
+			DeviceName: cred.DeviceName,
+			CreatedAt:  cred.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		}
+	}
+
+	c.JSON(http.StatusOK, SuccessResponse(dtos, "passkey credentials"))
 }
 
 func passkeyDeleteCredentialHandler(c *gin.Context) {

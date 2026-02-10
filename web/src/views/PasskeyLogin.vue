@@ -1,7 +1,9 @@
 <template>
   <div class="min-h-[70vh] flex items-center justify-center px-4">
     <div class="w-full max-w-5xl grid lg:grid-cols-[0.9fr_1.1fr] gap-8">
-      <aside class="rounded-3xl border border-slate-200 bg-white p-8 shadow-[0_18px_45px_rgba(15,23,42,0.08)]">
+      <aside
+        class="rounded-3xl border border-slate-200 bg-white p-8 shadow-[0_18px_45px_rgba(15,23,42,0.08)]"
+      >
         <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Welcome back</p>
         <h2 class="mt-3 text-3xl font-semibold text-slate-900">用 Passkey 登录</h2>
         <p class="mt-2 text-slate-600">无密码、更快速的身份验证。</p>
@@ -15,12 +17,16 @@
             <p>验证成功后将自动进入仪表盘。</p>
           </div>
         </div>
-        <div class="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-500">
+        <div
+          class="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-500"
+        >
           WebAuthn 需要 HTTPS 或 localhost 环境。
         </div>
       </aside>
 
-      <section class="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 p-10 text-white">
+      <section
+        class="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 p-10 text-white"
+      >
         <div class="flex items-center justify-between">
           <div>
             <p class="text-xs uppercase tracking-[0.2em] text-slate-200">Passkey Login</p>
@@ -40,7 +46,10 @@
           <span v-else>使用 Passkey 登录</span>
         </button>
 
-        <p v-if="error" class="mt-6 rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-sm">
+        <p
+          v-if="error"
+          class="mt-6 rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-sm"
+        >
           {{ error }}
         </p>
       </section>

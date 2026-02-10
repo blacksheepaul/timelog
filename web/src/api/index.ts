@@ -188,7 +188,10 @@ export const constraintAPI = {
 }
 
 export const passkeyAPI = {
-  registerBegin: (tempPassword: string, deviceName?: string): Promise<ApiResponse<PasskeyBeginResponse<any>>> =>
+  registerBegin: (
+    tempPassword: string,
+    deviceName?: string
+  ): Promise<ApiResponse<PasskeyBeginResponse<any>>> =>
     api
       .post('/passkey/register/begin', {
         temp_password: tempPassword,
@@ -196,7 +199,11 @@ export const passkeyAPI = {
       })
       .then(res => res.data),
 
-  registerFinish: (sessionId: string, response: any, deviceName?: string): Promise<ApiResponse<PasskeyCredential>> =>
+  registerFinish: (
+    sessionId: string,
+    response: any,
+    deviceName?: string
+  ): Promise<ApiResponse<PasskeyCredential>> =>
     api
       .post('/passkey/register/finish', {
         session_id: sessionId,

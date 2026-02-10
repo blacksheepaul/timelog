@@ -8,14 +8,12 @@
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm uppercase tracking-[0.2em] text-slate-500">Passkey Setup</p>
-              <h2 class="mt-3 text-3xl font-semibold text-slate-900">
-                绑定你的设备
-              </h2>
-              <p class="mt-2 text-slate-600">
-                输入临时密码，完成一次安全的 Passkey 绑定。
-              </p>
+              <h2 class="mt-3 text-3xl font-semibold text-slate-900">绑定你的设备</h2>
+              <p class="mt-2 text-slate-600">输入临时密码，完成一次安全的 Passkey 绑定。</p>
             </div>
-            <div class="hidden md:flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-900 text-white">
+            <div
+              class="hidden md:flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-900 text-white"
+            >
               <KeyIcon class="h-7 w-7" />
             </div>
           </div>
@@ -53,14 +51,19 @@
               <span v-if="loading">正在绑定...</span>
               <span v-else>开始绑定</span>
             </button>
-            <p v-if="error" class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <p
+              v-if="error"
+              class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            >
               {{ error }}
             </p>
           </div>
         </div>
       </section>
 
-      <aside class="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 p-8 text-white">
+      <aside
+        class="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 p-8 text-white"
+      >
         <div class="flex items-center gap-3">
           <SparklesIcon class="h-5 w-5" />
           <p class="text-xs uppercase tracking-[0.2em] text-slate-200">What happens</p>
@@ -72,9 +75,7 @@
           <li>完成后即可使用 Passkey 登录，无需再输入密码。</li>
         </ul>
         <div class="mt-10 rounded-2xl border border-white/10 bg-white/5 p-4">
-          <p class="text-sm text-slate-100">
-            需要在 HTTPS 或 localhost 环境中操作 WebAuthn。
-          </p>
+          <p class="text-sm text-slate-100">需要在 HTTPS 或 localhost 环境中操作 WebAuthn。</p>
           <router-link
             to="/login"
             class="mt-3 inline-flex text-sm font-semibold text-white underline underline-offset-4"

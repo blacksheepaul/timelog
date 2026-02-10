@@ -25,7 +25,10 @@ const mapCredentialCreationOptions = (options: any) => {
     challenge: base64UrlToBuffer(publicKey.challenge),
     user: {
       ...publicKey.user,
-      id: typeof publicKey.user.id === 'string' ? base64UrlToBuffer(publicKey.user.id) : publicKey.user.id,
+      id:
+        typeof publicKey.user.id === 'string'
+          ? base64UrlToBuffer(publicKey.user.id)
+          : publicKey.user.id,
     },
     excludeCredentials: (publicKey.excludeCredentials || []).map((cred: any) => ({
       ...cred,
@@ -64,9 +67,13 @@ const credentialToJSON = (credential: PublicKeyCredential) => {
         clientDataJSON: bufferToBase64Url(response.clientDataJSON),
         attestationObject: bufferToBase64Url(response.attestationObject),
         transports: response.getTransports ? response.getTransports() : undefined,
-        authenticatorData: response.getAuthenticatorData ? bufferToBase64Url(response.getAuthenticatorData()) : undefined,
+        authenticatorData: response.getAuthenticatorData
+          ? bufferToBase64Url(response.getAuthenticatorData())
+          : undefined,
         publicKey: response.getPublicKey ? bufferToBase64Url(response.getPublicKey()) : undefined,
-        publicKeyAlgorithm: response.getPublicKeyAlgorithm ? response.getPublicKeyAlgorithm() : undefined,
+        publicKeyAlgorithm: response.getPublicKeyAlgorithm
+          ? response.getPublicKeyAlgorithm()
+          : undefined,
       },
     }
   }
