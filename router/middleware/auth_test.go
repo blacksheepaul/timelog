@@ -13,16 +13,16 @@ import (
 // FakeLogger for testing
 type FakeLogger struct{}
 
-func (l FakeLogger) Debug(fields ...interface{})                      {}
-func (l FakeLogger) Debugw(msg string, keysAndValues ...interface{})  {}
-func (l FakeLogger) Info(fields ...interface{})                       {}
-func (l FakeLogger) Infow(msg string, keysAndValues ...interface{})   {}
-func (l FakeLogger) Warn(fields ...interface{})                       {}
-func (l FakeLogger) Warnw(msg string, keysAndValues ...interface{})   {}
-func (l FakeLogger) Error(fields ...interface{})                      {}
-func (l FakeLogger) Errorw(msg string, keysAndValues ...interface{})  {}
-func (l FakeLogger) Fatal(fields ...interface{})                      {}
-func (l FakeLogger) Fatalw(msg string, keysAndValues ...interface{})  {}
+func (l FakeLogger) Debug(fields ...interface{})                     {}
+func (l FakeLogger) Debugw(msg string, keysAndValues ...interface{}) {}
+func (l FakeLogger) Info(fields ...interface{})                      {}
+func (l FakeLogger) Infow(msg string, keysAndValues ...interface{})  {}
+func (l FakeLogger) Warn(fields ...interface{})                      {}
+func (l FakeLogger) Warnw(msg string, keysAndValues ...interface{})  {}
+func (l FakeLogger) Error(fields ...interface{})                     {}
+func (l FakeLogger) Errorw(msg string, keysAndValues ...interface{}) {}
+func (l FakeLogger) Fatal(fields ...interface{})                     {}
+func (l FakeLogger) Fatalw(msg string, keysAndValues ...interface{}) {}
 
 // setupTestEnvironment initializes model and service for testing
 func setupTestEnvironment() {
@@ -38,7 +38,7 @@ func TestAuthMiddlewareRejectsPasskeySession(t *testing.T) {
 
 	// Create a passkey session (stored with passkey_session: prefix)
 	sessionID := "test-session-abc123"
-	
+
 	// Simulate storing a passkey session directly in cache
 	dao := model.GetDao()
 	dao.WriteCache("passkey_session:"+sessionID, map[string]string{"challenge": "test-challenge"}, 300)
@@ -80,7 +80,7 @@ func TestAuthMiddlewareAcceptsValidToken(t *testing.T) {
 
 	// Create a handler that sets status 200 if middleware passes
 	Auth()(c)
-	
+
 	if c.IsAborted() {
 		t.Errorf("Expected request to pass, but middleware aborted it with status %d", w.Code)
 	}

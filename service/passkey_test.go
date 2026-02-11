@@ -11,16 +11,16 @@ import (
 // FakeLogger for testing
 type FakeLogger struct{}
 
-func (l FakeLogger) Debug(fields ...interface{})                      {}
-func (l FakeLogger) Debugw(msg string, keysAndValues ...interface{})  {}
-func (l FakeLogger) Info(fields ...interface{})                       {}
-func (l FakeLogger) Infow(msg string, keysAndValues ...interface{})   {}
-func (l FakeLogger) Warn(fields ...interface{})                       {}
-func (l FakeLogger) Warnw(msg string, keysAndValues ...interface{})   {}
-func (l FakeLogger) Error(fields ...interface{})                      {}
-func (l FakeLogger) Errorw(msg string, keysAndValues ...interface{})  {}
-func (l FakeLogger) Fatal(fields ...interface{})                      {}
-func (l FakeLogger) Fatalw(msg string, keysAndValues ...interface{})  {}
+func (l FakeLogger) Debug(fields ...interface{})                     {}
+func (l FakeLogger) Debugw(msg string, keysAndValues ...interface{}) {}
+func (l FakeLogger) Info(fields ...interface{})                      {}
+func (l FakeLogger) Infow(msg string, keysAndValues ...interface{})  {}
+func (l FakeLogger) Warn(fields ...interface{})                      {}
+func (l FakeLogger) Warnw(msg string, keysAndValues ...interface{})  {}
+func (l FakeLogger) Error(fields ...interface{})                     {}
+func (l FakeLogger) Errorw(msg string, keysAndValues ...interface{}) {}
+func (l FakeLogger) Fatal(fields ...interface{})                     {}
+func (l FakeLogger) Fatalw(msg string, keysAndValues ...interface{}) {}
 
 // setupTestModel initializes the model with an in-memory database for testing
 func setupTestModel() *model.Dao {
