@@ -79,6 +79,6 @@ install-deps:
 	go install gorm.io/gen/tools/gentool@latest
 
 gen-model:
-	@TIMELOG_GEN_DB_PATH=$(TIMELOG_GEN_DB_PATH) go run -tags sqlite3 tools/gormgen/gormgen.go
+	@go run tools/gormgen/gormgen.go
 	@rm -f model/gen/schema_migrations.gen.go model/gen/sqlite_sequence.gen.go 2>/dev/null || true
 	@echo "Models generated. Check compilation with: go build ./model/..."

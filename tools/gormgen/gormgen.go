@@ -13,7 +13,7 @@ import (
 func main() {
 	dbPath := os.Getenv("TIMELOG_GEN_DB_PATH")
 	if dbPath == "" {
-		panic("TIMELOG_GEN_DB_PATH is not set")
+		panic("env TIMELOG_GEN_DB_PATH is not set")
 	}
 
 	db, err := gorm.Open(sqlite.Open(dbPath))
@@ -23,8 +23,8 @@ func main() {
 
 	// 创建生成器
 	g := gen.NewGenerator(gen.Config{
-		OutPath:           "../../model/gen",
-		ModelPkgPath:      "github.com/blacksheepaul/timelog/model/gen",
+		OutPath:           "../model/gen",
+		ModelPkgPath:      "./model/gen",
 		FieldNullable:     true,
 		FieldWithIndexTag: true,
 		FieldWithTypeTag:  true,
