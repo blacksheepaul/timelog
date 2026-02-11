@@ -210,7 +210,7 @@
   import { CheckCircleIcon, XCircleIcon, Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline'
   import { useSettings } from '@/composables/useSettings'
   import { setNotificationHandler } from '@/api'
-  import { getAuthToken, clearAuthToken } from '@/utils/auth'
+  import { clearAuthToken } from '@/utils/auth'
   import { useRouter } from 'vue-router'
 
   // 移动端菜单状态
@@ -285,14 +285,6 @@
 
   const router = useRouter()
 
-  const enforceAuth = () => {
-    const token = getAuthToken()
-    const routeName = router.currentRoute.value.name
-    if (!token && routeName !== 'PasskeyLogin' && routeName !== 'PasskeyRegister') {
-      router.push('/login')
-    }
-  }
-
   const handleLogout = () => {
     clearAuthToken()
     router.push('/login')
@@ -303,12 +295,6 @@
     const { loadSettings } = useSettings()
     loadSettings()
     initSystemNotifications()
-
-    enforceAuth()
-
-    router.afterEach(() => {
-      enforceAuth()
-    })
 
     // Register notification handler for API timeout errors
     setNotificationHandler(showNotification)
