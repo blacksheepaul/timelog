@@ -3,7 +3,8 @@ package main
 import (
 	"os"
 
-	"github.com/ncruces/go-sqlite3/gormlite"
+	_ "github.com/ncruces/go-sqlite3/embed"
+	sqlite "github.com/ncruces/go-sqlite3/gormlite"
 	"gorm.io/gorm"
 
 	"gorm.io/gen"
@@ -15,7 +16,7 @@ func main() {
 		panic("TIMELOG_GEN_DB_PATH is not set")
 	}
 
-	db, err := gorm.Open(gormlite.Open(dbPath))
+	db, err := gorm.Open(sqlite.Open(dbPath))
 	if err != nil {
 		panic(err)
 	}
