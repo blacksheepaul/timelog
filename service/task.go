@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/blacksheepaul/timelog/model"
+	"github.com/blacksheepaul/timelog/model/gen"
 )
 
 // CreateTask 创建任务
@@ -90,7 +91,7 @@ func GetTaskStats(date time.Time) (map[string]interface{}, error) {
 
 // CompleteTaskWithTimelog 完成任务并创建时间记录
 // 这是一个组合操作，将任务标记为完成，并可选地创建关联的时间记录
-func CompleteTaskWithTimelog(taskID uint, createTimelog bool, timelogData *model.TimeLog) error {
+func CompleteTaskWithTimelog(taskID uint, createTimelog bool, timelogData *gen.Timelog) error {
 	dao := model.GetDao()
 
 	// 开始事务
@@ -110,7 +111,8 @@ func CompleteTaskWithTimelog(taskID uint, createTimelog bool, timelogData *model
 
 	// 如果需要创建时间记录
 	if createTimelog && timelogData != nil {
-		timelogData.TaskID = &taskID
+		id := int32(taskID)
+		timelogData.TaskID = &id
 		if err := model.CreateTimeLog(tx.Db(), timelogData); err != nil {
 			tx.Rollback()
 			return err

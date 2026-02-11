@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/blacksheepaul/timelog/model"
+	"github.com/blacksheepaul/timelog/model/gen"
 	"github.com/blacksheepaul/timelog/service"
 	"github.com/gin-gonic/gin"
 )
@@ -62,13 +63,13 @@ func RegisterTimeLogRoutes(group *gin.RouterGroup) {
 // @Tags timelog
 // @Accept json
 // @Produce json
-// @Param data body model.TimeLog true "时间日志数据"
-// @Success 200 {object} model.TimeLog
+// @Param data body gen.Timelog true "时间日志数据"
+// @Success 200 {object} gen.Timelog
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/timelogs [post]
 func createTimeLogHandler(c *gin.Context) {
-	var tl model.TimeLog
+	var tl gen.Timelog
 	if err := c.ShouldBindJSON(&tl); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
@@ -78,8 +79,8 @@ func createTimeLogHandler(c *gin.Context) {
 		return
 	}
 
-	// 重新查询以获取完整的Category信息
-	createdLog, err := service.GetTimeLogByID(tl.ID)
+	// 重新查询以获取完整信息
+	createdLog, err := service.GetTimeLogByID(*tl.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
@@ -95,14 +96,14 @@ func createTimeLogHandler(c *gin.Context) {
 // @Produce json
 // @Param limit query int false "Limit number of results"
 // @Param order query string false "Order by field (default: created_at DESC)"
-// @Success 200 {array} model.TimeLog
+// @Success 200 {array} gen.Timelog
 // @Failure 500 {object} map[string]string
 // @Router /api/timelogs [get]
 func listTimeLogsHandler(c *gin.Context) {
 	limitStr := c.Query("limit")
 	orderBy := c.Query("order")
 
-	var tls []model.TimeLog
+	var tls []gen.Timelog
 	var err error
 
 	if limitStr != "" || orderBy != "" {
@@ -135,13 +136,13 @@ func listTimeLogsHandler(c *gin.Context) {
 // @Tags timelog
 // @Produce json
 // @Param id path int true "日志ID"
-// @Success 200 {object} model.TimeLog
+// @Success 200 {object} gen.Timelog
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Router /api/timelogs/{id} [get]
 func getTimeLogHandler(c *gin.Context) {
-	var id uint
-	if err := parseUintParam(c, "id", &id); err != nil {
+	var id int32
+	if err := parseInt32Param(c, "id", &id); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
@@ -160,30 +161,30 @@ func getTimeLogHandler(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "日志ID"
-// @Param data body model.TimeLog true "时间日志数据"
-// @Success 200 {object} model.TimeLog
+// @Param data body gen.Timelog true "时间日志数据"
+// @Success 200 {object} gen.Timelog
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/timelogs/{id} [put]
 func updateTimeLogHandler(c *gin.Context) {
-	var id uint
-	if err := parseUintParam(c, "id", &id); err != nil {
+	var id int32
+	if err := parseInt32Param(c, "id", &id); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
-	var tl model.TimeLog
+	var tl gen.Timelog
 	if err := c.ShouldBindJSON(&tl); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
-	tl.ID = id
+	tl.ID = &id
 	if err := service.UpdateTimeLog(&tl); err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
 
-	// 重新查询以获取完整的Category信息
-	updatedLog, err := service.GetTimeLogByID(tl.ID)
+	// 重新查询以获取完整信息
+	updatedLog, err := service.GetTimeLogByID(*tl.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
@@ -203,8 +204,8 @@ func updateTimeLogHandler(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /api/timelogs/{id} [delete]
 func deleteTimeLogHandler(c *gin.Context) {
-	var id uint
-	if err := parseUintParam(c, "id", &id); err != nil {
+	var id int32
+	if err := parseInt32Param(c, "id", &id); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
@@ -229,6 +230,17 @@ func parseUintParam(c *gin.Context, key string, out *uint) error {
 
 func parseUint(s string) (uint64, error) {
 	return strconv.ParseUint(s, 10, 64)
+}
+
+// parseInt32Param 辅助函数
+func parseInt32Param(c *gin.Context, key string, out *int32) error {
+	idStr := c.Param(key)
+	id64, err := strconv.ParseInt(idStr, 10, 32)
+	if err != nil {
+		return err
+	}
+	*out = int32(id64)
+	return nil
 }
 
 // --- Category Handlers ---
@@ -371,7 +383,6 @@ func updateCategoryHandler(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, SuccessResponse(category, "Category updated successfully"))
 }
-
 
 // moveCategoryHandler godoc
 // @Summary 移动分类

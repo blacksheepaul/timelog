@@ -3,54 +3,35 @@ package model
 import (
 	"time"
 
+	"github.com/blacksheepaul/timelog/model/gen"
 	"gorm.io/gorm"
 )
-
-// TimeLog 表示一条时间日志
-// 字段与 timelogs 表结构保持一致
-// id, user_id, start_time, end_time, tag, remark
-
-type TimeLog struct {
-	gorm.Model
-	UserID     uint       `gorm:"column:user_id" json:"user_id"`
-	StartTime  time.Time  `gorm:"column:start_time" json:"start_time"`
-	EndTime    *time.Time `gorm:"column:end_time" json:"end_time"`
-	CategoryID uint       `gorm:"column:category_id" json:"category_id"`
-	Category   Category   `gorm:"foreignKey:CategoryID" json:"category"`
-	TaskID     *uint      `gorm:"column:task_id" json:"task_id,omitempty"`
-	Task       *Task      `gorm:"foreignKey:TaskID" json:"task,omitempty"`
-	Remark     string     `gorm:"column:remark" json:"remarks"`
-}
-
-func (TimeLog) TableName() string {
-	return "timelogs"
-}
 
 // --- CRUD ---
 
 // CreateTimeLog 新增一条时间日志
-func CreateTimeLog(db *gorm.DB, tl *TimeLog) error {
+func CreateTimeLog(db *gorm.DB, tl *gen.Timelog) error {
 	return db.Create(tl).Error
 }
 
 // GetTimeLogByID 根据ID获取时间日志
-func GetTimeLogByID(db *gorm.DB, id uint) (*TimeLog, error) {
-	var tl TimeLog
-	err := db.Preload("Category").Preload("Task").First(&tl, id).Error
+func GetTimeLogByID(db *gorm.DB, id int32) (*gen.Timelog, error) {
+	var tl gen.Timelog
+	err := db.First(&tl, id).Error
 	return &tl, err
 }
 
 // ListTimeLogs 查询时间日志（可扩展条件）
-func ListTimeLogs(db *gorm.DB, conds ...interface{}) ([]TimeLog, error) {
-	var tls []TimeLog
-	err := db.Preload("Category").Preload("Task").Find(&tls, conds...).Error
+func ListTimeLogs(db *gorm.DB, conds ...interface{}) ([]gen.Timelog, error) {
+	var tls []gen.Timelog
+	err := db.Find(&tls, conds...).Error
 	return tls, err
 }
 
 // ListTimeLogsWithOptions 查询时间日志（支持排序和限制）
-func ListTimeLogsWithOptions(db *gorm.DB, limit int, orderBy string, conds ...interface{}) ([]TimeLog, error) {
-	var tls []TimeLog
-	query := db.Preload("Category").Preload("Task")
+func ListTimeLogsWithOptions(db *gorm.DB, limit int, orderBy string, conds ...interface{}) ([]gen.Timelog, error) {
+	var tls []gen.Timelog
+	query := db
 
 	if len(conds) > 0 {
 		query = query.Where(conds[0], conds[1:]...)
@@ -69,13 +50,13 @@ func ListTimeLogsWithOptions(db *gorm.DB, limit int, orderBy string, conds ...in
 }
 
 // UpdateTimeLog 更新时间日志
-func UpdateTimeLog(db *gorm.DB, tl *TimeLog) error {
+func UpdateTimeLog(db *gorm.DB, tl *gen.Timelog) error {
 	return db.Save(tl).Error
 }
 
 // DeleteTimeLog 删除时间日志
-func DeleteTimeLog(db *gorm.DB, id uint) error {
-	return db.Delete(&TimeLog{}, id).Error
+func DeleteTimeLog(db *gorm.DB, id int32) error {
+	return db.Delete(&gen.Timelog{}, id).Error
 }
 
 // 定义新加坡时区
@@ -98,7 +79,7 @@ func GetSingaporeLocation() *time.Location {
 // ListTimeLogsByLocalDateRange 根据本地日期范围查询时间日志
 // startDateStr 和 endDateStr 格式为 "YYYY-MM-DD"，会被解析为新加坡时区
 // 数据库存储的是 UTC 时间，该函数会自动转换
-func ListTimeLogsByLocalDateRange(db *gorm.DB, startDateStr, endDateStr string) ([]TimeLog, error) {
+func ListTimeLogsByLocalDateRange(db *gorm.DB, startDateStr, endDateStr string) ([]gen.Timelog, error) {
 	startDate, err := time.ParseInLocation("2006-01-02", startDateStr, singaporeLocation)
 	if err != nil {
 		return nil, err

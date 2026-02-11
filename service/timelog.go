@@ -2,42 +2,43 @@ package service
 
 import (
 	"github.com/blacksheepaul/timelog/model"
+	"github.com/blacksheepaul/timelog/model/gen"
 )
 
 // --- TimeLog Service ---
 
 // CreateTimeLog 新增一条时间日志
-func CreateTimeLog(tl *model.TimeLog) error {
+func CreateTimeLog(tl *gen.Timelog) error {
 	db := model.GetDao().Db()
 	return model.CreateTimeLog(db, tl)
 }
 
 // GetTimeLogByID 根据ID获取时间日志
-func GetTimeLogByID(id uint) (*model.TimeLog, error) {
+func GetTimeLogByID(id int32) (*gen.Timelog, error) {
 	db := model.GetDao().Db()
 	return model.GetTimeLogByID(db, id)
 }
 
 // ListTimeLogs 查询时间日志（可扩展条件）
-func ListTimeLogs(conds ...interface{}) ([]model.TimeLog, error) {
+func ListTimeLogs(conds ...interface{}) ([]gen.Timelog, error) {
 	db := model.GetDao().Db()
 	return model.ListTimeLogs(db, conds...)
 }
 
 // ListTimeLogsWithOptions 查询时间日志（支持排序和限制）
-func ListTimeLogsWithOptions(limit int, orderBy string, conds ...interface{}) ([]model.TimeLog, error) {
+func ListTimeLogsWithOptions(limit int, orderBy string, conds ...interface{}) ([]gen.Timelog, error) {
 	db := model.GetDao().Db()
 	return model.ListTimeLogsWithOptions(db, limit, orderBy, conds...)
 }
 
 // UpdateTimeLog 更新一条时间日志
-func UpdateTimeLog(tl *model.TimeLog) error {
+func UpdateTimeLog(tl *gen.Timelog) error {
 	db := model.GetDao().Db()
 	return model.UpdateTimeLog(db, tl)
 }
 
 // DeleteTimeLog 删除一条时间日志
-func DeleteTimeLog(id uint) error {
+func DeleteTimeLog(id int32) error {
 	db := model.GetDao().Db()
 	return model.DeleteTimeLog(db, id)
 }
@@ -91,7 +92,6 @@ func UpdateCategory(category *model.Category) error {
 	db := model.GetDao().Db()
 	return model.UpdateCategory(db, category)
 }
-
 
 // MoveCategory 移动分类
 func MoveCategory(categoryID uint, newParentID *uint) error {
