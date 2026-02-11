@@ -79,6 +79,6 @@ install-deps:
 	go install gorm.io/gen/tools/gentool@latest
 
 gen-model:
-	@go run tools/gormgen/gormgen.go
+	@go run model/gentool/gormgen.go
 	@rm -f model/gen/schema_migrations.gen.go model/gen/sqlite_sequence.gen.go 2>/dev/null || true
 	@echo "Models generated. Check compilation with: go build ./model/..."
