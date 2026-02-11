@@ -151,12 +151,23 @@ func GetTasksByStatus(ctx context.Context, req *mcp.CallToolRequest, args TaskSt
 			continue
 		}
 
+		categoryName := ""
+		categoryColor := ""
+		if task.CategoryID > 0 {
+			if cat, err := model.GetCategoryByID(server.db, int32(task.CategoryID)); err == nil && cat != nil {
+				categoryName = cat.Name
+				if cat.Color != nil {
+					categoryColor = *cat.Color
+				}
+			}
+		}
+
 		entry := map[string]interface{}{
 			"id":                task.ID,
 			"title":             task.Title,
 			"description":       task.Description,
-			"category":          task.Category.Name,
-			"category_color":    task.Category.Color,
+			"category":          categoryName,
+			"category_color":    categoryColor,
 			"due_date":          task.DueDate.In(singaporeLocation).Format("2006-01-02"),
 			"estimated_minutes": task.EstimatedMinutes,
 			"is_completed":      task.IsCompleted,

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/blacksheepaul/timelog/model"
+	"github.com/blacksheepaul/timelog/model/gen"
 	"github.com/blacksheepaul/timelog/service"
 )
 
@@ -13,30 +14,24 @@ func TestCategoryTreeStructure(t *testing.T) {
 	db.Exec("DELETE FROM categories")
 
 	// Create test hierarchy: Root -> Child -> Grandchild
-	root := &model.Category{
-		Name:        "Root Category",
-		Color:       "#FF0000",
-		Description: "Root level category",
+	root := &gen.Category{
+		Name: "Root Category",
 	}
 	if err := service.CreateCategory(root); err != nil {
 		t.Fatalf("Failed to create root category: %v", err)
 	}
 
-	child := &model.Category{
-		Name:        "Child Category",
-		Color:       "#00FF00",
-		Description: "Child level category",
-		ParentID:    &root.ID,
+	child := &gen.Category{
+		Name:     "Child Category",
+		ParentID: root.ID,
 	}
 	if err := service.CreateCategory(child); err != nil {
 		t.Fatalf("Failed to create child category: %v", err)
 	}
 
-	grandchild := &model.Category{
-		Name:        "Grandchild Category",
-		Color:       "#0000FF",
-		Description: "Grandchild level category",
-		ParentID:    &child.ID,
+	grandchild := &gen.Category{
+		Name:     "Grandchild Category",
+		ParentID: child.ID,
 	}
 	if err := service.CreateCategory(grandchild); err != nil {
 		t.Fatalf("Failed to create grandchild category: %v", err)
@@ -82,11 +77,11 @@ func TestCategoryTreeStructure(t *testing.T) {
 
 	// Verify pointers are preserved (this is the key test)
 	// If pointers weren't used, the children arrays would be empty or incomplete
-	if rootNode.Children[0].Category.ID != child.ID {
+	if *rootNode.Children[0].Category.ID != *child.ID {
 		t.Error("Child node ID doesn't match expected child ID - pointer reference may be lost")
 	}
 
-	if rootNode.Children[0].Children[0].Category.ID != grandchild.ID {
+	if *rootNode.Children[0].Children[0].Category.ID != *grandchild.ID {
 		t.Error("Grandchild node ID doesn't match expected grandchild ID - pointer reference may be lost")
 	}
 }
@@ -97,37 +92,31 @@ func TestCategoryTreeMultipleRoots(t *testing.T) {
 	db.Exec("DELETE FROM categories")
 
 	// Create multiple root categories with children
-	root1 := &model.Category{
-		Name:        "Root 1",
-		Color:       "#FF0000",
-		Description: "First root",
+	root1 := &gen.Category{
+		Name: "Root 1",
 	}
 	if err := service.CreateCategory(root1); err != nil {
 		t.Fatalf("Failed to create root1: %v", err)
 	}
 
-	child1 := &model.Category{
+	child1 := &gen.Category{
 		Name:     "Child 1",
-		Color:    "#00FF00",
-		ParentID: &root1.ID,
+		ParentID: root1.ID,
 	}
 	if err := service.CreateCategory(child1); err != nil {
 		t.Fatalf("Failed to create child1: %v", err)
 	}
 
-	root2 := &model.Category{
-		Name:        "Root 2",
-		Color:       "#0000FF",
-		Description: "Second root",
+	root2 := &gen.Category{
+		Name: "Root 2",
 	}
 	if err := service.CreateCategory(root2); err != nil {
 		t.Fatalf("Failed to create root2: %v", err)
 	}
 
-	child2 := &model.Category{
+	child2 := &gen.Category{
 		Name:     "Child 2",
-		Color:    "#FFFF00",
-		ParentID: &root2.ID,
+		ParentID: root2.ID,
 	}
 	if err := service.CreateCategory(child2); err != nil {
 		t.Fatalf("Failed to create child2: %v", err)

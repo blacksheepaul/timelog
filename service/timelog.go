@@ -46,37 +46,37 @@ func DeleteTimeLog(id int32) error {
 // --- Category Service ---
 
 // CreateCategory 创建分类
-func CreateCategory(category *model.Category) error {
+func CreateCategory(category *gen.Category) error {
 	db := model.GetDao().Db()
 	return model.CreateCategory(db, category)
 }
 
 // GetCategoryByID 根据ID获取分类
-func GetCategoryByID(id uint) (*model.Category, error) {
+func GetCategoryByID(id int32) (*gen.Category, error) {
 	db := model.GetDao().Db()
 	return model.GetCategoryByID(db, id)
 }
 
 // GetCategoryByName 根据名称获取分类
-func GetCategoryByName(name string, parentID *uint) (*model.Category, error) {
+func GetCategoryByName(name string, parentID *int32) (*gen.Category, error) {
 	db := model.GetDao().Db()
 	return model.GetCategoryByName(db, name, parentID)
 }
 
 // ListCategories 查询所有分类
-func ListCategories(conds ...interface{}) ([]model.Category, error) {
+func ListCategories(conds ...interface{}) ([]gen.Category, error) {
 	db := model.GetDao().Db()
 	return model.ListCategories(db, conds...)
 }
 
 // ListCategoriesByLevel 按层级查询分类
-func ListCategoriesByLevel(level int) ([]model.Category, error) {
+func ListCategoriesByLevel(level int32) ([]gen.Category, error) {
 	db := model.GetDao().Db()
 	return model.ListCategoriesByLevel(db, level)
 }
 
 // GetCategoriesByParentID 获取指定父分类下的子分类
-func GetCategoriesByParentID(parentID *uint) ([]model.Category, error) {
+func GetCategoriesByParentID(parentID *int32) ([]gen.Category, error) {
 	db := model.GetDao().Db()
 	return model.GetCategoriesByParentID(db, parentID)
 }
@@ -88,13 +88,13 @@ func GetCategoryTree() ([]*model.CategoryNode, error) {
 }
 
 // UpdateCategory 更新分类
-func UpdateCategory(category *model.Category) error {
+func UpdateCategory(category *gen.Category) error {
 	db := model.GetDao().Db()
 	return model.UpdateCategory(db, category)
 }
 
 // MoveCategory 移动分类
-func MoveCategory(categoryID uint, newParentID *uint) error {
+func MoveCategory(categoryID int32, newParentID *int32) error {
 	db := model.GetDao().Db()
 	return model.MoveCategory(db, categoryID, newParentID)
 }

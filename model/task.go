@@ -25,7 +25,6 @@ type Task struct {
 	Title            string         `gorm:"column:title;not null;size:200" json:"title"`
 	Description      string         `gorm:"column:description;type:text" json:"description"`
 	CategoryID       uint           `gorm:"column:category_id;not null" json:"category_id"`
-	Category         Category       `gorm:"foreignKey:CategoryID" json:"category"`
 	DueDate          time.Time      `gorm:"column:due_date;not null" json:"due_date"`
 	EstimatedMinutes int            `gorm:"column:estimated_minutes;not null" json:"estimated_minutes"`
 	IsCompleted      bool           `gorm:"column:is_completed;default:false" json:"is_completed"`

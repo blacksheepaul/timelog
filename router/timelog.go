@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/blacksheepaul/timelog/model"
 	"github.com/blacksheepaul/timelog/model/gen"
 	"github.com/blacksheepaul/timelog/service"
 	"github.com/gin-gonic/gin"
@@ -252,30 +251,30 @@ func parseInt32Param(c *gin.Context, key string, out *int32) error {
 // @Produce json
 // @Param level query int false "Filter by level (0, 1, 2)"
 // @Param parent_id query int false "Filter by parent_id"
-// @Success 200 {array} model.Category
+// @Success 200 {array} gen.Category
 // @Failure 500 {object} map[string]string
 // @Router /api/categories [get]
 func listCategoriesHandler(c *gin.Context) {
 	levelStr := c.Query("level")
 	parentIDStr := c.Query("parent_id")
 
-	var categories []model.Category
+	var categories []gen.Category
 	var err error
 
 	if levelStr != "" {
-		level, parseErr := strconv.Atoi(levelStr)
+		level, parseErr := strconv.ParseInt(levelStr, 10, 32)
 		if parseErr != nil {
 			c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "invalid level parameter"))
 			return
 		}
-		categories, err = service.ListCategoriesByLevel(level)
+		categories, err = service.ListCategoriesByLevel(int32(level))
 	} else if parentIDStr != "" {
-		parentID, parseErr := strconv.ParseUint(parentIDStr, 10, 64)
+		parentID, parseErr := strconv.ParseInt(parentIDStr, 10, 32)
 		if parseErr != nil {
 			c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "invalid parent_id parameter"))
 			return
 		}
-		pid := uint(parentID)
+		pid := int32(parentID)
 		categories, err = service.GetCategoriesByParentID(&pid)
 	} else {
 		categories, err = service.ListCategories()
@@ -311,13 +310,13 @@ func getCategoryTreeHandler(c *gin.Context) {
 // @Tags category
 // @Accept json
 // @Produce json
-// @Param data body model.Category true "分类数据"
-// @Success 200 {object} model.Category
+// @Param data body gen.Category true "分类数据"
+// @Success 200 {object} gen.Category
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/categories [post]
 func createCategoryHandler(c *gin.Context) {
-	var category model.Category
+	var category gen.Category
 	if err := c.ShouldBindJSON(&category); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
@@ -335,13 +334,13 @@ func createCategoryHandler(c *gin.Context) {
 // @Tags category
 // @Produce json
 // @Param id path int true "分类ID"
-// @Success 200 {object} model.Category
+// @Success 200 {object} gen.Category
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Router /api/categories/{id} [get]
 func getCategoryHandler(c *gin.Context) {
-	var id uint
-	if err := parseUintParam(c, "id", &id); err != nil {
+	var id int32
+	if err := parseInt32Param(c, "id", &id); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
@@ -360,23 +359,23 @@ func getCategoryHandler(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "分类ID"
-// @Param data body model.Category true "分类数据"
-// @Success 200 {object} model.Category
+// @Param data body gen.Category true "分类数据"
+// @Success 200 {object} gen.Category
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/categories/{id} [put]
 func updateCategoryHandler(c *gin.Context) {
-	var id uint
-	if err := parseUintParam(c, "id", &id); err != nil {
+	var id int32
+	if err := parseInt32Param(c, "id", &id); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
-	var category model.Category
+	var category gen.Category
 	if err := c.ShouldBindJSON(&category); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
-	category.ID = id
+	category.ID = &id
 	if err := service.UpdateCategory(&category); err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
@@ -397,14 +396,14 @@ func updateCategoryHandler(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /api/categories/{id}/move [post]
 func moveCategoryHandler(c *gin.Context) {
-	var id uint
-	if err := parseUintParam(c, "id", &id); err != nil {
+	var id int32
+	if err := parseInt32Param(c, "id", &id); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
 
 	var req struct {
-		ParentID *uint `json:"parent_id"`
+		ParentID *int32 `json:"parent_id"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
