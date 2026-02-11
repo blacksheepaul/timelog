@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { getAuthToken } from '@/utils/auth'
 import type {
   TimeLog,
   Category,
@@ -13,6 +14,9 @@ import type {
   Constraint,
   CreateConstraintRequest,
   UpdateConstraintRequest,
+  PasskeyBeginResponse,
+  PasskeyCredential,
+  PasskeyLoginResponse,
 } from '@/types'
 
 const api = axios.create({
@@ -21,6 +25,15 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+})
+
+api.interceptors.request.use(config => {
+  const token = getAuthToken()
+  if (token) {
+    config.headers = config.headers || {}
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
 })
 
 // Store notification handler to be set by App.vue
@@ -172,6 +185,49 @@ export const constraintAPI = {
 
   reactivate: (id: number): Promise<ApiResponse<null>> =>
     api.post(`/constraints/${id}/reactivate`).then(res => res.data),
+}
+
+export const passkeyAPI = {
+  registerBegin: (
+    tempPassword: string,
+    deviceName?: string
+  ): Promise<ApiResponse<PasskeyBeginResponse<any>>> =>
+    api
+      .post('/passkey/register/begin', {
+        temp_password: tempPassword,
+        device_name: deviceName,
+      })
+      .then(res => res.data),
+
+  registerFinish: (
+    sessionId: string,
+    response: any,
+    deviceName?: string
+  ): Promise<ApiResponse<PasskeyCredential>> =>
+    api
+      .post('/passkey/register/finish', {
+        session_id: sessionId,
+        response,
+        device_name: deviceName,
+      })
+      .then(res => res.data),
+
+  loginBegin: (): Promise<ApiResponse<PasskeyBeginResponse<any>>> =>
+    api.post('/passkey/login/begin').then(res => res.data),
+
+  loginFinish: (sessionId: string, response: any): Promise<ApiResponse<PasskeyLoginResponse>> =>
+    api
+      .post('/passkey/login/finish', {
+        session_id: sessionId,
+        response,
+      })
+      .then(res => res.data),
+
+  listCredentials: (): Promise<ApiResponse<PasskeyCredential[]>> =>
+    api.get('/passkey/credentials').then(res => res.data),
+
+  deleteCredential: (id: number): Promise<ApiResponse<null>> =>
+    api.delete(`/passkey/credentials/${id}`).then(res => res.data),
 }
 
 export default api

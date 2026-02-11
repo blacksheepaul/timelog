@@ -65,6 +65,21 @@
             </nav>
           </div>
 
+          <div class="hidden md:flex items-center gap-4">
+            <router-link
+              to="/passkey/register"
+              class="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+            >
+              绑定设备
+            </router-link>
+            <button
+              class="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+              @click="handleLogout"
+            >
+              退出
+            </button>
+          </div>
+
           <!-- 移动端菜单按钮 -->
           <button
             @click="mobileMenuOpen = !mobileMenuOpen"
@@ -78,6 +93,13 @@
         <!-- 移动端导航菜单 -->
         <div v-if="mobileMenuOpen" class="md:hidden border-t border-gray-200 py-4">
           <nav class="space-y-1">
+            <router-link
+              to="/passkey/register"
+              class="block px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+              @click="mobileMenuOpen = false"
+            >
+              绑定设备
+            </router-link>
             <router-link
               to="/"
               class="block px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
@@ -138,6 +160,12 @@
             >
               约束
             </router-link>
+            <button
+              class="block w-full px-3 py-2 text-left text-base font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+              @click="handleLogout"
+            >
+              退出
+            </button>
           </nav>
         </div>
       </div>
@@ -182,6 +210,8 @@
   import { CheckCircleIcon, XCircleIcon, Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline'
   import { useSettings } from '@/composables/useSettings'
   import { setNotificationHandler } from '@/api'
+  import { getAuthToken, clearAuthToken } from '@/utils/auth'
+  import { useRouter } from 'vue-router'
 
   // 移动端菜单状态
   const mobileMenuOpen = ref(false)
@@ -253,11 +283,32 @@
     })
   }
 
+  const router = useRouter()
+
+  const enforceAuth = () => {
+    const token = getAuthToken()
+    const routeName = router.currentRoute.value.name
+    if (!token && routeName !== 'PasskeyLogin' && routeName !== 'PasskeyRegister') {
+      router.push('/login')
+    }
+  }
+
+  const handleLogout = () => {
+    clearAuthToken()
+    router.push('/login')
+  }
+
   // Initialize settings on app mount
   onMounted(() => {
     const { loadSettings } = useSettings()
     loadSettings()
     initSystemNotifications()
+
+    enforceAuth()
+
+    router.afterEach(() => {
+      enforceAuth()
+    })
 
     // Register notification handler for API timeout errors
     setNotificationHandler(showNotification)
