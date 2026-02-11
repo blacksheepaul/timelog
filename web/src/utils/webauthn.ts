@@ -70,7 +70,10 @@ const credentialToJSON = (credential: PublicKeyCredential) => {
         authenticatorData: response.getAuthenticatorData
           ? bufferToBase64Url(response.getAuthenticatorData())
           : undefined,
-        publicKey: response.getPublicKey ? bufferToBase64Url(response.getPublicKey()) : undefined,
+        publicKey:
+          response.getPublicKey && response.getPublicKey() !== null
+            ? bufferToBase64Url(response.getPublicKey()!)
+            : undefined,
         publicKeyAlgorithm: response.getPublicKeyAlgorithm
           ? response.getPublicKeyAlgorithm()
           : undefined,
