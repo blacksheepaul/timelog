@@ -104,24 +104,15 @@ func GetTimeLogsByDateRange(ctx context.Context, req *mcp.CallToolRequest, args 
 		}
 
 		entry := map[string]interface{}{
-			"id":             tl.ID,
-			"start_time":     tl.StartTime.In(sgLocation).Format("2006-01-02 15:04:05"),
-			"end_time":       nil,
-			"duration":       durationStr,
-			"category":       tl.Category.Name,
-			"category_color": tl.Category.Color,
-			"remarks":        tl.Remark,
+			"id":         tl.ID,
+			"start_time": tl.StartTime.In(sgLocation).Format("2006-01-02 15:04:05"),
+			"end_time":   nil,
+			"duration":   durationStr,
+			"remarks":    tl.Remark,
 		}
 
 		if tl.EndTime != nil {
 			entry["end_time"] = tl.EndTime.In(sgLocation).Format("2006-01-02 15:04:05")
-		}
-
-		if tl.Task != nil {
-			entry["task"] = map[string]interface{}{
-				"id":    tl.Task.ID,
-				"title": tl.Task.Title,
-			}
 		}
 
 		result = append(result, entry)
@@ -152,23 +143,36 @@ func GetTasksByStatus(ctx context.Context, req *mcp.CallToolRequest, args TaskSt
 
 	var result []map[string]interface{}
 	for _, task := range tasks {
+		isCompleted := task.IsCompleted != nil && *task.IsCompleted
+
 		// Filter by status
-		if statusStr == "completed" && !task.IsCompleted {
+		if statusStr == "completed" && !isCompleted {
 			continue
 		}
-		if statusStr == "pending" && task.IsCompleted {
+		if statusStr == "pending" && isCompleted {
 			continue
+		}
+
+		categoryName := ""
+		categoryColor := ""
+		if task.CategoryID > 0 {
+			if cat, err := model.GetCategoryByID(server.db, int32(task.CategoryID)); err == nil && cat != nil {
+				categoryName = cat.Name
+				if cat.Color != nil {
+					categoryColor = *cat.Color
+				}
+			}
 		}
 
 		entry := map[string]interface{}{
 			"id":                task.ID,
 			"title":             task.Title,
 			"description":       task.Description,
-			"category":          task.Category.Name,
-			"category_color":    task.Category.Color,
+			"category":          categoryName,
+			"category_color":    categoryColor,
 			"due_date":          task.DueDate.In(singaporeLocation).Format("2006-01-02"),
 			"estimated_minutes": task.EstimatedMinutes,
-			"is_completed":      task.IsCompleted,
+			"is_completed":      isCompleted,
 			"created_at":        task.CreatedAt.In(singaporeLocation).Format("2006-01-02 15:04:05"),
 		}
 
@@ -202,19 +206,10 @@ func GetCurrentActivity(ctx context.Context, req *mcp.CallToolRequest, args Curr
 		minutes := int(duration.Minutes()) % 60
 
 		entry := map[string]interface{}{
-			"id":             tl.ID,
-			"start_time":     tl.StartTime.In(singaporeLocation).Format("2006-01-02 15:04:05"),
-			"duration":       fmt.Sprintf("%dh %dm", hours, minutes),
-			"category":       tl.Category.Name,
-			"category_color": tl.Category.Color,
-			"remarks":        tl.Remark,
-		}
-
-		if tl.Task != nil {
-			entry["task"] = map[string]interface{}{
-				"id":    tl.Task.ID,
-				"title": tl.Task.Title,
-			}
+			"id":         tl.ID,
+			"start_time": tl.StartTime.In(singaporeLocation).Format("2006-01-02 15:04:05"),
+			"duration":   fmt.Sprintf("%dh %dm", hours, minutes),
+			"remarks":    tl.Remark,
 		}
 
 		result = append(result, entry)
@@ -237,20 +232,26 @@ func GetActiveConstraints(ctx context.Context, req *mcp.CallToolRequest, args Co
 
 	var result []map[string]interface{}
 	for _, constraint := range constraints {
+		isActive := constraint.IsActive != nil && *constraint.IsActive
+		createdAt := ""
+		if constraint.CreatedAt != nil {
+			createdAt = constraint.CreatedAt.In(singaporeLocation).Format("2006-01-02 15:04:05")
+		}
+
 		entry := map[string]interface{}{
 			"id":               constraint.ID,
 			"description":      constraint.Description,
 			"punishment_quote": constraint.PunishmentQuote,
 			"start_date":       constraint.StartDate.In(singaporeLocation).Format("2006-01-02"),
-			"is_active":        constraint.IsActive,
-			"created_at":       constraint.CreatedAt.In(singaporeLocation).Format("2006-01-02 15:04:05"),
+			"is_active":        isActive,
+			"created_at":       createdAt,
 		}
 
 		if constraint.EndDate != nil {
 			entry["end_date"] = constraint.EndDate.In(singaporeLocation).Format("2006-01-02")
 		}
-		if constraint.EndReason != "" {
-			entry["end_reason"] = constraint.EndReason
+		if constraint.EndReason != nil && *constraint.EndReason != "" {
+			entry["end_reason"] = *constraint.EndReason
 		}
 
 		result = append(result, entry)

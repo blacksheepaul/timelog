@@ -4,58 +4,59 @@ import (
 	"time"
 
 	"github.com/blacksheepaul/timelog/model"
+	"github.com/blacksheepaul/timelog/model/gen"
 )
 
 // CreateConstraint 创建约束
-func CreateConstraint(constraint *model.Constraint) error {
+func CreateConstraint(constraint *gen.Constraint) error {
 	dao := model.GetDao()
 	return model.CreateConstraint(dao.Db(), constraint)
 }
 
 // GetConstraintByID 根据ID获取约束
-func GetConstraintByID(id uint) (*model.Constraint, error) {
+func GetConstraintByID(id int32) (*gen.Constraint, error) {
 	dao := model.GetDao()
 	return model.GetConstraintByID(dao.Db(), id)
 }
 
 // GetAllConstraints 获取所有约束
-func GetAllConstraints() ([]model.Constraint, error) {
+func GetAllConstraints() ([]gen.Constraint, error) {
 	dao := model.GetDao()
 	return model.GetAllConstraints(dao.Db())
 }
 
 // GetActiveConstraints 获取活跃的约束
-func GetActiveConstraints() ([]model.Constraint, error) {
+func GetActiveConstraints() ([]gen.Constraint, error) {
 	dao := model.GetDao()
 	return model.GetActiveConstraints(dao.Db())
 }
 
 // GetConstraintsByDateRange 根据日期范围获取约束
-func GetConstraintsByDateRange(startDate, endDate time.Time) ([]model.Constraint, error) {
+func GetConstraintsByDateRange(startDate, endDate time.Time) ([]gen.Constraint, error) {
 	dao := model.GetDao()
 	return model.GetConstraintsByDateRange(dao.Db(), startDate, endDate)
 }
 
 // UpdateConstraint 更新约束
-func UpdateConstraint(constraint *model.Constraint) error {
+func UpdateConstraint(constraint *gen.Constraint) error {
 	dao := model.GetDao()
 	return model.UpdateConstraint(dao.Db(), constraint)
 }
 
 // DeleteConstraint 删除约束
-func DeleteConstraint(id uint) error {
+func DeleteConstraint(id int32) error {
 	dao := model.GetDao()
 	return model.DeleteConstraint(dao.Db(), id)
 }
 
 // MarkConstraintAsCompleted 标记约束为完成
-func MarkConstraintAsCompleted(constraintID uint, endReason string) error {
+func MarkConstraintAsCompleted(constraintID int32, endReason string) error {
 	dao := model.GetDao()
 	return model.MarkConstraintAsCompleted(dao.Db(), constraintID, endReason)
 }
 
 // MarkConstraintAsActive 重新激活约束
-func MarkConstraintAsActive(constraintID uint) error {
+func MarkConstraintAsActive(constraintID int32) error {
 	dao := model.GetDao()
 	return model.MarkConstraintAsActive(dao.Db(), constraintID)
 }

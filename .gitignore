@@ -42,3 +42,7 @@ web/node_modules
 web/dist
 .claude/settings.json
 dev.db.bk*
+
+# gorm gen generated files (re-generate with `make gen-model`)
+model/gen/
+.vscode

@@ -2,43 +2,57 @@ package model
 
 import (
 	"testing"
+
+	"github.com/blacksheepaul/timelog/model/gen"
 )
 
 // TestBuildCategoryTreePointers tests that the tree building uses pointers correctly
 // so that children are preserved in the returned structure
 func TestBuildCategoryTreePointers(t *testing.T) {
 	// Create test categories
-	rootID := uint(1)
-	childID := uint(2)
-	grandchildID := uint(3)
+	rootID := int32(1)
+	childID := int32(2)
+	grandchildID := int32(3)
+	rootColor := "#FF0000"
+	rootDesc := "Root category"
+	rootPath := "/"
+	childColor := "#00FF00"
+	childDesc := "Child category"
+	childPath := "/Root"
+	grandchildColor := "#0000FF"
+	grandchildDesc := "Grandchild category"
+	grandchildPath := "/Root/Child"
+	levelZero := int32(0)
+	levelOne := int32(1)
+	levelTwo := int32(2)
 
-	categories := []Category{
+	categories := []gen.Category{
 		{
-			ID:          rootID,
+			ID:          &rootID,
 			Name:        "Root",
-			Color:       "#FF0000",
-			Description: "Root category",
+			Color:       &rootColor,
+			Description: &rootDesc,
 			ParentID:    nil,
-			Level:       0,
-			Path:        "/",
+			Level:       &levelZero,
+			Path:        &rootPath,
 		},
 		{
-			ID:          childID,
+			ID:          &childID,
 			Name:        "Child",
-			Color:       "#00FF00",
-			Description: "Child category",
+			Color:       &childColor,
+			Description: &childDesc,
 			ParentID:    &rootID,
-			Level:       1,
-			Path:        "/Root",
+			Level:       &levelOne,
+			Path:        &childPath,
 		},
 		{
-			ID:          grandchildID,
+			ID:          &grandchildID,
 			Name:        "Grandchild",
-			Color:       "#0000FF",
-			Description: "Grandchild category",
+			Color:       &grandchildColor,
+			Description: &grandchildDesc,
 			ParentID:    &childID,
-			Level:       2,
-			Path:        "/Root/Child",
+			Level:       &levelTwo,
+			Path:        &grandchildPath,
 		},
 	}
 
@@ -51,8 +65,8 @@ func TestBuildCategoryTreePointers(t *testing.T) {
 	}
 
 	rootNode := tree[0]
-	if rootNode.Category.ID != rootID {
-		t.Errorf("Expected root ID %d, got %d", rootID, rootNode.Category.ID)
+	if *rootNode.Category.ID != rootID {
+		t.Errorf("Expected root ID %d, got %d", rootID, *rootNode.Category.ID)
 	}
 
 	if len(rootNode.Children) != 1 {
@@ -60,8 +74,8 @@ func TestBuildCategoryTreePointers(t *testing.T) {
 	}
 
 	childNode := rootNode.Children[0]
-	if childNode.Category.ID != childID {
-		t.Errorf("Expected child ID %d, got %d", childID, childNode.Category.ID)
+	if *childNode.Category.ID != childID {
+		t.Errorf("Expected child ID %d, got %d", childID, *childNode.Category.ID)
 	}
 
 	if len(childNode.Children) != 1 {
@@ -69,8 +83,8 @@ func TestBuildCategoryTreePointers(t *testing.T) {
 	}
 
 	grandchildNode := childNode.Children[0]
-	if grandchildNode.Category.ID != grandchildID {
-		t.Errorf("Expected grandchild ID %d, got %d", grandchildID, grandchildNode.Category.ID)
+	if *grandchildNode.Category.ID != grandchildID {
+		t.Errorf("Expected grandchild ID %d, got %d", grandchildID, *grandchildNode.Category.ID)
 	}
 
 	if len(grandchildNode.Children) != 0 {
@@ -80,35 +94,37 @@ func TestBuildCategoryTreePointers(t *testing.T) {
 
 // TestBuildCategoryTreeMultipleRoots tests tree building with multiple root nodes
 func TestBuildCategoryTreeMultipleRoots(t *testing.T) {
-	root1ID := uint(1)
-	root2ID := uint(2)
-	child1ID := uint(3)
-	child2ID := uint(4)
+	root1ID := int32(1)
+	root2ID := int32(2)
+	child1ID := int32(3)
+	child2ID := int32(4)
+	levelZero := int32(0)
+	levelOne := int32(1)
 
-	categories := []Category{
+	categories := []gen.Category{
 		{
-			ID:       root1ID,
+			ID:       &root1ID,
 			Name:     "Root1",
 			ParentID: nil,
-			Level:    0,
+			Level:    &levelZero,
 		},
 		{
-			ID:       root2ID,
+			ID:       &root2ID,
 			Name:     "Root2",
 			ParentID: nil,
-			Level:    0,
+			Level:    &levelZero,
 		},
 		{
-			ID:       child1ID,
+			ID:       &child1ID,
 			Name:     "Child1",
 			ParentID: &root1ID,
-			Level:    1,
+			Level:    &levelOne,
 		},
 		{
-			ID:       child2ID,
+			ID:       &child2ID,
 			Name:     "Child2",
 			ParentID: &root2ID,
-			Level:    1,
+			Level:    &levelOne,
 		},
 	}
 
@@ -128,7 +144,7 @@ func TestBuildCategoryTreeMultipleRoots(t *testing.T) {
 
 // TestBuildCategoryTreeEmptyInput tests with empty category list
 func TestBuildCategoryTreeEmptyInput(t *testing.T) {
-	categories := []Category{}
+	categories := []gen.Category{}
 	tree := buildCategoryTree(categories)
 
 	if len(tree) != 0 {
@@ -138,12 +154,15 @@ func TestBuildCategoryTreeEmptyInput(t *testing.T) {
 
 // TestBuildCategoryTreeSingleRoot tests with only one root category
 func TestBuildCategoryTreeSingleRoot(t *testing.T) {
-	categories := []Category{
+	rootID := int32(1)
+	levelZero := int32(0)
+
+	categories := []gen.Category{
 		{
-			ID:       uint(1),
+			ID:       &rootID,
 			Name:     "OnlyRoot",
 			ParentID: nil,
-			Level:    0,
+			Level:    &levelZero,
 		},
 	}
 

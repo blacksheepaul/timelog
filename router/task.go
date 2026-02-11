@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/blacksheepaul/timelog/model"
+	"github.com/blacksheepaul/timelog/model/gen"
 	"github.com/blacksheepaul/timelog/service"
 	"github.com/gin-gonic/gin"
 )
@@ -30,13 +30,13 @@ func setupTaskRoutes(group *gin.RouterGroup) {
 // @Tags task
 // @Accept json
 // @Produce json
-// @Param data body model.Task true "任务数据"
-// @Success 200 {object} model.Task
+// @Param data body gen.Task true "任务数据"
+// @Success 200 {object} gen.Task
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/tasks [post]
 func createTaskHandler(c *gin.Context) {
-	var task model.Task
+	var task gen.Task
 	if err := c.ShouldBindJSON(&task); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
@@ -48,7 +48,7 @@ func createTaskHandler(c *gin.Context) {
 	}
 
 	// 重新查询以获取完整的Tag信息
-	if createdTask, err := service.GetTaskByID(task.ID); err == nil {
+	if createdTask, err := service.GetTaskByID(*task.ID); err == nil {
 		c.JSON(http.StatusOK, SuccessResponse(createdTask, "Task created successfully"))
 	} else {
 		c.JSON(http.StatusOK, SuccessResponse(task, "Task created successfully"))
@@ -63,7 +63,7 @@ func createTaskHandler(c *gin.Context) {
 // @Param date query string false "日期过滤 (YYYY-MM-DD格式)"
 // @Param include_suspended query boolean false "是否包含暂停的任务 (默认false)"
 // @Param include_completed query boolean false "是否包含已完成的任务 (默认false)"
-// @Success 200 {array} model.Task
+// @Success 200 {array} gen.Task
 // @Failure 500 {object} map[string]string
 // @Router /api/tasks [get]
 func listTasksHandler(c *gin.Context) {
@@ -71,7 +71,7 @@ func listTasksHandler(c *gin.Context) {
 	includeSuspended := c.Query("include_suspended") == "true"
 	includeCompleted := c.Query("include_completed") == "true"
 
-	var tasks []model.Task
+	var tasks []gen.Task
 	var err error
 
 	if dateStr != "" {
@@ -100,20 +100,21 @@ func listTasksHandler(c *gin.Context) {
 // @Tags task
 // @Produce json
 // @Param id path int true "任务ID"
-// @Success 200 {object} model.Task
+// @Success 200 {object} gen.Task
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/tasks/{id} [get]
 func getTaskHandler(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id64, err := strconv.ParseInt(idStr, 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "Invalid task ID"))
 		return
 	}
+	id := int32(id64)
 
-	task, err := service.GetTaskByID(uint(id))
+	task, err := service.GetTaskByID(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, ErrorResponse(http.StatusNotFound, "Task not found"))
 		return
@@ -129,28 +130,29 @@ func getTaskHandler(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "任务ID"
-// @Param data body model.Task true "任务数据"
-// @Success 200 {object} model.Task
+// @Param data body gen.Task true "任务数据"
+// @Success 200 {object} gen.Task
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/tasks/{id} [put]
 func updateTaskHandler(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id64, err := strconv.ParseInt(idStr, 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "Invalid task ID"))
 		return
 	}
+	id := int32(id64)
 
 	// 先检查任务是否存在
-	existingTask, err := service.GetTaskByID(uint(id))
+	existingTask, err := service.GetTaskByID(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, ErrorResponse(http.StatusNotFound, "Task not found"))
 		return
 	}
 
-	var updateData model.Task
+	var updateData gen.Task
 	if err := c.ShouldBindJSON(&updateData); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
@@ -166,7 +168,7 @@ func updateTaskHandler(c *gin.Context) {
 	}
 
 	// 重新查询以获取完整信息
-	if updatedTask, err := service.GetTaskByID(uint(id)); err == nil {
+	if updatedTask, err := service.GetTaskByID(id); err == nil {
 		c.JSON(http.StatusOK, SuccessResponse(updatedTask, "Task updated successfully"))
 	} else {
 		c.JSON(http.StatusOK, SuccessResponse(updateData, "Task updated successfully"))
@@ -186,19 +188,20 @@ func updateTaskHandler(c *gin.Context) {
 // @Router /api/tasks/{id} [delete]
 func deleteTaskHandler(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id64, err := strconv.ParseInt(idStr, 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "Invalid task ID"))
 		return
 	}
+	id := int32(id64)
 
 	// 先检查任务是否存在
-	if _, err := service.GetTaskByID(uint(id)); err != nil {
+	if _, err := service.GetTaskByID(id); err != nil {
 		c.JSON(http.StatusNotFound, ErrorResponse(http.StatusNotFound, "Task not found"))
 		return
 	}
 
-	if err := service.DeleteTask(uint(id)); err != nil {
+	if err := service.DeleteTask(id); err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
@@ -219,13 +222,14 @@ func deleteTaskHandler(c *gin.Context) {
 // @Router /api/tasks/{id}/complete [post]
 func completeTaskHandler(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id64, err := strconv.ParseInt(idStr, 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "Invalid task ID"))
 		return
 	}
+	id := int32(id64)
 
-	if err := service.MarkTaskAsCompleted(uint(id)); err != nil {
+	if err := service.MarkTaskAsCompleted(id); err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
@@ -246,13 +250,14 @@ func completeTaskHandler(c *gin.Context) {
 // @Router /api/tasks/{id}/incomplete [post]
 func incompleteTaskHandler(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id64, err := strconv.ParseInt(idStr, 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "Invalid task ID"))
 		return
 	}
+	id := int32(id64)
 
-	if err := service.MarkTaskAsIncomplete(uint(id)); err != nil {
+	if err := service.MarkTaskAsIncomplete(id); err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
@@ -273,19 +278,20 @@ func incompleteTaskHandler(c *gin.Context) {
 // @Router /api/tasks/{id}/suspend [post]
 func suspendTaskHandler(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id64, err := strconv.ParseInt(idStr, 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "Invalid task ID"))
 		return
 	}
+	id := int32(id64)
 
 	// 先检查任务是否存在
-	if _, err := service.GetTaskByID(uint(id)); err != nil {
+	if _, err := service.GetTaskByID(id); err != nil {
 		c.JSON(http.StatusNotFound, ErrorResponse(http.StatusNotFound, "Task not found"))
 		return
 	}
 
-	if err := service.SuspendTask(uint(id)); err != nil {
+	if err := service.SuspendTask(id); err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
@@ -306,19 +312,20 @@ func suspendTaskHandler(c *gin.Context) {
 // @Router /api/tasks/{id}/unsuspend [post]
 func unsuspendTaskHandler(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id64, err := strconv.ParseInt(idStr, 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "Invalid task ID"))
 		return
 	}
+	id := int32(id64)
 
 	// 先检查任务是否存在
-	if _, err := service.GetTaskByID(uint(id)); err != nil {
+	if _, err := service.GetTaskByID(id); err != nil {
 		c.JSON(http.StatusNotFound, ErrorResponse(http.StatusNotFound, "Task not found"))
 		return
 	}
 
-	if err := service.UnsuspendTask(uint(id)); err != nil {
+	if err := service.UnsuspendTask(id); err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}

@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/blacksheepaul/timelog/model"
+	"github.com/blacksheepaul/timelog/model/gen"
 	"github.com/blacksheepaul/timelog/service"
 	"github.com/gin-gonic/gin"
 )
@@ -27,8 +27,8 @@ func setupConstraintRoutes(group *gin.RouterGroup) {
 // @Tags constraint
 // @Accept json
 // @Produce json
-// @Param data body model.Constraint true "约束数据"
-// @Success 200 {object} model.Constraint
+// @Param data body gen.Constraint true "约束数据"
+// @Success 200 {object} gen.Constraint
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/constraints [post]
@@ -65,13 +65,14 @@ func createConstraintHandler(c *gin.Context) {
 	}
 
 	// 创建约束
-	constraint := &model.Constraint{
+	trueValue := true
+	constraint := &gen.Constraint{
 		Description:     request.Description,
-		EndReason:       request.EndReason,
+		EndReason:       &request.EndReason,
 		PunishmentQuote: request.PunishmentQuote,
 		StartDate:       startDate,
 		EndDate:         endDate,
-		IsActive:        true,
+		IsActive:        &trueValue,
 	}
 
 	if err := service.CreateConstraint(constraint); err != nil {
@@ -80,7 +81,7 @@ func createConstraintHandler(c *gin.Context) {
 	}
 
 	// 重新查询以获取完整信息
-	if createdConstraint, err := service.GetConstraintByID(constraint.ID); err == nil {
+	if createdConstraint, err := service.GetConstraintByID(*constraint.ID); err == nil {
 		c.JSON(http.StatusOK, SuccessResponse(createdConstraint, "Constraint created successfully"))
 	} else {
 		c.JSON(http.StatusOK, SuccessResponse(constraint, "Constraint created successfully"))
@@ -93,13 +94,13 @@ func createConstraintHandler(c *gin.Context) {
 // @Tags constraint
 // @Produce json
 // @Param active query bool false "是否只显示活跃约束"
-// @Success 200 {array} model.Constraint
+// @Success 200 {array} gen.Constraint
 // @Failure 500 {object} map[string]string
 // @Router /api/constraints [get]
 func listConstraintsHandler(c *gin.Context) {
 	activeStr := c.Query("active")
 
-	var constraints []model.Constraint
+	var constraints []gen.Constraint
 	var err error
 
 	if activeStr == "true" {
@@ -122,20 +123,21 @@ func listConstraintsHandler(c *gin.Context) {
 // @Tags constraint
 // @Produce json
 // @Param id path int true "约束ID"
-// @Success 200 {object} model.Constraint
+// @Success 200 {object} gen.Constraint
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/constraints/{id} [get]
 func getConstraintHandler(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id64, err := strconv.ParseInt(idStr, 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "Invalid constraint ID"))
 		return
 	}
+	id := int32(id64)
 
-	constraint, err := service.GetConstraintByID(uint(id))
+	constraint, err := service.GetConstraintByID(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, ErrorResponse(http.StatusNotFound, "Constraint not found"))
 		return
@@ -151,22 +153,23 @@ func getConstraintHandler(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "约束ID"
-// @Param data body model.Constraint true "约束数据"
-// @Success 200 {object} model.Constraint
+// @Param data body gen.Constraint true "约束数据"
+// @Success 200 {object} gen.Constraint
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/constraints/{id} [put]
 func updateConstraintHandler(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id64, err := strconv.ParseInt(idStr, 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "Invalid constraint ID"))
 		return
 	}
+	id := int32(id64)
 
 	// 先检查约束是否存在
-	existingConstraint, err := service.GetConstraintByID(uint(id))
+	existingConstraint, err := service.GetConstraintByID(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, ErrorResponse(http.StatusNotFound, "Constraint not found"))
 		return
@@ -216,7 +219,7 @@ func updateConstraintHandler(c *gin.Context) {
 		existingConstraint.PunishmentQuote = request.PunishmentQuote
 	}
 	if request.EndReason != "" {
-		existingConstraint.EndReason = request.EndReason
+		existingConstraint.EndReason = &request.EndReason
 	}
 
 	if err := service.UpdateConstraint(existingConstraint); err != nil {
@@ -225,7 +228,7 @@ func updateConstraintHandler(c *gin.Context) {
 	}
 
 	// 重新查询以获取完整信息
-	if updatedConstraint, err := service.GetConstraintByID(uint(id)); err == nil {
+	if updatedConstraint, err := service.GetConstraintByID(id); err == nil {
 		c.JSON(http.StatusOK, SuccessResponse(updatedConstraint, "Constraint updated successfully"))
 	} else {
 		c.JSON(http.StatusOK, SuccessResponse(existingConstraint, "Constraint updated successfully"))
@@ -245,19 +248,20 @@ func updateConstraintHandler(c *gin.Context) {
 // @Router /api/constraints/{id} [delete]
 func deleteConstraintHandler(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id64, err := strconv.ParseInt(idStr, 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "Invalid constraint ID"))
 		return
 	}
+	id := int32(id64)
 
 	// 先检查约束是否存在
-	if _, err := service.GetConstraintByID(uint(id)); err != nil {
+	if _, err := service.GetConstraintByID(id); err != nil {
 		c.JSON(http.StatusNotFound, ErrorResponse(http.StatusNotFound, "Constraint not found"))
 		return
 	}
 
-	if err := service.DeleteConstraint(uint(id)); err != nil {
+	if err := service.DeleteConstraint(id); err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
@@ -280,11 +284,12 @@ func deleteConstraintHandler(c *gin.Context) {
 // @Router /api/constraints/{id}/complete [post]
 func completeConstraintHandler(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id64, err := strconv.ParseInt(idStr, 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "Invalid constraint ID"))
 		return
 	}
+	id := int32(id64)
 
 	var requestData struct {
 		EndReason string `json:"end_reason"`
@@ -294,7 +299,7 @@ func completeConstraintHandler(c *gin.Context) {
 		return
 	}
 
-	if err := service.MarkConstraintAsCompleted(uint(id), requestData.EndReason); err != nil {
+	if err := service.MarkConstraintAsCompleted(id, requestData.EndReason); err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
@@ -315,13 +320,14 @@ func completeConstraintHandler(c *gin.Context) {
 // @Router /api/constraints/{id}/reactivate [post]
 func reactivateConstraintHandler(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id64, err := strconv.ParseInt(idStr, 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, "Invalid constraint ID"))
 		return
 	}
+	id := int32(id64)
 
-	if err := service.MarkConstraintAsActive(uint(id)); err != nil {
+	if err := service.MarkConstraintAsActive(id); err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
