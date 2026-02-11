@@ -143,11 +143,13 @@ func GetTasksByStatus(ctx context.Context, req *mcp.CallToolRequest, args TaskSt
 
 	var result []map[string]interface{}
 	for _, task := range tasks {
+		isCompleted := task.IsCompleted != nil && *task.IsCompleted
+
 		// Filter by status
-		if statusStr == "completed" && !task.IsCompleted {
+		if statusStr == "completed" && !isCompleted {
 			continue
 		}
-		if statusStr == "pending" && task.IsCompleted {
+		if statusStr == "pending" && isCompleted {
 			continue
 		}
 
@@ -170,7 +172,7 @@ func GetTasksByStatus(ctx context.Context, req *mcp.CallToolRequest, args TaskSt
 			"category_color":    categoryColor,
 			"due_date":          task.DueDate.In(singaporeLocation).Format("2006-01-02"),
 			"estimated_minutes": task.EstimatedMinutes,
-			"is_completed":      task.IsCompleted,
+			"is_completed":      isCompleted,
 			"created_at":        task.CreatedAt.In(singaporeLocation).Format("2006-01-02 15:04:05"),
 		}
 
