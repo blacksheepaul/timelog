@@ -44,7 +44,7 @@ jobs:
           cache-dependency-path: web/pnpm-lock.yaml
 
       - name: Build
-        run: make buildx-linux
+        run: make install-deps gen-model buildx-linux
 
       - name: Package
         run: |
@@ -89,7 +89,7 @@ jobs:
           go-version-file: go.mod
 
       - name: Build MCP
-        run: make mcp
+        run: make install-deps gen-model mcp
 
       - name: Package MCP
         run: |
