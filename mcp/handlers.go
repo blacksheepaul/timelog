@@ -232,20 +232,26 @@ func GetActiveConstraints(ctx context.Context, req *mcp.CallToolRequest, args Co
 
 	var result []map[string]interface{}
 	for _, constraint := range constraints {
+		isActive := constraint.IsActive != nil && *constraint.IsActive
+		createdAt := ""
+		if constraint.CreatedAt != nil {
+			createdAt = constraint.CreatedAt.In(singaporeLocation).Format("2006-01-02 15:04:05")
+		}
+
 		entry := map[string]interface{}{
 			"id":               constraint.ID,
 			"description":      constraint.Description,
 			"punishment_quote": constraint.PunishmentQuote,
 			"start_date":       constraint.StartDate.In(singaporeLocation).Format("2006-01-02"),
-			"is_active":        constraint.IsActive,
-			"created_at":       constraint.CreatedAt.In(singaporeLocation).Format("2006-01-02 15:04:05"),
+			"is_active":        isActive,
+			"created_at":       createdAt,
 		}
 
 		if constraint.EndDate != nil {
 			entry["end_date"] = constraint.EndDate.In(singaporeLocation).Format("2006-01-02")
 		}
-		if constraint.EndReason != "" {
-			entry["end_reason"] = constraint.EndReason
+		if constraint.EndReason != nil && *constraint.EndReason != "" {
+			entry["end_reason"] = *constraint.EndReason
 		}
 
 		result = append(result, entry)
