@@ -207,7 +207,7 @@ func passkeyLoginFinishHandler(c *gin.Context) {
 		return
 	}
 
-	user, credential, err := webAuthn.ValidatePasskeyLogin(service.LoadPasskeyUserByHandle, *session, parsed)
+	_, credential, err := webAuthn.ValidatePasskeyLogin(service.LoadPasskeyUserByHandle, *session, parsed)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, ErrorResponse(http.StatusUnauthorized, err.Error()))
 		return
