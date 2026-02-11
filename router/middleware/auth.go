@@ -36,7 +36,8 @@ func isValidUserToken(token string) bool {
 	once.Do(func() {
 		dao = model.GetDao()
 	})
-	if _, ok := dao.GetCache(token); ok {
+	// Only accept keys with auth_token: prefix to prevent passkey session misuse
+	if _, ok := dao.GetCache("auth_token:" + token); ok {
 		return true
 	}
 	return false

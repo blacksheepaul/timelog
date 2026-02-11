@@ -24,10 +24,13 @@ func main() {
 	cfg := config.GetConfig("config.yml")
 	logger := log.SetZapLogger(*cfg)
 
-	r := router.Register(gin.New(), cfg, logger, staticFiles)
 	service.InitService(logger, cfg)
-
 	model.InitDao(cfg, logger)
+	if err := service.InitWebAuthn(); err != nil {
+		logger.Fatal("Failed to initialize WebAuthn", err)
+	}
+
+	r := router.Register(gin.New(), cfg, logger, staticFiles)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

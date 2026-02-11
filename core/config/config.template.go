@@ -19,6 +19,15 @@ type Config struct {
 		} `yaml:"rotation"`
 		ORMLogLevel int `yaml:"orm_log_level"`
 	} `yaml:"log"`
+	Passkey struct {
+		RPID         string   `yaml:"rp_id"`
+		RPName       string   `yaml:"rp_name"`
+		RPOrigins    []string `yaml:"rp_origins"`
+		TokenTTL     int      `yaml:"token_ttl" env-default:"86400"`
+		TempPassword struct {
+			TTL int `yaml:"ttl" env-default:"900"`
+		} `yaml:"temp_password"`
+	} `yaml:"passkey"`
 	MCP struct {
 		Enabled    bool   `yaml:"enabled" env:"MCP_ENABLED" env-default:"false"`
 		Level      string `yaml:"level" env:"MCP_LEVEL" env-default:"debug"`

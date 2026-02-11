@@ -372,7 +372,6 @@ func updateCategoryHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, SuccessResponse(category, "Category updated successfully"))
 }
 
-
 // moveCategoryHandler godoc
 // @Summary 移动分类
 // @Description 将分类移动到新的父分类下

@@ -27,25 +27,30 @@ var GinLogger = gin.LoggerWithFormatter(func(p gin.LogFormatterParams) string {
 	)
 })
 var log logger.Logger
+var appConfig *config.Config
 
 func Register(r *gin.Engine, cfg *config.Config, l logger.Logger, staticFiles embed.FS) *gin.Engine {
 	log = l
+	appConfig = cfg
 
 	r.Use(GinLogger)
 	r.Use(middleware.Cors(cfg))
 
-	api := r.Group("/api")   // api
-	auth := api.Group("/v1") // api/v1
-	auth.Use(middleware.Auth())
+	api := r.Group("/api")
+	protected := api.Group("")
+	protected.Use(middleware.Auth())
 
 	// 注册 TimeLog 路由
-	RegisterTimeLogRoutes(api)
+	RegisterTimeLogRoutes(protected)
 
 	// 注册 Task 路由
-	setupTaskRoutes(api)
+	setupTaskRoutes(protected)
 
 	// 注册 Constraint 路由
-	setupConstraintRoutes(api)
+	setupConstraintRoutes(protected)
+
+	// 注册 Passkey 路由
+	setupPasskeyRoutes(api, protected)
 
 	// 注册 Swagger 文档路由（仅非 prod 构建）
 	setupSwagger(r)

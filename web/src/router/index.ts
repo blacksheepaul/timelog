@@ -9,6 +9,8 @@ const Categories = () => import('@/views/Categories.vue')
 const Statistics = () => import('@/views/Statistics.vue')
 // @ts-ignore
 const Constraints = () => import('@/views/Constraints.vue') as Promise<{ default: any }>
+const PasskeyRegister = () => import('@/views/PasskeyRegister.vue')
+const PasskeyLogin = () => import('@/views/PasskeyLogin.vue')
 
 const routes: RouteRecordRaw[] = [
   {
@@ -57,6 +59,22 @@ const routes: RouteRecordRaw[] = [
     component: Constraints,
     meta: {
       title: '约束',
+    },
+  },
+  {
+    path: '/passkey/register',
+    name: 'PasskeyRegister',
+    component: PasskeyRegister,
+    meta: {
+      title: 'Passkey Setup',
+    },
+  },
+  {
+    path: '/login',
+    name: 'PasskeyLogin',
+    component: PasskeyLogin,
+    meta: {
+      title: 'Passkey Login',
     },
   },
   {

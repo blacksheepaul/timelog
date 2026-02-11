@@ -90,6 +90,23 @@ export interface ApiResponse<T> {
   status: number
 }
 
+export interface PasskeyBeginResponse<T> {
+  session_id: string
+  data: T
+}
+
+export interface PasskeyCredential {
+  id: number
+  device_name?: string
+  created_at: string
+}
+
+export interface PasskeyLoginResponse {
+  token: string
+  token_type: string
+  expires_in: number
+}
+
 export interface Constraint {
   id: number
   description: string

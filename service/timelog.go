@@ -92,7 +92,6 @@ func UpdateCategory(category *model.Category) error {
 	return model.UpdateCategory(db, category)
 }
 
-
 // MoveCategory 移动分类
 func MoveCategory(categoryID uint, newParentID *uint) error {
 	db := model.GetDao().Db()
